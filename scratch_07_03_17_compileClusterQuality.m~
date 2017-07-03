@@ -7,7 +7,7 @@ isolationMetrics.region = spikes.region;
 isolationMetrics.sessionName = spikes.sessionName;
 
 load([spikes.sessionName '.sessionInfo.mat'])
-count = 1;
+
 for i=1:length(sessionInfo.SpkGrps)
     f = find(spikes.shankID==i);
     [Fet, nFeatures] = LoadFeatures([sessionInfo.FileName '.fet.' num2str(i)]);
@@ -19,13 +19,12 @@ for i=1:length(sessionInfo.SpkGrps)
     waveforms = single(reshape(waveforms,length(waveforms),nSamples*nChannels));
     
     for cell=1:length(f)
-        isolationMetrics.isoDist_wav(count) = IsolationDistance(waveforms,find(clu==spikes.cluID(f(cell))));
+        isolationMetrics.isoDist_wav(f(cell)) = IsolationDistance(waveforms,find(clu==spikes.cluID(f(cell))));
         isolationMetrics.isoDist_fet(f(cell)) = IsolationDistance(Fet,find(clu==spikes.cluID(f(cell))));
         isolationMetrics.lratio_wav(f(cell)) = L_Ratio(waveforms,find(clu==spikes.cluID(f(cell))));
         isolationMetrics.lratio_fet(f(cell)) = L_Ratio(Fet,find(clu==spikes.cluID(f(cell))));
-        isolationMetrics.waveformAmplitude = max(abs(spikes.rawWaveform{f(cell)}));
-        count = 1+count;
+        isolationMetrics.waveformAmplitude(f(cell)) = max(abs(spikes.rawWaveform{f(cell)}));
     end   
     
 end
-save([isolationMetrics.sessionName 'isolationMetrics.cellinfo.mat'],'isolationMetrics')
+ save([isolationMetrics.sessionName 'isolationMetrics.cellinfo.mat'],'isolationMetrics')

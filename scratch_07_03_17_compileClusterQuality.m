@@ -23,8 +23,9 @@ for i=1:length(sessionInfo.SpkGrps)
         isolationMetrics.isoDist_fet(f(cell)) = IsolationDistance(Fet,find(clu==spikes.cluID(f(cell))));
         isolationMetrics.lratio_wav(f(cell)) = L_Ratio(waveforms,find(clu==spikes.cluID(f(cell))));
         isolationMetrics.lratio_fet(f(cell)) = L_Ratio(Fet,find(clu==spikes.cluID(f(cell))));
-        isolationMetrics.waveformAmplitude(f(cell)) = max(abs(spikes.rawWaveform{f(cell)}));
+        isolationMetrics.waveformAmplitude(f(cell)) = max(abs(spikes.rawWaveform{f(cell)})) *.195;
     end   
     
 end
-save([isolationMetrics.sessionName 'isolationMetrics.cellinfo.mat'],'isolationMetrics')
+isolationMetrics.waveformUnits = 'uV';
+save([isolationMetrics.sessionName '.isolationMetrics.cellinfo.mat'],'isolationMetrics')
