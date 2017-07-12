@@ -23,7 +23,7 @@ for i=1:length(d)
                first500ms = find(ismember(positionDecodingGLM.results{cell}.tau(rows),1:500));
                if strcmp(positionDecodingGLM.region{cell},'hpc')
                    if positionDecodingGLM.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
-                           positionDecodingGLM.results{cell}.mse_rate(rows(bb)) <.05
+                           positionDecodingGLM.results{cell}.mse_rate_pval(rows(bb)) <.05
                    subplot(2,4,1)
                    scatter(a./worstFit,aa./worstFit,'.k')
                    ylabel('rate')
