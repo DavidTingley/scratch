@@ -5,7 +5,7 @@ xml = LoadParameters;
 
 load([xml.FileName '.behavior.mat'])
 load([xml.FileName '.sessionInfo.mat'])
-load([xml.FileName '.spikes.cellinfo.mat'])
+spikes = bz_GetSpikes;
 lfp = bz_GetLFP(sessionInfo.thetaChans(2));
 nBins = max(behavior.events.trials{1}.mapping);
 
@@ -66,58 +66,66 @@ for smoothing = 1:round(nBins/2)
             [b dev stats] = glmfit([r_train],z_train,'normal');
             yfit = glmval(b,r_test,'identity');
             struct.mse_rate(count) = nanmean((z_test-yfit).^2);
-            struct.mse_rate_pval(count,:) = stats.p';
+%             struct.mse_rate_pval(count,:) = stats.p';
             
             [b dev stats] = glmfit([p_train cos(p_train) sin(p_train)],z_train,'normal');
             yfit = glmval(b,[p_test cos(p_test) sin(p_test)],'identity');
             struct.mse_phase_all(count) = nanmean((z_test-yfit).^2);
-            struct.mse_phase_all_pval(count,:) = stats.p';
+%             struct.mse_phase_all_pval(count,:) = stats.p';
             
             [b dev stats] = glmfit([p_train],z_train,'normal');
             yfit = glmval(b,[p_test ],'identity');
             struct.mse_phase(count) = nanmean((z_test-yfit).^2);
-            struct.mse_phase_pval(count,:) = stats.p';
+%             struct.mse_phase_pval(count,:) = stats.p';
             
             [b dev stats] = glmfit([cos(p_train) ],z_train,'normal');
             yfit = glmval(b,[ cos(p_test) ],'identity');
             struct.mse_phase_cos(count) = nanmean((z_test-yfit).^2);
-            struct.mse_phase_cos_pval(count,:) = stats.p';
+%             struct.mse_phase_cos_pval(count,:) = stats.p';
             
             [b dev stats] = glmfit([ sin(p_train)],z_train,'normal');
             yfit = glmval(b,[ sin(p_test)],'identity');
             struct.mse_phase_sin(count) = nanmean((z_test-yfit).^2);
-            struct.mse_phase_sin_pval(count,:) = stats.p';
+%             struct.mse_phase_sin_pval(count,:) = stats.p';
             
             [b dev stats] = glmfit([r_train p_train cos(p_train) sin(p_train)],z_train,'normal');
             yfit = glmval(b,[r_test p_test cos(p_test) sin(p_test)],'identity');
             struct.mse_both(count)  = nanmean((z_test-yfit).^2);
-            struct.mse_both_pval(count,:) = stats.p';
+%             struct.mse_both_pval(count,:) = stats.p';
             count = 1+count;
             end
-
+            % reshape data
+%             struct.mse_both = struct.mse_both';
+%             struct.mse_rate = struct.mse_rate';
+%             struct.mse_phase = struct.mse_phase';
+%             struct.mse_phase_cos = struct.mse_phase_cos';
+%             struct.mse_phase_sin = struct.mse_phase_sin';
+%             struct.mse_phase_all = struct.mse_phase_all';
+            
+            % store peripherals
             struct.dfe = stats.dfe;
             struct.tau = smoothing;
             struct.condition = cond;
             positionDecodingGLM_binnedspace.results{cell} = [positionDecodingGLM_binnedspace.results{cell}; struct2table(struct)];
-            if cell == 117
-                rows = find(positionDecodingGLM_binnedspace.results{cell}.condition==cond);
-                subplot(2,2,1);
-                imagesc(squeeze(binnedPhaseMap_smooth{cond}(cell,:,:)));
-                caxis([-pi pi])
-                subplot(2,2,2);
-                plot(positionDecodingGLM_binnedspace.results{cell}.tau(rows),...
-                    mean(positionDecodingGLM_binnedspace.results{cell}.mse_rate(rows,:)'),'.r')
-                hold on
-                plot(positionDecodingGLM_binnedspace.results{cell}.tau(rows),...
-                    mean(positionDecodingGLM_binnedspace.results{cell}.mse_phase_all(rows,:)'),'.g')
-                plot(positionDecodingGLM_binnedspace.results{cell}.tau(rows),...
-                    mean(positionDecodingGLM_binnedspace.results{cell}.mse_both(rows,:)'),'.k')
-                hold off
-                subplot(2,2,4)
-                scatter(phaseMap{cond}{cell}(:,1),phaseMap{cond}{cell}(:,end)+2*pi,'.k');
-                title([cell cond])
-                pause(.1)
-            end         
+%             if cell == 117
+%                 rows = find(positionDecodingGLM_binnedspace.results{cell}.condition==cond);
+%                 subplot(2,2,1);
+%                 imagesc(squeeze(binnedPhaseMap_smooth{cond}(cell,:,:)));
+%                 caxis([-pi pi])
+%                 subplot(2,2,2);
+%                 plot(positionDecodingGLM_binnedspace.results{cell}.tau(rows),...
+%                     mean(positionDecodingGLM_binnedspace.results{cell}.mse_rate(rows,:)'),'.r')
+%                 hold on
+%                 plot(positionDecodingGLM_binnedspace.results{cell}.tau(rows),...
+%                     mean(positionDecodingGLM_binnedspace.results{cell}.mse_phase_all(rows,:)'),'.g')
+%                 plot(positionDecodingGLM_binnedspace.results{cell}.tau(rows),...
+%                     mean(positionDecodingGLM_binnedspace.results{cell}.mse_both(rows,:)'),'.k')
+%                 hold off
+%                 subplot(2,2,4)
+%                 scatter(phaseMap{cond}{cell}(:,1),phaseMap{cond}{cell}(:,end)+2*pi,'.k');
+%                 title([cell cond])
+%                 pause(.1)
+%             end         
         end
         disp(['done with condition: ' num2str(cond) ' of ' num2str(length(unique(behavior.events.trialConditions)))]);
     end
