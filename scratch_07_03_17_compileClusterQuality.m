@@ -1,12 +1,12 @@
 
 
-% clf
-% 
-% d  = dir('*201*');
-% for ii=1:length(d)
-%    cd(d(ii).name) 
-%    load([d(ii).name '.isolationMetrics.cellinfo.mat'])
-%     if ~exist([d(ii).name '.isolationMetrics.cellinfo.mat'])
+clf
+
+d  = dir('*201*');
+for ii=1:length(d)
+   cd(d(ii).name) 
+   load([d(ii).name '.isolationMetrics.cellinfo.mat'])
+    if ~exist([d(ii).name '.isolationMetrics.cellinfo.mat'])
         spikes = bz_GetSpikes;
         if ~isempty(spikes)
         isolationMetrics.UID = spikes.UID;
@@ -45,48 +45,53 @@
         isolationMetrics.waveformUnits = 'uV';
         save([isolationMetrics.sessionName '.isolationMetrics.cellinfo.mat'],'isolationMetrics')
         clear isolationMetrics
-%     end
-%  cd /home/david/datasets/lsDataset/
-% end
+    end
+ cd /home/david/datasets/lsDataset/
+end
 
 
 % 
 % 
 % % 
-% c=1;
-% d = ls('*/*isol*');
-% dd = strsplit(d,'\n');
-% fdists = [];
-% amplitudes = [];
-% for i=1:length(dd)-1
-%     load(dd{i})
-%     isolationMetrics
-%     fdists = [fdists,isolationMetrics.isoDist_fet];
-%     amplitudes = [amplitudes,isolationMetrics.waveformAmplitude];
-%     for j=1:length(isolationMetrics.region)
-%         region(c) = sum(double(isolationMetrics.region{j}));
-%         c=1+c;
-%     end
-% end
-% 
-% subplot(2,2,1)
-% histogram(fdists(region==223),0:5:700)
-% title(['ls ' num2str(nanmean(fdists(region==223))) ' total:' num2str(length(find(region==223)))])
-% set(gca,'xscale','log')
-% subplot(2,2,2)
-% histogram(fdists(region==315),0:5:700)
-% title(['hpc ' num2str(nanmean(fdists(region==315))) ' total:' num2str(length(find(region==315)))])
-% set(gca,'xscale','log')
-% 
-% 
-% subplot(2,2,3)
-% histogram(abs(amplitudes(region==223)),0:5:1300)
-% title(['ls ' num2str(nanmean(abs(amplitudes(region==223)))) ' total:' num2str(length(find(region==223)))])
-% set(gca,'xscale','log')
-% subplot(2,2,4)
-% histogram(abs(amplitudes(region==315)),0:5:1300)
-% title(['hpc ' num2str(nanmean(abs(amplitudes(region==315)))) ' total:' num2str(length(find(region==315)))])
-% set(gca,'xscale','log')
+c=1;
+d = ls('*/*isol*');
+dd = strsplit(d,'\n');
+fdists = [];
+amplitudes = [];
+for i=1:length(dd)-1
+    load(dd{i})
+    isolationMetrics
+    
+    fdists = [fdists,isolationMetrics.isoDist_fet];
+    amplitudes = [amplitudes,isolationMetrics.waveformAmplitude];
+    for j=1:length(isolationMetrics.region)
+        region(c) = sum(double(isolationMetrics.region{j}));
+        c=1+c;
+    end
+end
+
+subplot(2,2,1)
+histogram(fdists(region==223),0:5:700)
+title(['ls ' num2str(nanmean(fdists(region==223))) ' total:' num2str(length(find(region==223)))])
+set(gca,'xscale','log')
+axis([10 1000 0 350])
+subplot(2,2,2)
+histogram(fdists(region==315),0:5:700)
+title(['hpc ' num2str(nanmean(fdists(region==315))) ' total:' num2str(length(find(region==315)))])
+set(gca,'xscale','log')
+axis([10 1000 0 350])
+
+
+subplot(2,2,3)
+histogram(abs(amplitudes(region==223)),0:10:1300)
+title(['ls ' num2str(nanmean(abs(amplitudes(region==223)))) ' total:' num2str(length(find(region==223)))])
+set(gca,'xscale','log')
+axis([10 1000 0 350])
+subplot(2,2,4)
+histogram(abs(amplitudes(region==315)),0:10:1300)
+title(['hpc ' num2str(nanmean(abs(amplitudes(region==315)))) ' total:' num2str(length(find(region==315)))])
+set(gca,'xscale','log')
+axis([10 1000 0 350])
 % 
 
 

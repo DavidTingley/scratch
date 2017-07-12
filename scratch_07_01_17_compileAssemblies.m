@@ -4,10 +4,10 @@ clf
 pairCount = 0;
 h=[];
 ii=[];
-for i=1:51
+for i=1:length(d)
 cd(d(i).name)
-if exist(['assembliesWithinRegionData_w_theta_sin_cos_coord_vel.mat'])
-load(['assembliesWithinRegionData_w_theta_sin_cos_coord_vel.mat'])
+if exist(['assembliesCrossRegionData.mat'])
+load(['assembliesCrossRegionData.mat'])
 p=[];
 if ~isempty(pairs)
 % figure(1);
@@ -16,7 +16,7 @@ for c = 1:length(dev)
     [a b] =  min(dev{c}(:,pair));
     [aa bb] = min(mean(devControl{c}(:,pair,:),3));
     imp = (a-mean(dev{c}(:,pair))) ./ (aa - mean(mean(devControl{c}(:,pair,:),3)));
-    if imp > 10 & b > 7
+    if imp > 20 & b > 5
         subplot(2,2,1)
        scatter(b,imp,'.k')
        hold on

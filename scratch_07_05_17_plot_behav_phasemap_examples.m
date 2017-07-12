@@ -2,7 +2,7 @@
 
 
 d  = dir('*201*');
-for ii=33:length(d)
+for ii=40:length(d)
    cd(d(ii).name) 
    spikes = bz_GetSpikes;
    load([spikes.sessionName '.behavior.mat'])
@@ -14,14 +14,16 @@ for ii=33:length(d)
     figure(1)
     clf
     bz_plotTrials(behavior)
-
+    title(spikes.sessionName)
     figure(2)
+    clf
     f = factor(length(unique(behavior.events.trialConditions)));
     for i = 1:length(spikes.times)
         if strcmp(spikes.region{i},'ls')
             for j=1:length(unique(behavior.events.trialConditions))
                 if ~isempty(phaseMap{j})
                     if ~isempty(phaseMap{j}{i})
+                        figure(2)
             subplot(f(1),length(unique(behavior.events.trialConditions))./f(1),j)
             plot(1)
             scatter(phaseMap{j}{i}(:,1),phaseMap{j}{i}(:,end),'.k');
