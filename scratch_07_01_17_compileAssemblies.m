@@ -5,10 +5,11 @@ pairCount = 0;
 h=[];
 z=[];
 ii=[];
+rate=[];
 for i=1:length(d)
 cd(d(i).name)
-if exist(['assembliesWithinRegionData_w_theta_sin_cos_coord_vel.mat'])
-load(['assembliesWithinRegionData_w_theta_sin_cos_coord_vel.mat'])
+if exist('assembliesCrossRegionData.mat')
+load('assembliesCrossRegionData.mat')
 % if exist(['assembliesCrossRegionData.mat'])
 % load(['assembliesCrossRegionData.mat'])
 p=[];
@@ -19,10 +20,14 @@ for c = 1:length(dev)
     [a b] =  min(dev{c}(:,pair));
     [aa bb] = min(mean(devControl{c}(:,pair,:),3));
     imp = (a-mean(dev{c}(:,pair))) ./ (aa - mean(mean(devControl{c}(:,pair,:),3)));
-    zerolag = (min(dev{c}(1:5,pair)) -mean(dev{c}(:,pair))) ./ (aa - mean(mean(devControl{c}(1,pair,:),3)));
-  
-    if imp > 8 & b > 1 & zerolag < 5
-        subplot(2,2,1)
+    imp2 = a ./ max(mean(mean(devControl{c}(:,pair,:),3)));
+    zerolag = (min(dev{c}(1:6,pair)) - mean(dev{c}(:,pair))) ./ (aa - mean(mean(devControl{c}(1,pair,:),3)));
+    if zerolag < 1 
+        zerolag = 1;
+    end
+    
+    if imp > 7 & b > 7 & zerolag < 1.2 & mean(dev{c}(:,pair))>150
+       subplot(2,2,1)
        scatter(b,imp,'.k')
        hold on
        subplot(2,2,2)
@@ -31,10 +36,20 @@ for c = 1:length(dev)
        h = [h; imp];
        ii = [ii;b];
        z=[z;zerolag];
+       rate=[rate;mean(dev{c}(:,pair))];
        line([median(ii) median(ii)],[0 25],'color','r')
        line([mean(ii) mean(ii)],[0 25],'color','g')
        ylabel('improvement (min-mean) ./ (minc-meanc)')
        xlabel('time, ms')
+       subplot(2,2,3)
+       scatter(b,imp2,'.k')
+       hold on
+       subplot(2,2,4)
+       plot(dev{c}(:,pair));
+       hold on
+       plot(mean(devControl{c}(:,pair,:),3));
+       title([imp zerolag ])
+       hold off
        pause(.001)
     end
     pairCount = 1 + pairCount;
