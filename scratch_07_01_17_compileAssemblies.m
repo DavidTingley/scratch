@@ -8,8 +8,8 @@ ii=[];
 rate=[];
 for i=1:length(d)
 cd(d(i).name)
-if exist('assembliesCrossRegionData.mat')
-load('assembliesCrossRegionData.mat')
+if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
+load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
 % if exist(['assembliesCrossRegionData.mat'])
 % load(['assembliesCrossRegionData.mat'])
 p=[];

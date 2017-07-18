@@ -7,18 +7,18 @@ noAss_phaseonly = [];
 ass_phaseonly = [];
 d  = dir('*201*');
 
-for i=[1:28 30:length(d)]
+for i=[1:length(d)]
 cd(d(i).name) 
 spikes = bz_GetSpikes;
 b = dir('*.behavior.mat');
 load(b.name);
 nBins = length(behavior.events.map{1}.x);
 xml = LoadParameters;
-if exist('assembliesCrossRegionData.mat') & exist([xml.FileName '.positionDecodingGLM.cellinfo.mat']) ...
+if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat') & exist([xml.FileName '.positionDecodingGLM_gaussian.cellinfo.mat']) ...
 
-    load([xml.FileName '.positionDecodingGLM.cellinfo.mat'])
-    load('assembliesCrossRegionData.mat');
-%     positionDecodingGLM=positionDecodingGLM_binnedspace
+    load([xml.FileName '.positionDecodingGLM_gaussian.cellinfo.mat'])
+    load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat');
+    positionDecodingGLM=positionDecodingGLM_gaussian
     if isfield(positionDecodingGLM,'dateRun') & length(pairs)>1 & exist('dev')==1
     conditions = length(unique(positionDecodingGLM.results{1}.condition));
     for cell =1:length(positionDecodingGLM.results)
@@ -33,11 +33,11 @@ if exist('assembliesCrossRegionData.mat') & exist([xml.FileName '.positionDecodi
             rows = find(positionDecodingGLM.results{cell}.condition==cond);
             first500ms = find(ismember(positionDecodingGLM.results{cell}.tau(rows),1:4000));
             
-            min_mse_rate(cell,cond) = sqrt(min(positionDecodingGLM.results{cell}.mse_rate(rows(first500ms))));
-            min_mse_phase_all(cell,cond) = sqrt(min(positionDecodingGLM.results{cell}.mse_phase_all(rows(first500ms))));
+            min_mse_rate(cell,cond) = sqrt(min(positionDecodingGLM.results{cell}.mse_rate(rows(first500ms))))./nBins;
+            min_mse_phase_all(cell,cond) = sqrt(min(positionDecodingGLM.results{cell}.mse_phase_all(rows(first500ms))))./nBins;
             
-            max_mse_rate(cell,cond) = sqrt(max(positionDecodingGLM.results{cell}.mse_rate(rows(first500ms))));
-            max_mse_phase_all(cell,cond) = sqrt(max(positionDecodingGLM.results{cell}.mse_phase_all(rows(first500ms))));
+            max_mse_rate(cell,cond) = sqrt(max(positionDecodingGLM.results{cell}.mse_rate(rows(first500ms))))./nBins;
+            max_mse_phase_all(cell,cond) = sqrt(max(positionDecodingGLM.results{cell}.mse_phase_all(rows(first500ms))))./nBins;
             end
         end
     end

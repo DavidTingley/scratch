@@ -109,7 +109,7 @@ for smoothing = 1:round(nBins/2)
             
             count = 1+count;
             end
-%             if cell == 44 & cond == 2
+%             if cell == 24 & cond == 1
 %                 
 %                 t_rate = varfun(@mean,positionDecodingGLM_binnedspace_gauss.results{cell},'InputVariables','mse_rate',...
 %                 'GroupingVariables',{'tau','condition'});

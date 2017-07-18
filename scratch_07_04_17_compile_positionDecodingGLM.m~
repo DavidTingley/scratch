@@ -5,9 +5,9 @@ hpc_mean_phase = zeros(101,1);
 ls_mean_phase = zeros(101,1);
 hpc_mean_rate = zeros(101,1);
 ls_mean_rate = zeros(101,1);
-% d  = dir('*201*');
-% for i=1:length(d)
-%    cd(d(i).name) 
+d  = dir('*201*');
+for i=1:length(d)
+   cd(d(i).name) 
     if ~isempty(dir('*positionDecodingGLM_binnedspace_gauss.cell*'))
         xml = LoadParameters;
         b = dir('*.behavior.mat');
@@ -42,9 +42,9 @@ ls_mean_rate = zeros(101,1);
                
                min_mse_phase_all = sqrt(min(tab.mean_mse_phase_all(rows(first500ms))))./nBins;
                min_mse_rate = sqrt(min(tab.mean_mse_rate(rows(first500ms))))./nBins;
-               if min_mse_phase_all < .28 || min_mse_rate < .28
+               
 %                if b ~= length(rows) & bb ~= length(rows) & b ~= 1 & bb ~= 1
-               if strcmp(positionDecodingGLM.region{cell},'hpc') 
+               if strcmp(positionDecodingGLM.region{cell},'hpc') & min_mse_phase_all < .28 | min_mse_rate 
 %                    if positionDecodingGLM.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
 %                            positionDecodingGLM.results{cell}.mse_rate_pval(rows(bb)) <.05
                    
@@ -91,7 +91,7 @@ ls_mean_rate = zeros(101,1);
                    
                    title('tau vs mse trough')
 %                    end
-               elseif strcmp(positionDecodingGLM.region{cell},'ls') 
+               elseif strcmp(positionDecodingGLM.region{cell},'ls')    
 %                      if positionDecodingGLM.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
 %                            positionDecodingGLM.results{cell}.mse_rate(rows(bb)) <.05
                    subplot(2,5,6)
@@ -152,11 +152,10 @@ ls_mean_rate = zeros(101,1);
                end
                 end
             pause(.01)
-                end
             end
         end
         end
     end
 %     pause
-%     cd /home/david/datasets/lsDataset/
-% end
+    cd /home/david/datasets/lsDataset/
+end
