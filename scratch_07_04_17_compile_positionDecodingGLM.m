@@ -5,16 +5,16 @@ hpc_mean_phase = zeros(101,1);
 ls_mean_phase = zeros(101,1);
 hpc_mean_rate = zeros(101,1);
 ls_mean_rate = zeros(101,1);
-% d  = dir('*201*');
-% for i=1:length(d)
-%    cd(d(i).name) 
+d  = dir('*201*');
+for i=1:length(d)
+   cd(d(i).name) 
     if ~isempty(dir('*positionDecodingGLM_binnedspace_gauss.cell*'))
         xml = LoadParameters;
         b = dir('*.behavior.mat');
         load(b.name);
         nBins = length(behavior.events.map{1}.x);
         load([xml.FileName '.positionDecodingGLM_binnedspace_gauss.cellinfo.mat'])
-        positionDecodingGLM=positionDecodingGLM_binnedspace_gauss;
+%         positionDecodingGLM=positionDecodingGLM_binnedspace_gauss;
         if isfield(positionDecodingGLM,'dateRun')
         conditions = length(unique(positionDecodingGLM.results{1}.condition));
         for cell =1:length(positionDecodingGLM.results)
@@ -79,9 +79,9 @@ ls_mean_rate = zeros(101,1);
                    ylabel('1-500 ms, rate normed MSE')
                     
                    subplot(2,5,5)
-                   plot(tab.tau(rows(b))*(3.2/nBins),min_mse_phase_all,'.g')
+                   plot(tab.tau(rows(b)),min_mse_phase_all,'.g')
                    hold on
-                   plot(tab.tau(rows(bb))*(3.2/nBins),min_mse_rate,'.r')
+                   plot(tab.tau(rows(bb)),min_mse_rate,'.r')
 %                    hpc_mean_phase = hpc_mean_phase + sqrt(tab.mean_mse_phase_all(rows))./nBins;
 %                    plot(tab.tau(rows),hpc_mean_phase,'g')
 %                    hpc_mean_rate = hpc_mean_rate + sqrt(tab.mean_mse_rate(rows))./nBins;
@@ -135,9 +135,9 @@ ls_mean_rate = zeros(101,1);
 %                    hold off
                    
                    subplot(2,5,10)
-                   plot(tab.tau(rows(b))*(3.2/nBins),min_mse_phase_all,'.g')
+                   plot(tab.tau(rows(b)),min_mse_phase_all,'.g')
                    hold on
-                   plot(tab.tau(rows(bb))*(3.2/nBins),min_mse_rate,'.r')
+                   plot(tab.tau(rows(bb)),min_mse_rate,'.r')
 
 % ls_mean_phase = ls_mean_phase + sqrt(tab.mean_mse_phase_all(rows))./nBins;
 %                     plot(tab.tau(rows),ls_mean_phase,'g')
@@ -158,5 +158,5 @@ ls_mean_rate = zeros(101,1);
         end
     end
 %     pause
-%     cd /home/david/datasets/lsDataset/
-% end
+    cd /home/david/datasets/lsDataset/
+end

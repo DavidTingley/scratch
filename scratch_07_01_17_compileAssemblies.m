@@ -8,10 +8,10 @@ ii=[];
 rate=[];
 for i=1:length(d)
 cd(d(i).name)
-if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
-load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
-% if exist(['assembliesCrossRegionData.mat'])
-% load(['assembliesCrossRegionData.mat'])
+% if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
+% load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
+if exist(['assembliesCrossRegionData.mat'])
+load(['assembliesCrossRegionData.mat'])
 p=[];
 if ~isempty(pairs)
 % figure(1);
@@ -31,7 +31,7 @@ for c = 1:length(dev)
        scatter(b,imp,'.k')
        hold on
        subplot(2,2,2)
-       histogram(ii,1:200)
+       histogram(ii,1:2:200)
        p = [p; pairs(pair,:)];
        h = [h; imp];
        ii = [ii;b];
