@@ -40,7 +40,7 @@ for smoothing = 1:round(nBins/2)
 %                 sin_phase_trains_smooth=[sin_phase_trains_smooth;...
 %                      Smooth(squeeze(sin(binnedPhaseMap{cond}(cell,t,:))),smoothing,'type','c')];
                 rates_trains_smooth = [rates_trains_smooth; ...
-                                       smoothts(squeeze(countMap{cond}(cell,t,:)),'b',smoothing)];
+                                       smoothts(squeeze(countMap{cond}(cell,t,:))','b',smoothing)'];
                 pos = [pos,1:nBins];                   
             end
             
