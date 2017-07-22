@@ -1,10 +1,12 @@
-% % d  = dir('*201*');
+% d  = dir('*201*');
 % % ii=38;
 % 
-% load([d(ii).name '.behavior.mat'])
-%     load([d(ii).name '.sessionInfo.mat'])
-%     spikes = bz_GetSpikes;
-%     lfp = bz_GetLFP(sessionInfo.thetaChans(2));
+% for ii=1:length(d)
+xml = LoadParameters;
+load([xml.FileName '.behavior.mat'])
+load([xml.FileName '.sessionInfo.mat'])
+spikes = bz_GetSpikes;
+lfp = bz_GetLFP(sessionInfo.thetaChans(2));
 %     
 conditions = unique(behavior.events.trialConditions);
 nCells = length(spikes.times);
@@ -134,7 +136,7 @@ for wind = smoothingRange
         
         for iter = 1:5
             r = randperm(length(rates_trains_smooth));
-            pct = prctile(1:length(r),60);
+            pct = round(prctile(1:length(r),60));
             rates_train = rates_trains_smooth(r(1:pct));
             rates_test = rates_trains_smooth(r(pct+1:end));
             
@@ -144,27 +146,6 @@ for wind = smoothingRange
             predictors_test = predictors(r(pct+1:end),:);
 
             %% begin modelling rate
-            % allo
-%             [b dev_allo stats] = glmfit([predictors_train(:,1:6)],rates_train,'normal');
-%             yfit = glmval(b,predictors_test(:,1:6),'identity');
-%             mse_allo(c,iter) = mean((yfit-rates_test).^2); 
-%             % route
-%             [b dev_route stats] = glmfit([predictors_train(:,7:10)],rates_train,'normal');
-%             yfit = glmval(b,predictors_test(:,7:10),'identity');
-%             mse_route(c,iter) = mean((yfit-rates_test).^2); 
-%             % condition
-%             [b dev_cond stats] = glmfit([predictors_train(:,11:20)],rates_train,'normal');
-%             yfit = glmval(b,predictors_test(:,11:20),'identity');
-%             mse_cond(c,iter) = mean((yfit-rates_test).^2); 
-%             % goal
-%             [b dev_goal stats] = glmfit([predictors_train(:,21)],rates_train,'normal');
-%             yfit = glmval(b,predictors_test(:,21),'identity');
-%             mse_goal(c,iter) = mean((yfit-rates_test).^2); 
-%             %ego
-%             [b dev_goal stats] = glmfit([predictors_train(:,22:end)],rates_train,'normal');
-%             yfit = glmval(b,predictors_test(:,22:end),'identity');
-%             mse_ego(c,iter) = mean((yfit-rates_test).^2); 
-            
             mse_chance_rate(c,iter) = mean((rates_test(randperm(length(rates_test)))-rates_test).^2);
             for p=1:size(predictors,2)
                 [b dev_p stats] = glmfit(predictors_train(:,p),rates_train,'normal');
@@ -172,44 +153,25 @@ for wind = smoothingRange
                 mse_rate(c,p,iter) = mean((yfit-rates_test).^2);     
             end
             %% begin modelling phase
-            % allo
-%             [b dev_allo stats] = glmfit([predictors_train(:,1:6)],rates_train,'normal');
-%             yfit = glmval(b,predictors_test(:,1:6),'identity');
-%             mse_allo(c,iter) = mean((yfit-rates_test).^2); 
-%             % route
-%             [b dev_route stats] = glmfit([predictors_train(:,7:10)],rates_train,'normal');
-%             yfit = glmval(b,predictors_test(:,7:10),'identity');
-%             mse_route(c,iter) = mean((yfit-rates_test).^2); 
-%             % condition
-%             [b dev_cond stats] = glmfit([predictors_train(:,11:20)],rates_train,'normal');
-%             yfit = glmval(b,predictors_test(:,11:20),'identity');
-%             mse_cond(c,iter) = mean((yfit-rates_test).^2); 
-%             % goal
-%             [b dev_goal stats] = glmfit([predictors_train(:,21)],rates_train,'normal');
-%             yfit = glmval(b,predictors_test(:,21),'identity');
-%             mse_goal(c,iter) = mean((yfit-rates_test).^2); 
-%             %ego
-%             [b dev_goal stats] = glmfit([predictors_train(:,22:end)],rates_train,'normal');
-%             yfit = glmval(b,predictors_test(:,22:end),'identity');
-%             mse_ego(c,iter) = mean((yfit-rates_test).^2); 
-            
             mse_chance_phase(c,iter) = mean((phase_test(randperm(length(phase_test)))-phase_test).^2);
+            mse_chance_phase_cos(c,iter) = mean((cos(phase_test(randperm(length(phase_test))))-cos(phase_test)).^2);
+            mse_chance_phase_sin(c,iter) = mean((sin(phase_test(randperm(length(phase_test))))-sin(phase_test)).^2);
             for p=1:size(predictors,2)
                 [b dev_p stats] = glmfit(predictors_train(:,p),phase_train,'normal');
                 yfit = glmval(b,predictors_test(:,p),'identity');
-                mse_phase(c,p,iter) = mean((yfit-phase_test).^2);     
+                mse_phase(c,p,iter) = mean((yfit-phase_test).^2);   
+                [b dev_p stats] = glmfit(predictors_train(:,p),cos(phase_train),'normal');
+                yfit = glmval(b,predictors_test(:,p),'identity');
+                mse_phase_cos(c,p,iter) = mean((yfit-cos(phase_test)).^2);   
+                [b dev_p stats] = glmfit(predictors_train(:,p),sin(phase_train),'normal');
+                yfit = glmval(b,predictors_test(:,p),'identity');
+                mse_phase_sin(c,p,iter) = mean((yfit-sin(phase_test)).^2);   
+%                  [b dev_p stats] = glmfit([phase_train cos(phase_train) sin(phase_train)],predictors_train(:,p),'normal');
+%                 yfit = glmval(b,[phase_test cos(phase_test) sin(phase_test)],'identity');
+%                 mse_phase(c,p,iter) = mean((yfit-rates_test).^2); 
             end            
-            
         end
         
-%         subplot(2,2,1)
-%         plot(smoothingRange(1:c),mean(mse_allo,2),'.k')
-%         hold on
-%         plot(smoothingRange(1:c),mean(mse_route,2),'.r')
-%         plot(smoothingRange(1:c),mean(mse_cond,2),'.b')
-%         plot(smoothingRange(1:c),mean(mse_goal,2),'.g')
-%         set(gca,'yscale','log')
-%         hold off
         subplot(2,2,2)
         for j=1:size(mse_rate,1)
                 mse_norm(j,:,:) = zscore(mse_rate(j,:,:));
@@ -217,6 +179,7 @@ for wind = smoothingRange
         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm,3))))
         title('rate')
         clear mse_norm
+        
         subplot(2,2,4)
         for j=1:size(mse_phase,1)
                 mse_norm(j,:,:) = zscore(mse_phase(j,:,:));
@@ -225,6 +188,7 @@ for wind = smoothingRange
         clear mse_norm
         title('phase')
         hold off
+        
         subplot(2,2,1)
         % allo
         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,1:6,:),2),3))))./mean(mse_chance_rate,2),'.k')
@@ -243,42 +207,43 @@ for wind = smoothingRange
         % allo
         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,1:6,:),2),3))))./mean(mse_chance_phase,2),'.k')
         hold on
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,1:6,:),2),3))))./mean(mse_chance_phase_cos,2),'.k')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,1:6,:),2),3))))./mean(mse_chance_phase_sin,2),'.k')
         %route
         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,7:10,:),2),3))))./mean(mse_chance_phase,2),'.r')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,7:10,:),2),3))))./mean(mse_chance_phase_cos,2),'.r')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,7:10,:),2),3))))./mean(mse_chance_phase_sin,2),'.r')
         %cond
         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,11:20,:),2),3))))./mean(mse_chance_phase,2),'.b')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,11:20,:),2),3))))./mean(mse_chance_phase_cos,2),'.b')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,11:20,:),2),3))))./mean(mse_chance_phase_sin,2),'.b')
         %goal
         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,21,:),2),3))))./mean(mse_chance_phase,2),'.g')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,21,:),2),3))))./mean(mse_chance_phase_cos,2),'.g')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,21,:),2),3))))./mean(mse_chance_phase_sin,2),'.g')
         %ego
         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,22:end,:),2),3))))./mean(mse_chance_phase,2),'.m')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,22:end,:),2),3))))./mean(mse_chance_phase_cos,2),'.m')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,22:end,:),2),3))))./mean(mse_chance_phase_sin,2),'.m')
         hold off
         
 %         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse,3))))
         title(cell)
-%         subplot(2,2,2)
-%         [b dev stats] = glmfit([alloCentric, conditionCentric, routeCentric, goalCentric],sin(phase_trains_smooth),'normal');
-%         plot(wind,dev,'.k')
-%         hold on
-%         [b dev stats] = glmfit([alloCentric, goalCentric],phase_trains_smooth,'normal');
-%         plot(wind,dev,'.r')
-%         [b dev stats] = glmfit([routeCentric, goalCentric],phase_trains_smooth,'normal');
-%         plot(wind,dev,'.g')
-%         [b dev stats] = glmfit([alloCentric, routeCentric],phase_trains_smooth,'normal');
-%         plot(wind,dev,'.m')
-% %         hold off
-%         set(gca,'yscale','log')
+        
         pause(.05)
         c=c+1;
 end
     mse_all_phase{cell} = mse_phase;
+    mse_all_phase_cos{cell} = mse_phase_cos;
+    mse_all_phase_sin{cell} = mse_phase_sin;
     mse_all_rate{cell} = mse_rate;
-    mse_chance_phase{cell} = mse_chance_phase;
-    mse_chance_rate{cell} = mse_chance_rate;
+    mse_all_chance_phase{cell} = mse_chance_phase;
+    mse_all_chance_rate{cell} = mse_chance_rate;
     clear mse mse_allo mse_cond mse_route mse_goal mse_chance
 end
 
-
-
+save([spikes.sessionName '.referenceFrames.mat'],'mse*')
+% end
 
 
 
