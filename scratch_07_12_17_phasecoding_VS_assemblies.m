@@ -14,7 +14,7 @@ b = dir('*.behavior.mat');
 load(b.name);
 nBins = length(behavior.events.map{1}.x);
 xml = LoadParameters;
-if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat') & exist([xml.FileName '.positionDecodingGLM_gaussian.cellinfo.mat']) ...
+if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat') & exist([xml.FileName '.positionDecodingGLM_box.cellinfo.mat']) ...
 
     load([xml.FileName '.positionDecodingGLM_gaussian.cellinfo.mat'])
     load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat');
@@ -60,7 +60,7 @@ if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat') & exist([xml
                 zerolag = 1;
             end
             
-            if imp > 4 & b > 7 & b < 75 & zerolag < 1.4 & mean(dev{cond}(:,pair))>150
+            if imp > 7 & b > 7 & b < 75 & zerolag < 1.2 & mean(dev{cond}(:,pair))>150
                 p = [p; pairs(pair,:)];
                 h = [h; imp];
                 ii = [ii;b];

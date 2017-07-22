@@ -8,13 +8,13 @@ ls_mean_rate = zeros(101,1);
 d  = dir('*201*');
 for i=1:length(d)
    cd(d(i).name) 
-    if ~isempty(dir('*positionDecodingGLM_binnedspace_gauss.cell*'))
+    if ~isempty(dir('*positionDecodingGLM_box.cell*'))
         xml = LoadParameters;
         b = dir('*.behavior.mat');
         load(b.name);
         nBins = length(behavior.events.map{1}.x);
-        load([xml.FileName '.positionDecodingGLM_binnedspace_gauss.cellinfo.mat'])
-%         positionDecodingGLM=positionDecodingGLM_binnedspace_gauss;
+        load([xml.FileName '.positionDecodingGLM_box.cellinfo.mat'])
+        positionDecodingGLM=positionDecodingGLM_box;
         if isfield(positionDecodingGLM,'dateRun')
         conditions = length(unique(positionDecodingGLM.results{1}.condition));
         for cell =1:length(positionDecodingGLM.results)
