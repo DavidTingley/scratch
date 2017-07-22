@@ -136,7 +136,7 @@ for wind = smoothingRange
         
         for iter = 1:5
             r = randperm(length(rates_trains_smooth));
-            pct = prctile(1:length(r),60);
+            pct = round(prctile(1:length(r),60));
             rates_train = rates_trains_smooth(r(1:pct));
             rates_test = rates_trains_smooth(r(pct+1:end));
             
