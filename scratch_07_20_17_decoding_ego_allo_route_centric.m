@@ -240,7 +240,7 @@ end
     mse_all_chance_phase_cos{cell} = mse_chance_phase_cos;
     mse_all_chance_phase_sin{cell} = mse_chance_phase_sin;
     mse_all_chance_rate{cell} = mse_chance_rate;
-    clear mse mse_allo mse_cond mse_route mse_goal mse_chance
+    clear mse mse_allo mse_cond mse_route mse_goal mse_chance mse_rate mse_phase*
 end
 
 save([spikes.sessionName '.referenceFrames.mat'],'mse*')
