@@ -81,7 +81,7 @@ for smoothing = 1:round(nBins/2)
             %phase
             [b dev stats] = glmfit([p_train],pos_train','normal');
             yfit = glmval(b,[p_test ],'identity');
-            struct.mse_phase = nanmean((pos_test'-yfit).^2);git
+            struct.mse_phase = nanmean((pos_test'-yfit).^2);
             struct.mse_phase_pval = stats.p';
             %phase cos
             [b dev stats] = glmfit([p_cos_train ],pos_train','normal');
