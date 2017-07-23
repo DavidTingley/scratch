@@ -108,39 +108,39 @@ for smoothing = 1:round(nBins/2)
             
             count = 1+count;
             end
-            if cell == 24 & cond == 1
-                
-                t_rate = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_rate',...
-                'GroupingVariables',{'tau','condition'});
-                t_phase = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_phase_all',...
-                'GroupingVariables',{'tau','condition'});
-                t_both = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_both',...
-                'GroupingVariables',{'tau','condition'});
-                tab = join(join(t_rate,t_phase),t_both);
-                rows = find(tab.condition==cond);
-                subplot(2,2,1);
-%                 imagesc(phase_trains_smooth);
-%                 caxis([-pi pi])
-                subplot(2,2,2);
-                plot(tab.tau(rows),tab.mean_mse_rate(rows),'r')
-                hold on
-                plot(tab.tau(rows),tab.mean_mse_phase_all(rows),'g')
-                plot(tab.tau(rows),tab.mean_mse_both(rows),'k')
-%                 plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
-%                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_rate(rows,:)'),'r')
+%             if cell == 24 & cond == 1
+%                 
+%                 t_rate = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_rate',...
+%                 'GroupingVariables',{'tau','condition'});
+%                 t_phase = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_phase_all',...
+%                 'GroupingVariables',{'tau','condition'});
+%                 t_both = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_both',...
+%                 'GroupingVariables',{'tau','condition'});
+%                 tab = join(join(t_rate,t_phase),t_both);
+%                 rows = find(tab.condition==cond);
+%                 subplot(2,2,1);
+% %                 imagesc(phase_trains_smooth);
+% %                 caxis([-pi pi])
+%                 subplot(2,2,2);
+%                 plot(tab.tau(rows),tab.mean_mse_rate(rows),'r')
 %                 hold on
+%                 plot(tab.tau(rows),tab.mean_mse_phase_all(rows),'g')
+%                 plot(tab.tau(rows),tab.mean_mse_both(rows),'k')
+% %                 plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
+% %                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_rate(rows,:)'),'r')
+% %                 hold on
+% %                 plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
+% %                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_phase_all(rows,:)'),'g')
 %                 plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
-%                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_phase_all(rows,:)'),'g')
-                plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
-                    mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_both(rows,:)'),'k')
-                hold off
-%                 subplot(2,2,3)
-%                 imagesc(rates_trains_smooth);
-%                 subplot(2,2,4)
-                
-                title([cell cond smoothing])
-                pause(.1)
-            end         
+%                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_both(rows,:)'),'k')
+%                 hold off
+% %                 subplot(2,2,3)
+% %                 imagesc(rates_trains_smooth);
+% %                 subplot(2,2,4)
+%                 
+%                 title([cell cond smoothing])
+%                 pause(.1)
+%             end         
         end
         disp(['done with condition: ' num2str(cond) ' of ' num2str(length(unique(behavior.events.trialConditions)))]);
     end
