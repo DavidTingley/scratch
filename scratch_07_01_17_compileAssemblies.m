@@ -6,12 +6,13 @@ h=[];
 z=[];
 ii=[];
 rate=[];
+
 for i=1:length(d)
 cd(d(i).name)
-% if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
-% load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
-if exist(['assembliesCrossRegionData.mat'])
-load(['assembliesCrossRegionData.mat'])
+if exist('assembliesCrossRegion_split_w_theta.mat')
+load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs','coords')
+% if exist(['assembliesCrossRegionData.mat'])
+% load(['assembliesCrossRegionData.mat'])
 p=[];
 if ~isempty(pairs)
 % figure(1);
@@ -26,7 +27,7 @@ for c = 1:length(dev)
         zerolag = 1;
     end
     
-    if imp > 7 & b > 7 & zerolag < 1.2 & mean(dev{c}(:,pair))>150
+    if imp > 5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{c}(:,pair))>150
        subplot(2,2,1)
        scatter(b,imp,'.k')
        hold on

@@ -38,11 +38,11 @@ for i=1:length(d)
 %                b = bb(c);clear bb
                [aa bb] =min(tab.mean_mse_rate(rows));
                
-               first500ms = find(ismember(tab.tau(rows),1:500));
+               first500ms = find(ismember(tab.tau(rows),1:nBins/3));
                
                min_mse_phase_all = sqrt(min(tab.mean_mse_phase_all(rows(first500ms))))./nBins;
                min_mse_rate = sqrt(min(tab.mean_mse_rate(rows(first500ms))))./nBins;
-               if min_mse_phase_all < .28 || min_mse_rate < .28
+               if min_mse_phase_all < .33 & min_mse_rate < .33
 %                if b ~= length(rows) & bb ~= length(rows) & b ~= 1 & bb ~= 1
                if strcmp(positionDecodingGLM.region{cell},'hpc') 
 %                    if positionDecodingGLM.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
@@ -79,9 +79,9 @@ for i=1:length(d)
                    ylabel('1-500 ms, rate normed MSE')
                     
                    subplot(2,5,5)
-                   plot(tab.tau(rows(b)),min_mse_phase_all,'.g')
+                   plot(tab.tau(rows(b))./nBins,min_mse_phase_all,'.g')
                    hold on
-                   plot(tab.tau(rows(bb)),min_mse_rate,'.r')
+                   plot(tab.tau(rows(bb))./nBins,min_mse_rate,'.r')
 %                    hpc_mean_phase = hpc_mean_phase + sqrt(tab.mean_mse_phase_all(rows))./nBins;
 %                    plot(tab.tau(rows),hpc_mean_phase,'g')
 %                    hpc_mean_rate = hpc_mean_rate + sqrt(tab.mean_mse_rate(rows))./nBins;
@@ -135,9 +135,9 @@ for i=1:length(d)
 %                    hold off
                    
                    subplot(2,5,10)
-                   plot(tab.tau(rows(b)),min_mse_phase_all,'.g')
+                   plot(tab.tau(rows(b))./nBins,min_mse_phase_all,'.g')
                    hold on
-                   plot(tab.tau(rows(bb)),min_mse_rate,'.r')
+                   plot(tab.tau(rows(bb))./nBins,min_mse_rate,'.r')
 
 % ls_mean_phase = ls_mean_phase + sqrt(tab.mean_mse_phase_all(rows))./nBins;
 %                     plot(tab.tau(rows),ls_mean_phase,'g')

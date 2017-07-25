@@ -19,10 +19,10 @@ end
     
 for smoothing = 1:round(nBins/2)
     disp(['smoothing by: ' num2str(smoothing) ' bins']);
-    for cond = 1:length(unique(behavior.events.trialConditions))
+    for cond = 2%1:length(unique(behavior.events.trialConditions))
 %         figure(cond)
         % smooth data..
-        for cell = 1:length(spikes.times)
+        for cell = 2%1:length(spikes.times)
                        %smoothing
             phase_trains_smooth=[];
             cos_phase_trains_smooth=[];
@@ -42,9 +42,15 @@ for smoothing = 1:round(nBins/2)
 %                      Smooth(squeeze(sin(binnedPhaseMap{cond}(cell,t,:))),smoothing,'type','c')];
                 rates_trains_smooth = [rates_trains_smooth; ...
                                        smoothts(squeeze(countMap{cond}(cell,t,:))','b',smoothing)'];
-                pos = [pos,1:nBins];                   
+                
+                pos = [pos,[1:nBins]];                   
             end
-            
+%             subplot(2,1,1)
+%             plot(rates_trains_smooth(1:200))
+%             subplot(2,1,2)
+%             plot(phase_trains_smooth(1:200))
+%             title(smoothing)
+%             pause
 
             r = rates_trains_smooth;
             p = phase_trains_smooth;
@@ -69,7 +75,7 @@ for smoothing = 1:round(nBins/2)
             pos_train = pos(rr(1:pct));
             pos_test = pos(rr(pct+1:end));
             % rate
-            [b dev stats] = glmfit([r_train],pos_train,'normal');
+            [b dev stats] = glmfit([r_train],pos_train','normal');
             yfit = glmval(b,r_test,'identity');
             struct.mse_rate = nanmean((pos_test'-yfit).^2);
             struct.mse_rate_pval = stats.p';
@@ -98,7 +104,11 @@ for smoothing = 1:round(nBins/2)
             yfit = glmval(b,[r_test p_test p_cos_test p_sin_test],'identity');
             struct.mse_both  = nanmean((pos_test'-yfit).^2);
             struct.mse_both_pval = stats.p';
-
+            
+            [b dev stats] = glmfit([rand(length(pos_train),1)],pos_train','normal');
+            yfit = glmval(b,[rand(length(pos_test),1)],'identity');
+            struct.mse_chance  = nanmean((pos_test'-yfit).^2);
+            
             % store peripherals
             struct.iter = count;
             struct.dfe = stats.dfe;
@@ -108,24 +118,31 @@ for smoothing = 1:round(nBins/2)
             
             count = 1+count;
             end
-%             if cell == 24 & cond == 1
-%                 
+%             if cell == 2 & cond == 2
+% %                 
 %                 t_rate = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_rate',...
 %                 'GroupingVariables',{'tau','condition'});
 %                 t_phase = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_phase_all',...
 %                 'GroupingVariables',{'tau','condition'});
 %                 t_both = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_both',...
 %                 'GroupingVariables',{'tau','condition'});
-%                 tab = join(join(t_rate,t_phase),t_both);
+%                 t_chance = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_chance',...
+%                 'GroupingVariables',{'tau','condition'});   
+%                 t_std = varfun(@std,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_chance',...
+%                 'GroupingVariables',{'tau','condition'});  
+%                 tab = join(join(join(t_rate,t_phase),t_both),t_chance);
 %                 rows = find(tab.condition==cond);
 %                 subplot(2,2,1);
 % %                 imagesc(phase_trains_smooth);
 % %                 caxis([-pi pi])
 %                 subplot(2,2,2);
-%                 plot(tab.tau(rows),tab.mean_mse_rate(rows),'r')
+%                 boundedline(tab.tau(rows),tab.mean_mse_chance(rows),3*t_std.std_mse_chance(rows),'k')
 %                 hold on
-%                 plot(tab.tau(rows),tab.mean_mse_phase_all(rows),'g')
+%                 plot(tab.tau(rows),tab.mean_mse_rate(rows),'r')
 %                 plot(tab.tau(rows),tab.mean_mse_both(rows),'k')
+%                 plot(tab.tau(rows),tab.mean_mse_phase_all(rows),'g')
+%                 
+% 
 % %                 plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
 % %                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_rate(rows,:)'),'r')
 % %                 hold on

@@ -14,7 +14,7 @@ for cond = 1:length(unique(behavior.events.trialConditions))
         sp{cell} = Restrict(spikes.times{cell},behavior.events.trialIntervals(behavior.events.trialConditions==cond,:));
     end
     [times groups] = spikes2sorted(sp);
-    [ccg t]  = CCG(times,groups,'binSize',.001,'duration',3);
+    [ccg t]  = CCG(times,groups,'binSize',.001,'duration',1);
     if cond <= length(dev)
     for pair = 1:size(dev{cond},2)
     [a b] =  min(dev{cond}(:,pair));

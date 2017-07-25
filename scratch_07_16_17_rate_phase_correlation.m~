@@ -8,8 +8,6 @@ hpc_corrs_change =[];
 ls_corrs_change=[];
 hpc_corrs_shuffle_change =[];
 ls_corrs_shuffle_change=[];
-ls_pvals = [];
-hpc_pvals =[];
  
 %% compile data
 
@@ -70,7 +68,7 @@ for ii=1:length(d)
                      rate_phase_corrs.meanRatePhaseChangeCorr(j,i) = nanmean(rate_phase_corrs.instRate_phase_corr{j,i});
                      rate_phase_corrs.meanRateChangePhaseChangeCorr_shuffle(j,i) = nanmean(rate_phase_corrs.instRateChange_phaseChange_corr_shuffle{j,i}(:));
                      rate_phase_corrs.meanRatePhaseChangeCorr_shuffle(j,i) = nanmean(rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i}(:));
-                     [rate_phase_corrs.ksSig rate_phase_corrs.ksPval(j,i)] = kstest2(nanmean(rate_phase_corrs.instRate_phase_corr{j,i}),rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i}(:));
+                     [rate_phase_corrs.ksSig rate_phase_corrs.ksPval(j] = kstest2(nanmean(rate_phase_corrs.instRate_phase_corr{j,i}),rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i}(:));
                 end
             end
         end
@@ -78,12 +76,12 @@ for ii=1:length(d)
    end
    for j=1:length(spikes.times)
        if strcmp(spikes.region{j},'hpc')
-        subplot(4,2,1)
+        subplot(2,2,1)
         hpc_corrs = [hpc_corrs ,rate_phase_corrs.meanRatePhaseChangeCorr(j,:)];
         hpc_corrs_shuffle = [hpc_corrs_shuffle ,rate_phase_corrs.meanRatePhaseChangeCorr_shuffle(j,:)];
         hpc_corrs_change = [hpc_corrs_change ,rate_phase_corrs.meanRateChangePhaseChangeCorr(j,:)];
         hpc_corrs_shuffle_change = [hpc_corrs_shuffle_change ,rate_phase_corrs.meanRateChangePhaseChangeCorr_shuffle(j,:)];
-        hpc_pvals = [hpc_pvals;rate_phase_corrs.ksPval(j,:)];
+        hpc_pvals = [hpc_pvals;rate_phase_corrs.ksPval(j)];
         histogram(hpc_corrs,0:.02:1,'Normalization','pdf')
         hold on
         histogram(hpc_corrs_shuffle,0:.02:1,'Normalization','pdf','FaceColor','r')
@@ -93,7 +91,7 @@ for ii=1:length(d)
         %    set(gca,'yscale','log')
         title('hpc, phase vs inst rate corrs')
    
-        subplot(4,2,2)
+        subplot(2,2,3)
         histogram(hpc_corrs_change,0:.02:1,'Normalization','pdf')
         hold on
         histogram(hpc_corrs_shuffle_change,0:.02:1,'Normalization','pdf','FaceColor','r')
@@ -102,19 +100,13 @@ for ii=1:length(d)
         hold off
         %    set(gca,'yscale','log')
         title('hpc, phase vs inst rate change corrs')
-        
-        subplot(4,2,3)
-        scatter(hpc_corrs_change,hpc_corrs_shuffle_change,'.')
-        subplot(4,2,4)
-        histogram(hpc_pvals)
-        
+
        elseif strcmp(spikes.region{j},'ls')
-        subplot(4,2,5)
+        subplot(2,2,2)
         ls_corrs = [ls_corrs ,rate_phase_corrs.meanRatePhaseChangeCorr(j,:)];
         ls_corrs_shuffle = [ls_corrs_shuffle ,rate_phase_corrs.meanRatePhaseChangeCorr_shuffle(j,:)];
         ls_corrs_change = [ls_corrs_change ,rate_phase_corrs.meanRateChangePhaseChangeCorr(j,:)];
         ls_corrs_shuffle_change = [ls_corrs_shuffle_change ,rate_phase_corrs.meanRateChangePhaseChangeCorr_shuffle(j,:)];
-        ls_pvals = [ls_pvals;rate_phase_corrs.ksPval(j,:)];
         histogram(ls_corrs,0:.02:1,'Normalization','pdf')
         hold on
         histogram(ls_corrs_shuffle,0:.02:1,'Normalization','pdf','FaceColor','r')
@@ -124,7 +116,7 @@ for ii=1:length(d)
         title('ls, phase vs inst rate corrs')
         
         
-        subplot(4,2,6)
+        subplot(2,2,4)
         histogram(ls_corrs_change,0:.02:1,'Normalization','pdf')
         hold on
         histogram(ls_corrs_shuffle_change,0:.02:1,'Normalization','pdf','FaceColor','r')
@@ -132,11 +124,7 @@ for ii=1:length(d)
         line([nanmedian(ls_corrs_shuffle_change(:)) nanmedian(ls_corrs_shuffle_change(:))],[0 20],'color','r')
         hold off
         title('ls, phase vs inst rate change corrs')
-        
-        subplot(4,2,7)
-        scatter(ls_corrs_change,ls_corrs_shuffle_change,'.')
-        subplot(4,2,8)
-        histogram(ls_pvals)
+
        end
    end
    pause(.1)
