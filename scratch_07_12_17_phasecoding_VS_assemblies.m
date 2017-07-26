@@ -7,18 +7,27 @@ noAss_phaseonly = [];
 ass_phaseonly = [];
 d  = dir('*201*');
 
-for i=[1:length(d)]
+for i=1:length(d)
+    figure
+    
+ass = [];
+noAss = [];
+stren = [];
+devs = [];
+noAss_phaseonly = [];
+ass_phaseonly = [];
+
 cd(d(i).name) 
 spikes = bz_GetSpikes;
 b = dir('*.behavior.mat');
 load(b.name);
 nBins = length(behavior.events.map{1}.x);
 xml = LoadParameters;
-if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat') & exist([xml.FileName '.positionDecodingGLM_box.cellinfo.mat']) ...
+if exist('assembliesCrossRegion_split_w_theta.mat') & exist([xml.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat']) ...
 
-    load([xml.FileName '.positionDecodingGLM_gaussian.cellinfo.mat'])
-    load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat');
-    positionDecodingGLM=positionDecodingGLM_gaussian
+    load([xml.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'])
+    load('assembliesCrossRegion_split_w_theta.mat');
+    positionDecodingGLM=positionDecodingGLM_binnedspace_box;
     if isfield(positionDecodingGLM,'dateRun') & length(pairs)>1 & exist('dev')==1
     conditions = length(unique(positionDecodingGLM.results{1}.condition));
     for cell =1:length(positionDecodingGLM.results)
@@ -31,7 +40,7 @@ if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat') & exist([xml
             if cond <= length(dev)
             % grab phase/rate coding variables
             rows = find(positionDecodingGLM.results{cell}.condition==cond);
-            first500ms = find(ismember(positionDecodingGLM.results{cell}.tau(rows),1:4000));
+            first500ms = find(ismember(positionDecodingGLM.results{cell}.tau(rows),1:nBins/2));
             
             min_mse_rate(cell,cond) = sqrt(min(positionDecodingGLM.results{cell}.mse_rate(rows(first500ms))))./nBins;
             min_mse_phase_all(cell,cond) = sqrt(min(positionDecodingGLM.results{cell}.mse_phase_all(rows(first500ms))))./nBins;
@@ -60,7 +69,7 @@ if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat') & exist([xml
                 zerolag = 1;
             end
             
-            if imp > 7 & b > 7 & b < 75 & zerolag < 1.2 & mean(dev{cond}(:,pair))>150
+            if imp > 5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>150
                 p = [p; pairs(pair,:)];
                 h = [h; imp];
                 ii = [ii;b];
@@ -92,7 +101,7 @@ if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat') & exist([xml
             end
 
     end
-        clear pairs dev devControl
+       
 if ~isempty(stren)
 subplot(2,2,1)
 histogram(ass,[-1:.02:1],'Normalization','pdf','FaceColor','g')
@@ -103,7 +112,8 @@ histogram(noAss,[-1:.02:1],'Normalization','pdf','FaceColor','r')
 xlabel('phase coding only             neither/both             rate code only')
 set(gca,'yscale','log')
 ylabel('probability')
-title('phase coding strength for gamma assemblies or no assembly')
+title(length(pairs))
+% title('phase coding strength for gamma assemblies or no assembly')
 hold off
 subplot(2,2,2)
 scatter(stren(:,2),stren(:,5),'.')
@@ -125,10 +135,15 @@ scatter(stren(:,1),stren(:,5),'.')
 xlabel('improvement val')
 ylabel('phase coding val')
 title(d(i).name)
-pause(.1)
+[a b] = kstest2(ass_phaseonly,noAss_phaseonly);
+subplot(2,2,2)
+title(b);
+pause
 end
+ clear pairs dev devControl
 end
 % 
+
 cd /home/david/datasets/lsDataset/
 end
 

@@ -6,6 +6,10 @@ h=[];
 z=[];
 ii=[];
 rate=[];
+nHPC = [];
+nLS = [];
+rec=[];
+
 
 for i=1:length(d)
 cd(d(i).name)
@@ -38,6 +42,9 @@ for c = 1:length(dev)
        ii = [ii;b];
        z=[z;zerolag];
        rate=[rate;mean(dev{c}(:,pair))];
+       nHPC=[nHPC; length(unique(pairs(:,2)))];
+       nLS=[nLS; length(unique(pairs(:,1)))];
+       rec = [rec; i];
        line([median(ii) median(ii)],[0 25],'color','r')
        line([mean(ii) mean(ii)],[0 25],'color','g')
        ylabel('improvement (min-mean) ./ (minc-meanc)')
