@@ -114,7 +114,7 @@ end
 warning off
 
 
-for cell = 44%1:nCells
+for cell = 1:nCells
     c=1;
 %     figure
 for wind = smoothingRange
@@ -241,9 +241,10 @@ end
     mse_all_chance_phase_sin{cell} = mse_chance_phase_sin;
     mse_all_chance_rate{cell} = mse_chance_rate;
     clear mse mse_allo mse_cond mse_route mse_goal mse_chance_rate mse_chance_phase_cos mse_chance_phase_sin mse_rate mse_phase*
+    save([spikes.sessionName '.referenceFrames.mat'],'mse*')
 end
 
-save([spikes.sessionName '.referenceFrames.mat'],'mse*')
+
 % end
 
 
