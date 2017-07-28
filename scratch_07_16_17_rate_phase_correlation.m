@@ -55,6 +55,21 @@ for ii=1:length(d)
                             [rate_phase_corrs.instRateChange_phaseChange_corr_shuffle{j,i}(t,iter),rate_phase_corrs.instRateChange_phaseChange_pval_shuffle{j,i}(t,iter)]= circ_corrcl(...
                                 [firingMaps.phaseMaps{i}{j}(f,end)],circshift([0; diff(firingMaps.phaseMaps{i}{j}(f,end-1))]',round(rand*100)));
                         end
+%                         if j == 80
+%                             subplot(2,2,1)
+%                             scatter([firingMaps.phaseMaps{i}{j}(f,end)],firingMaps.phaseMaps{i}{j}(f,end-1),'.k')
+%                             hold on
+%                             title('inst rate vs phase')
+%                             subplot(2,2,2)
+%                             scatter([firingMaps.phaseMaps{i}{j}(f,end)],[0; diff(firingMaps.phaseMaps{i}{j}(f,end-1))],'.k')
+%                             hold on
+%                             title('deriv inst rate vs phase')
+%                             subplot(2,2,3)
+%                             scatter((firingMaps.phaseMaps{i}{j}(f,end)),(firingMaps.phaseMaps{i}{j}(f,end-1)),'.k')
+%                             hold on
+%                             ylabel('delta rate')
+%                             xlabel('delta phase')
+%                         end
                    else  
                         for iter= 1:100
                             rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i}(t,iter)=nan;
@@ -72,7 +87,7 @@ for ii=1:length(d)
                      rate_phase_corrs.meanRateChangePhaseChangeCorr_shuffle(j,i) = nanmean(rate_phase_corrs.instRateChange_phaseChange_corr_shuffle{j,i}(:));
                      rate_phase_corrs.meanRatePhaseChangeCorr_shuffle(j,i) = nanmean(rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i}(:));
                      if ~isnan(nanmean(rate_phase_corrs.instRate_phase_corr{j,i}))
-                         [rate_phase_corrs.ksSig rate_phase_corrs.ksPval(j,i)] = kstest2(nanmean(rate_phase_corrs.instRate_phase_corr{j,i}),rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i}(:));
+                         [rate_phase_corrs.ksSig rate_phase_corrs.ksPval(j,i)] = ttest2(nanmean(rate_phase_corrs.instRate_phase_corr{j,i}),rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i}(:));
                      else
                          rate_phase_corrs.ksSig =nan;
                          rate_phase_corrs.ksPval(j,i)=nan;

@@ -6,7 +6,7 @@ xml = LoadParameters;
 load([xml.FileName '.behavior.mat'])
 load([xml.FileName '.sessionInfo.mat'])
 spikes = bz_GetSpikes;
-lfp = bz_GetLFP(sessionInfo.thetaChans(2));
+% lfp = bz_GetLFP(sessionInfo.thetaChans(2));
 %     
 conditions = unique(behavior.events.trialConditions);
 nCells = length(spikes.times);
@@ -14,8 +14,8 @@ routeCentricSamplingRate = behavior.samplingRate;
 smoothingRange = 1:300:4000;
 % 
 % % find a better way to get spike phase relationship...
-[rateMap countMap occuMap phaseMap] = bz_firingMap1D(spikes.times,behavior,lfp,4);
-% 
+% [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
+load([spikes.sessionName '.firingMaps.cellinfo.mat'])
 % % iterate through conditions and compile spike trains and spike-phase
 % % trains
 routeCentric = [];
@@ -31,12 +31,12 @@ for cond = conditions
         spk_trains{cond}{t} = zeros(nCells,ceil((intervals(t,2)-intervals(t,1))*1000)); % assumes intervals are in seconds, rounds to nearest millisecond
         phase_trains{cond}{t} = zeros(nCells,ceil((intervals(t,2)-intervals(t,1))*1000));
         for cell = 1:nCells
-            if ~isempty(phaseMap{cond}{cell})
-                f = find(phaseMap{cond}{cell}(:,2)==t);
+            if ~isempty(firingMaps.phaseMaps{cond}{cell})
+                f = find(firingMaps.phaseMaps{cond}{cell}(:,2)==t);
                 if ~isempty(f)
                 for s=1:length(f)
-                    phase_trains{cond}{t}(cell,ceil(phaseMap{cond}{cell}(f(s),5)*1000)) = ...
-                        phaseMap{cond}{cell}(f(s),end);
+                    phase_trains{cond}{t}(cell,ceil(firingMaps.phaseMaps{cond}{cell}(f(s),5)*1000)) = ...
+                        firingMaps.phaseMaps{cond}{cell}(f(s),end);
                 end
                 end
             end
@@ -114,7 +114,7 @@ end
 warning off
 
 
-for cell = 24%cell =1:nCells
+for cell = 44%1:nCells
     c=1;
 %     figure
 for wind = smoothingRange
@@ -172,65 +172,65 @@ for wind = smoothingRange
             end            
         end
         
-        subplot(2,2,2)
-        for j=1:size(mse_rate,1)
-                mse_norm(j,:,:) = zscore(mse_rate(j,:,:));
-        end
-        imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm,3))))
-        title('rate')
-        clear mse_norm
-        
-        subplot(2,2,4)
-        for j=1:size(mse_phase_cos,1)
-                mse_norm(j,:,:) = zscore(mse_phase_cos(j,:,:));
-        end
-        imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm,3))))
-        clear mse_norm
-        title('phase')
-        hold off
-        
-        subplot(2,2,1)
-        % allo
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,1:6,:),2),3))))./mean(mse_chance_rate,2),'.k')
-        hold on
-        %route
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,7:10,:),2),3))))./mean(mse_chance_rate,2),'.r')
-        %cond
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,11:20,:),2),3))))./mean(mse_chance_rate,2),'.b')
-        %goal
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,21,:),2),3))))./mean(mse_chance_rate,2),'.g')
-        %ego
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,22:end,:),2),3))))./mean(mse_chance_rate,2),'.m')
-        hold off
-        
-        subplot(2,2,3)
-        % allo
-%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,1:6,:),2),3))))./mean(mse_chance_phase,2),'.k')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,1:6,:),2),3))))./mean(mse_chance_phase_cos,2),'.k')
-        hold on
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,1:6,:),2),3))))./mean(mse_chance_phase_sin,2),'.k')
-        %route
-%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,7:10,:),2),3))))./mean(mse_chance_phase,2),'.r')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,7:10,:),2),3))))./mean(mse_chance_phase_cos,2),'.r')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,7:10,:),2),3))))./mean(mse_chance_phase_sin,2),'.r')
-        %cond
-%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,11:20,:),2),3))))./mean(mse_chance_phase,2),'.b')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,11:20,:),2),3))))./mean(mse_chance_phase_cos,2),'.b')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,11:20,:),2),3))))./mean(mse_chance_phase_sin,2),'.b')
-        %goal
-%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,21,:),2),3))))./mean(mse_chance_phase,2),'.g')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,21,:),2),3))))./mean(mse_chance_phase_cos,2),'.g')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,21,:),2),3))))./mean(mse_chance_phase_sin,2),'.g')
-        %ego
-%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,22:end,:),2),3))))./mean(mse_chance_phase,2),'.m')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,22:end,:),2),3))))./mean(mse_chance_phase_cos,2),'.m')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,22:end,:),2),3))))./mean(mse_chance_phase_sin,2),'.m')
-        hold off
-        
-%         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse,3))))
-        title(cell)
-        
-        pause(.05)
+%         subplot(2,2,2)
+%         for j=1:size(mse_rate,1)
+%                 mse_norm(j,:,:) = zscore(mse_rate(j,:,:));
+%         end
+%         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm,3))))
+%         title('rate')
+%         clear mse_norm
+%         
+%         subplot(2,2,4)
+%         for j=1:size(mse_phase_cos,1)
+%                 mse_norm(j,:,:) = zscore(mse_phase_cos(j,:,:));
+%         end
+%         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm,3))))
+%         clear mse_norm
+%         title('phase')
+%         hold off
+%         
+%         subplot(2,2,1)
+%         % allo
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,1:6,:),2),3))))./mean(mse_chance_rate,2),'.k')
+%         hold on
+%         %route
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,7:10,:),2),3))))./mean(mse_chance_rate,2),'.r')
+%         %cond
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,11:20,:),2),3))))./mean(mse_chance_rate,2),'.b')
+%         %goal
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,21,:),2),3))))./mean(mse_chance_rate,2),'.g')
+%         %ego
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,22:end,:),2),3))))./mean(mse_chance_rate,2),'.m')
+%         hold off
+%         
+%         subplot(2,2,3)
+%         % allo
+% %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,1:6,:),2),3))))./mean(mse_chance_phase,2),'.k')
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,1:6,:),2),3))))./mean(mse_chance_phase_cos,2),'.k')
+%         hold on
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,1:6,:),2),3))))./mean(mse_chance_phase_sin,2),'.k')
+%         %route
+% %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,7:10,:),2),3))))./mean(mse_chance_phase,2),'.r')
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,7:10,:),2),3))))./mean(mse_chance_phase_cos,2),'.r')
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,7:10,:),2),3))))./mean(mse_chance_phase_sin,2),'.r')
+%         %cond
+% %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,11:20,:),2),3))))./mean(mse_chance_phase,2),'.b')
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,11:20,:),2),3))))./mean(mse_chance_phase_cos,2),'.b')
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,11:20,:),2),3))))./mean(mse_chance_phase_sin,2),'.b')
+%         %goal
+% %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,21,:),2),3))))./mean(mse_chance_phase,2),'.g')
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,21,:),2),3))))./mean(mse_chance_phase_cos,2),'.g')
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,21,:),2),3))))./mean(mse_chance_phase_sin,2),'.g')
+%         %ego
+% %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,22:end,:),2),3))))./mean(mse_chance_phase,2),'.m')
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,22:end,:),2),3))))./mean(mse_chance_phase_cos,2),'.m')
+%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,22:end,:),2),3))))./mean(mse_chance_phase_sin,2),'.m')
+%         hold off
+%         
+% %         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse,3))))
+%         title(cell)
+%         
+%         pause(.05)
         c=c+1;
 end
 %     mse_all_phase{cell} = mse_phase;
