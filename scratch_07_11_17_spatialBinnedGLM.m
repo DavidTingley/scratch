@@ -5,7 +5,7 @@ load([xml.FileName '.behavior.mat'])
 load([xml.FileName '.sessionInfo.mat'])
 spikes = bz_GetSpikes;
 lfp = bz_GetLFP(sessionInfo.thetaChans(2));
-nBins = max(behavior.events.trials{1}.mapping);
+nBins = round(max(behavior.events.trials{1}.mapping));
 % 
 positionDecodingGLM_binnedspace_box.region = spikes.region;
 positionDecodingGLM_binnedspace_box.sessionName = spikes.sessionName;
@@ -24,7 +24,7 @@ phaseMap=firingMaps.phaseMaps;
 for smoothing = 1:round(nBins/2)
     disp(['smoothing by: ' num2str(smoothing) ' bins']);
     for cond = 1:length(unique(behavior.events.trialConditions))
-        if size(binnedPhaseMap{cond},2) > 12
+        if size(binnedPhaseMap{cond},2) >= 7
 %         figure(cond)
         % smooth data..
         for cell = 1:length(spikes.times)
@@ -56,7 +56,8 @@ for smoothing = 1:round(nBins/2)
 %             plot(phase_trains_smooth(1:200))
 %             title(smoothing)
 %             pause
-
+            rates_trains_smooth(rates_trains_smooth==0)=nan;
+            phase_trains_smooth(phase_trains_smooth==0)=nan;
             r = rates_trains_smooth;
             p = phase_trains_smooth;
             p_cos =cos(phase_trains_smooth);
@@ -110,8 +111,8 @@ for smoothing = 1:round(nBins/2)
             struct.mse_both  = nanmean((pos_test'-yfit).^2);
             struct.mse_both_pval = stats.p';
             
-            [b dev stats] = glmfit([rand(length(pos_train),1)],pos_train','normal');
-            yfit = glmval(b,[rand(length(pos_test),1)],'identity');
+            [b dev stats] = glmfit([r_train(randperm(length(r_train)))],pos_train','normal');
+            yfit = glmval(b,[r_test(randperm(length(r_test)))],'identity');
             struct.mse_chance  = nanmean((pos_test'-yfit).^2);
             
             % store peripherals
@@ -123,7 +124,7 @@ for smoothing = 1:round(nBins/2)
             
             count = 1+count;
             end
-%             if cell == 17 & cond == 2
+%             if cell == 44 & cond == 7
 % %                 
 %                 t_rate = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_rate',...
 %                 'GroupingVariables',{'tau','condition'});
@@ -161,6 +162,7 @@ for smoothing = 1:round(nBins/2)
 % %                 subplot(2,2,4)
 %                 
 %                 title([cell cond smoothing])
+% 
 %                 pause(.1)
 %             end         
         end
@@ -168,6 +170,6 @@ for smoothing = 1:round(nBins/2)
         end
     end
     positionDecodingGLM_binnedspace_box.dateRun = date;  % this can take a very long time so lets save each loop...
-% save([xml.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'],'positionDecodingGLM_binnedspace_box')
+save([xml.FileName '.positionDecodingGLM_binnedspace_box_nozero.cellinfo.mat'],'positionDecodingGLM_binnedspace_box')
 end
 

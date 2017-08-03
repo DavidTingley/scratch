@@ -77,7 +77,7 @@ if exist('assembliesCrossRegion_split_w_theta.mat') & exist([xml.FileName '.posi
             if zerolag < 1 
                 zerolag = 1;
             end
-            if imp > 5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>150
+            if imp > 5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>100
                 p = [p; pairs(pair,:)];
                 h = [h; imp];
                 ii = [ii;b];
@@ -106,7 +106,7 @@ if exist('assembliesCrossRegion_split_w_theta.mat') & exist([xml.FileName '.posi
                 zerolag = 1;
                 end
 
-                if imp > 5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>150
+                if imp > 5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>100
                 p = [p; pairs(pair,:)];
                 h = [h; imp];
                 ii = [ii;b];

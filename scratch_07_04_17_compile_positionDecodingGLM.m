@@ -7,6 +7,7 @@ hpc_phase_pval = [];
 hpc_rate_pval = [];
 ls_phase_pval = [];
 ls_rate_pval = [];
+ls_rec =[]; hpc_rec = [];
                    
 hpc_mean_phase = zeros(101,1);
 ls_mean_phase = zeros(101,1);
@@ -23,7 +24,7 @@ for i=1:length(d)
         load([xml.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'])
         positionDecodingGLM=positionDecodingGLM_binnedspace_box;
         if isfield(positionDecodingGLM,'dateRun')
-        conditions = length(unique(positionDecodingGLM.results{1}.condition));
+        conditions = length(unique(behavior.events.trialConditions));
         for cell =1:length(positionDecodingGLM.results)
         t_rate = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_rate',...
             'GroupingVariables',{'tau','condition'});
@@ -40,7 +41,7 @@ for i=1:length(d)
         pvals = join(t_phase_pval,t_rate_pval);
         
             for cond = 1:conditions
-                if sum(behavior.events.trialConditions==cond) > 10 
+                if sum(behavior.events.trialConditions==cond) >= 10
                rows = find(tab.condition==cond);
 %                if sqrt(tab.mean_mse_phase_all(rows(1)))./nBins < .3 
                 [a b] =min(tab.mean_mse_phase_all(rows));
@@ -87,6 +88,7 @@ for i=1:length(d)
                    hpc_tau_rate = [hpc_tau_rate;tab.tau(rows(bb))./nBins];
                    hpc_phase_pval = [hpc_phase_pval;pvals.mean_mse_phase_all_pval(rows(b),:)];
                    hpc_rate_pval = [hpc_rate_pval;pvals.mean_mse_rate_pval(rows(bb),:)];
+                   hpc_rec = [hpc_rec; i];
 %                    histogram(hpc_phase,0:.01:1,'Normalization','pdf','FaceColor','g'); .4:.05:1;
 %                    hold on
 %                    histogram(hpc_rate,0:.01:1,'Normalization','pdf','FaceColor','r')
@@ -141,6 +143,7 @@ for i=1:length(d)
                    ls_tau_rate = [ls_tau_rate;tab.tau(rows(bb))./nBins];
                    ls_phase_pval = [ls_phase_pval;pvals.mean_mse_phase_all_pval(rows(b),:)];
                    ls_rate_pval = [ls_rate_pval;pvals.mean_mse_rate_pval(rows(bb),:)];
+                   ls_rec = [ls_rec; i];
 %                    histogram(ls_phase,0:.01:1,'Normalization','pdf','FaceColor','g')
 %                    hold on
 %                    histogram(ls_rate,0:.01:1,'Normalization','pdf','FaceColor','r')
