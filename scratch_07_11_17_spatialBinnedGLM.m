@@ -7,12 +7,7 @@ spikes = bz_GetSpikes;
 lfp = bz_GetLFP(sessionInfo.thetaChans(2));
 nBins = round(max(behavior.events.trials{1}.mapping));
 % 
-positionDecodingGLM_binnedspace_box.region = spikes.region;
-positionDecodingGLM_binnedspace_box.sessionName = spikes.sessionName;
-positionDecodingGLM_binnedspace_box.UID = spikes.UID;
-for cell=1:length(spikes.times)
-    positionDecodingGLM_binnedspace_box.results{cell} = table;
-end
+
 % % %    % set up phase coding data
 [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
 rateMap =firingMaps.rateMaps;
@@ -21,6 +16,13 @@ occuMap =firingMaps.occupancy;
 phaseMap=firingMaps.phaseMaps;
 [binnedPhaseMap] = bz_phaseMap2Bins(phaseMap,rateMap,behavior);
     
+positionDecodingGLM_binnedspace_box.region = spikes.region;
+positionDecodingGLM_binnedspace_box.sessionName = spikes.sessionName;
+positionDecodingGLM_binnedspace_box.UID = spikes.UID;
+for cell=1:length(spikes.times)
+    positionDecodingGLM_binnedspace_box.results{cell} = table;
+end
+
 for smoothing = 1:round(nBins/2)
     disp(['smoothing by: ' num2str(smoothing) ' bins']);
     for cond = 1:length(unique(behavior.events.trialConditions))
@@ -56,8 +58,10 @@ for smoothing = 1:round(nBins/2)
 %             plot(phase_trains_smooth(1:200))
 %             title(smoothing)
 %             pause
-            rates_trains_smooth(rates_trains_smooth==0)=nan;
-            phase_trains_smooth(phase_trains_smooth==0)=nan;
+%             pos(rates_trains_smooth==0)=nan;
+%             phase_trains_smooth(rates_trains_smooth==0)=nan;
+%             rates_trains_smooth(rates_trains_smooth==0)=nan;
+            
             r = rates_trains_smooth;
             p = phase_trains_smooth;
             p_cos =cos(phase_trains_smooth);
@@ -124,7 +128,7 @@ for smoothing = 1:round(nBins/2)
             
             count = 1+count;
             end
-%             if cell == 44 & cond == 7
+%             if cell == 80 & cond == 5
 % %                 
 %                 t_rate = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_rate',...
 %                 'GroupingVariables',{'tau','condition'});
@@ -144,6 +148,7 @@ for smoothing = 1:round(nBins/2)
 %                 subplot(2,2,2);
 %                 boundedline(tab.tau(rows),tab.mean_mse_chance(rows),3*t_std.std_mse_chance(rows),'k')
 %                 hold on
+%                 nans(smoothing) = sum(isnan(yfit));
 %                 plot(tab.tau(rows),tab.mean_mse_rate(rows),'r')
 %                 plot(tab.tau(rows),tab.mean_mse_both(rows),'k')
 %                 plot(tab.tau(rows),tab.mean_mse_phase_all(rows),'g')
@@ -170,6 +175,6 @@ for smoothing = 1:round(nBins/2)
         end
     end
     positionDecodingGLM_binnedspace_box.dateRun = date;  % this can take a very long time so lets save each loop...
-save([xml.FileName '.positionDecodingGLM_binnedspace_box_nozero.cellinfo.mat'],'positionDecodingGLM_binnedspace_box')
+save([xml.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'],'positionDecodingGLM_binnedspace_box')
 end
 
