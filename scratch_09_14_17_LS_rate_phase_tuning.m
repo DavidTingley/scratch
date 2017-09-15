@@ -143,11 +143,19 @@ f = find(mark==1);
 for cond = 1:length(unique(behavior.events.trialConditions))
 peers{cond} = spktrains{cond}(f,:);
 peers_phase{cond} = spk_phase_trains{cond}(f,:);
-    for iter = 1:10
-       for ts = 1:size(peers_phase{cond},2)
-           r = randperm(length(f));
-           peers_phase_shuffle{cond}{iter}(:,ts) = peers_phase{cond}(r,ts);
-       end
+    for iter = 1:5
+        [x y]  = find(peers{cond}~=0);
+        xx = x(randperm(length(x)));
+        yy = y(randperm(length(y)));
+        p = zeros(size(peers_phase{cond}));
+        for i=1:length(x)
+        p(xx(i),yy(i)) = peers_phase{cond}(x(i),y(i));
+        end
+        peers_phase_shuffle{cond}{iter} = p;
+%        for ts = 1:size(peers_phase{cond},2)
+%            r = randperm(length(f));
+%            peers_phase_shuffle{cond}{iter}(:,ts) = peers_phase{cond}(r,ts);
+%        end
     end
 end
 clear *smooth
@@ -156,7 +164,7 @@ for cond = 1:length(unique(behavior.events.trialConditions))
     for k = 1:size(peers{cond},1)
     peers_smooth{cond}(k,:) = smooth(peers{cond}(k,:),i);
     peers_phase_smooth{cond}(k,:) = circ_smoothTS(peers_phase{cond}(k,:),i,'method','mean','exclude',0);
-    for iter = 1:10
+    for iter = 1:5
         peers_phase_smooth_shuffle{cond}{iter}(k,:) = circ_smoothTS(peers_phase_shuffle{cond}{iter}(k,:),i,'method','mean','exclude',0);
     end
     end
@@ -171,30 +179,32 @@ for cell=1:length(ls)
         response = spktrains{cond}(cell,:);
         clear  dev dev_phase
         [results dev] = glmfit([peers_smooth{cond}',zscore(phasetrains{cond}'),zscore(phasetrains_cos{cond}'),zscore(phasetrains_sin{cond}'),zscore(round(coords{cond}))'],response,'normal');
-        [results_phase dev_phase] = glmfit([cos(peers_phase_smooth{cond}'),zscore(phasetrains{cond}'),zscore(phasetrains_cos{cond}'),zscore(phasetrains_sin{cond}'),zscore(round(coords{cond}))'],response,'normal');
-        for iter = 1:10
-            [results_phase_shuffle{iter} dev_phase_shuffle(iter)] = glmfit([cos(peers_phase_smooth_shuffle{cond}{iter}'),zscore(phasetrains{cond}'),zscore(phasetrains_cos{cond}'),zscore(phasetrains_sin{cond}'),zscore(round(coords{cond}))'],response,'normal');
+        [results_phase dev_phase] = glmfit([cos(peers_phase_smooth{cond}'),sin(peers_phase_smooth{cond}'),zscore(phasetrains{cond}'),zscore(phasetrains_cos{cond}'),zscore(phasetrains_sin{cond}'),zscore(round(coords{cond}))'],response,'normal');
+        for iter = 1:5
+            [results_phase_shuffle{iter} dev_phase_shuffle(iter)] = glmfit([cos(peers_phase_smooth_shuffle{cond}{iter}'),sin(peers_phase_smooth_shuffle{cond}{iter}'),zscore(phasetrains{cond}'),zscore(phasetrains_cos{cond}'),zscore(phasetrains_sin{cond}'),zscore(round(coords{cond}))'],response,'normal');
         end
-%         subplot(2,2,1)
-%         hold on
-%         plot(NMSE_phases{cell}(cond),dev-dev_phase,'.k')
-%         set(gca,'yscale','log')
-%         axis([0.3 1 .0000002 1])
-%         ylabel('HPC rate-phase tuning')
-%         xlabel('phase coding strength')
-%         subplot(2,2,2)
-%         plot(NMSE_rates{cell}(cond)-NMSE_phases{cell}(cond),dev-dev_phase,'.k'); hold on
-%         set(gca,'yscale','log')
-%         axis([-.5 .5 .0000002 1])
-%         subplot(2,2,3)
-%         plot(NMSE_rates{cell}(cond),dev-dev_phase,'.k'); hold on
-%         set(gca,'yscale','log')
-%         axis([0.3 1 .0000002 1])
-%         subplot(2,2,4)
-%         plot(dev_phase,mean(dev_phase_shuffle)-dev_phase,'.k')
-%         set(gca,'xscale','log')
-%         hold on
-%         pause(.1)
+        subplot(2,2,1)
+        hold on
+        plot(NMSE_phases{cell}(cond),dev-dev_phase,'.k')
+        set(gca,'yscale','log')
+        axis([0.3 1 .0000002 1])
+        ylabel('HPC rate-phase tuning')
+        xlabel('phase coding strength')
+        subplot(2,2,2)
+        plot(NMSE_rates{cell}(cond)-NMSE_phases{cell}(cond),dev-dev_phase,'.k'); hold on
+        set(gca,'yscale','log')
+        axis([-.5 .5 .0000002 1])
+        subplot(2,2,3)
+        plot(NMSE_rates{cell}(cond),dev-dev_phase,'.k'); hold on
+        set(gca,'yscale','log')
+        axis([0.3 1 .0000002 1])
+        subplot(2,2,4)
+        plot(NMSE_phases{cell}(cond),mean(dev_phase_shuffle)-dev_phase,'.k')
+        ylabel('phase tuning relative to chance')
+        xlabel('phase coding for space')
+       
+        hold on
+        pause(.1)
         
         devs_shuffle{cell}(cond,:) = dev_phase_shuffle;
         devs_rate{cell}(cond) = dev;
