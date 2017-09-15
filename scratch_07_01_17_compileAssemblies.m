@@ -31,7 +31,7 @@ for c = 1:length(dev)
         zerolag = 1;
     end
     
-    if imp > 5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{c}(:,pair))>150
+    if imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{c}(:,pair))>100
        subplot(2,2,1)
        scatter(b,imp,'.k')
        hold on
@@ -52,13 +52,14 @@ for c = 1:length(dev)
        subplot(2,2,3)
        scatter(b,imp2,'.k')
        hold on
+       title(pairs(pair,:))
        subplot(2,2,4)
        plot(dev{c}(:,pair));
        hold on
        plot(mean(devControl{c}(:,pair,:),3));
        title([imp zerolag ])
        hold off
-       pause(.001)
+       pause
     end
     pairCount = 1 + pairCount;
    end    

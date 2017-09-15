@@ -28,16 +28,19 @@ for ii=1:length(d)
     for j=1:length(spikes.times)
         rate_phase_corrs.instRate_phase_corr{j,i}=NaN;
         rate_phase_corrs.instRate_phase_pval{j,i}=NaN;
-        rate_phase_corrs.instRateChange_phaseChange_corr{j,i}=NaN;
-        rate_phase_corrs.instRateChange_phaseChange_pval{j,i}=NaN;
-        rate_phase_corrs.meanRateChangePhaseChangeCorr(j,i)=NaN;
-        rate_phase_corrs.meanRatePhaseChangeCorr(j,i)=NaN;
-        rate_phase_corrs.instRateChange_phaseChange_corr_shuffle{j,i}=NaN;
-        rate_phase_corrs.instRateChange_phaseChange_pval_shuffle{j,i}=NaN;
-        rate_phase_corrs.meanRateChangePhaseChangeCorr_shuffle(j,i)=NaN;
-        rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i} = NaN; 
-        rate_phase_corrs.instRate_phaseChange_pval_shuffle{j,i} = NaN; 
-        rate_phase_corrs.meanRatePhaseChangeCorr_shuffle(j,i) = NaN; 
+        rate_phase_corrs.instRate_phase_corr_shuffle{j,i} = NaN; 
+        rate_phase_corrs.instRate_phase_pval_shuffle{j,i} = NaN; 
+        
+        rate_phase_corrs.instRateChange_phase_corr{j,i}=NaN;
+        rate_phase_corrs.instRateChange_phase_pval{j,i}=NaN;
+        rate_phase_corrs.instRateChange_phase_corr_shuffle{j,i}=NaN;
+        rate_phase_corrs.instRateChange_phase_pval_shuffle{j,i}=NaN;
+        rate_phase_corrs.meanRatePhaseCorr_shuffle(j,i)=NaN;
+        rate_phase_corrs.meanRateChangePhaseCorr(j,i)=NaN;
+        rate_phase_corrs.meanRatePhaseCorr(j,i)=NaN;
+        rate_phase_corrs.meanRateChangePhaseCorr_shuffle(j,i)=NaN;
+
+        rate_phase_corrs.meanRatePhaseCorr_shuffle(j,i) = NaN; 
         rate_phase_corrs.ksPval(j,i) = NaN;
         
         if ~isempty(firingMaps.phaseMaps{i})
@@ -47,21 +50,26 @@ for ii=1:length(d)
                     if length(f) > 4  % min 3 spikes per trial...
                          [rate_phase_corrs.instRate_phase_corr{j,i}(t),rate_phase_corrs.instRate_phase_pval{j,i}(t)]= circ_corrcl(...
                             [firingMaps.phaseMaps{i}{j}(f,end)],firingMaps.phaseMaps{i}{j}(f,end-1));
-                         [rate_phase_corrs.instRateChange_phaseChange_corr{j,i}(t),rate_phase_corrs.instRateChange_phaseChange_pval{j,i}(t)]= circ_corrcl(...
+                         [rate_phase_corrs.instRateChange_phase_corr{j,i}(t),rate_phase_corrs.instRateChange_phase_pval{j,i}(t)]= circ_corrcl(...
                             [firingMaps.phaseMaps{i}{j}(f,end)],[0; diff(firingMaps.phaseMaps{i}{j}(f,end-1))]);
                         for iter= 1:100
-                            [rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i}(t,iter),rate_phase_corrs.instRate_phaseChange_pval_shuffle{j,i}(t,iter)]= circ_corrcl(...
+%                             ff = f(randperm(length(f)));
+                            [rate_phase_corrs.instRate_phase_corr_shuffle{j,i}(t,iter),rate_phase_corrs.instRate_phase_pval_shuffle{j,i}(t,iter)]= circ_corrcl(...
                                 [firingMaps.phaseMaps{i}{j}(f,end)],circshift([(firingMaps.phaseMaps{i}{j}(f,end-1))]',round(rand*100)));
-                            [rate_phase_corrs.instRateChange_phaseChange_corr_shuffle{j,i}(t,iter),rate_phase_corrs.instRateChange_phaseChange_pval_shuffle{j,i}(t,iter)]= circ_corrcl(...
+                            [rate_phase_corrs.instRateChange_phase_corr_shuffle{j,i}(t,iter),rate_phase_corrs.instRateChange_phase_pval_shuffle{j,i}(t,iter)]= circ_corrcl(...
                                 [firingMaps.phaseMaps{i}{j}(f,end)],circshift([0; diff(firingMaps.phaseMaps{i}{j}(f,end-1))]',round(rand*100)));
+%                             [rate_phase_corrs.instRate_phase_corr_shuffle{j,i}(t,iter),rate_phase_corrs.instRate_phase_pval_shuffle{j,i}(t,iter)]= circ_corrcl(...
+%                                 [firingMaps.phaseMaps{i}{j}(f,end)],([(firingMaps.phaseMaps{i}{j}(ff,end-1))]'));
+%                             [rate_phase_corrs.instRateChange_phase_corr_shuffle{j,i}(t,iter),rate_phase_corrs.instRateChange_phase_pval_shuffle{j,i}(t,iter)]= circ_corrcl(...
+%                                 [firingMaps.phaseMaps{i}{j}(f,end)],([0; diff(firingMaps.phaseMaps{i}{j}(ff,end-1))]'));
                         end
 %                         if j == 80
 %                             subplot(2,2,1)
-%                             scatter([firingMaps.phaseMaps{i}{j}(f,end)],firingMaps.phaseMaps{i}{j}(f,end-1),'.k')
+%                             scatter(([firingMaps.phaseMaps{i}{j}(f,end)]),firingMaps.phaseMaps{i}{j}(f,end-1),'.k')
 %                             hold on
 %                             title('inst rate vs phase')
 %                             subplot(2,2,2)
-%                             scatter([firingMaps.phaseMaps{i}{j}(f,end)],[0; diff(firingMaps.phaseMaps{i}{j}(f,end-1))],'.k')
+%                             scatter(([firingMaps.phaseMaps{i}{j}(f,end)]),[0; diff(firingMaps.phaseMaps{i}{j}(f,end-1))],'.k')
 %                             hold on
 %                             title('deriv inst rate vs phase')
 %                             subplot(2,2,3)
@@ -79,15 +87,15 @@ for ii=1:length(d)
                         end
                          rate_phase_corrs.instRate_phase_corr{j,i}(t)=NaN;
                          rate_phase_corrs.instRate_phase_pval{j,i}(t)=NaN;
-                         rate_phase_corrs.instRateChange_phaseChange_corr{j,i}(t)=NaN;
-                         rate_phase_corrs.instRateChange_phaseChange_pval{j,i}(t)=NaN;
+                         rate_phase_corrs.instRateChange_phase_corr{j,i}(t)=NaN;
+                         rate_phase_corrs.instRateChange_phase_pval{j,i}(t)=NaN;
                     end
-                     rate_phase_corrs.meanRateChangePhaseChangeCorr(j,i) = nanmean(rate_phase_corrs.instRateChange_phaseChange_corr{j,i});
-                     rate_phase_corrs.meanRatePhaseChangeCorr(j,i) = nanmean(rate_phase_corrs.instRate_phase_corr{j,i});
-                     rate_phase_corrs.meanRateChangePhaseChangeCorr_shuffle(j,i) = nanmean(rate_phase_corrs.instRateChange_phaseChange_corr_shuffle{j,i}(:));
-                     rate_phase_corrs.meanRatePhaseChangeCorr_shuffle(j,i) = nanmean(rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i}(:));
+                     rate_phase_corrs.meanRateChangePhaseCorr(j,i) = nanmean(rate_phase_corrs.instRateChange_phase_corr{j,i});
+                     rate_phase_corrs.meanRatePhaseCorr(j,i) = nanmean(rate_phase_corrs.instRate_phase_corr{j,i});
+                     rate_phase_corrs.meanRateChangePhaseCorr_shuffle(j,i) = nanmean(rate_phase_corrs.instRateChange_phase_corr_shuffle{j,i}(:));
+                     rate_phase_corrs.meanRatePhaseCorr_shuffle(j,i) = nanmean(rate_phase_corrs.instRate_phase_corr_shuffle{j,i}(:));
                      if ~isnan(nanmean(rate_phase_corrs.instRate_phase_corr{j,i}))
-                         [rate_phase_corrs.ksSig rate_phase_corrs.ksPval(j,i)] = kstest2(nanmean(rate_phase_corrs.instRate_phase_corr{j,i}),rate_phase_corrs.instRate_phaseChange_corr_shuffle{j,i}(:));
+                         [rate_phase_corrs.ksSig rate_phase_corrs.ksPval(j,i)] = kstest2(nanmean(rate_phase_corrs.instRate_phase_corr{j,i}),rate_phase_corrs.instRate_phase_corr_shuffle{j,i}(:));
                      else
                          rate_phase_corrs.ksSig =nan;
                          rate_phase_corrs.ksPval(j,i)=nan;
@@ -100,10 +108,10 @@ for ii=1:length(d)
    for j=1:length(spikes.times)
        if strcmp(spikes.region{j},'hpc')
         subplot(4,2,1)
-        hpc_corrs = [hpc_corrs ,rate_phase_corrs.meanRatePhaseChangeCorr(j,:)];
-        hpc_corrs_shuffle = [hpc_corrs_shuffle ,rate_phase_corrs.meanRatePhaseChangeCorr_shuffle(j,:)];
-        hpc_corrs_change = [hpc_corrs_change ,rate_phase_corrs.meanRateChangePhaseChangeCorr(j,:)];
-        hpc_corrs_shuffle_change = [hpc_corrs_shuffle_change ,rate_phase_corrs.meanRateChangePhaseChangeCorr_shuffle(j,:)];
+        hpc_corrs = [hpc_corrs ,rate_phase_corrs.meanRatePhaseCorr(j,:)];
+        hpc_corrs_shuffle = [hpc_corrs_shuffle ,rate_phase_corrs.meanRatePhaseCorr_shuffle(j,:)];
+        hpc_corrs_change = [hpc_corrs_change ,rate_phase_corrs.meanRateChangePhaseCorr(j,:)];
+        hpc_corrs_shuffle_change = [hpc_corrs_shuffle_change ,rate_phase_corrs.meanRateChangePhaseCorr_shuffle(j,:)];
         hpc_pvals = [hpc_pvals,rate_phase_corrs.ksPval(j,:)];
         histogram(hpc_corrs,0:.02:1,'Normalization','pdf')
         hold on
@@ -131,10 +139,10 @@ for ii=1:length(d)
         
        elseif strcmp(spikes.region{j},'ls')
         subplot(4,2,5)
-        ls_corrs = [ls_corrs ,rate_phase_corrs.meanRatePhaseChangeCorr(j,:)];
-        ls_corrs_shuffle = [ls_corrs_shuffle ,rate_phase_corrs.meanRatePhaseChangeCorr_shuffle(j,:)];
-        ls_corrs_change = [ls_corrs_change ,rate_phase_corrs.meanRateChangePhaseChangeCorr(j,:)];
-        ls_corrs_shuffle_change = [ls_corrs_shuffle_change ,rate_phase_corrs.meanRateChangePhaseChangeCorr_shuffle(j,:)];
+        ls_corrs = [ls_corrs ,rate_phase_corrs.meanRatePhaseCorr(j,:)];
+        ls_corrs_shuffle = [ls_corrs_shuffle ,rate_phase_corrs.meanRatePhaseCorr_shuffle(j,:)];
+        ls_corrs_change = [ls_corrs_change ,rate_phase_corrs.meanRateChangePhaseCorr(j,:)];
+        ls_corrs_shuffle_change = [ls_corrs_shuffle_change ,rate_phase_corrs.meanRateChangePhaseCorr_shuffle(j,:)];
         ls_pvals = [ls_pvals,rate_phase_corrs.ksPval(j,:)];
         histogram(ls_corrs,0:.02:1,'Normalization','pdf')
         hold on

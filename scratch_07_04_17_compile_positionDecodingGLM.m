@@ -7,7 +7,14 @@ hpc_phase_pval = [];
 hpc_rate_pval = [];
 ls_phase_pval = [];
 ls_rate_pval = [];
+chance =[];
 ls_rec =[]; hpc_rec = [];
+hpc_an = []; ls_an=[];
+ls_depth=[];
+hpc_depth=[];
+ls_phase_info = []; hpc_phase_info =[];
+ls_rate_info =[]; hpc_rate_info = [];
+
                    
 hpc_mean_phase = zeros(101,1);
 ls_mean_phase = zeros(101,1);
@@ -15,17 +22,25 @@ hpc_mean_rate = zeros(101,1);
 ls_mean_rate = zeros(101,1);
 d  = dir('*201*');
 for i=1:length(d)
+    i
    cd(d(i).name) 
-    if ~isempty(dir('*positionDecodingGLM_binnedspace_box.cell*'))
-        xml = LoadParameters;
+%    animal = pwd;
+%    animal = strsplit(animal,'/');
+%    animal = animal{end-1};
+animal = 1;
+    if ~isempty(dir('*positionDecodingGLM_binnedspace_box.cell*')) & exist([d(i).name '.olypherInfo.cellinfo.mat'])
+        sessionInfo = bz_getSessionInfo;
+        load([d(i).name '.firingMaps.cellinfo.mat'],'firingMaps') 
+        load([d(i).name '.olypherInfo.cellinfo.mat'],'olypherInfo') 
         b = dir('*.behavior.mat');
-        load(b.name);
-        nBins = length(behavior.events.map{1}.x);
-        load([xml.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'])
+        load(b(1).name);
+        nBins = round(length(behavior.events.map{1}.x));
+        load([sessionInfo.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'])
         positionDecodingGLM=positionDecodingGLM_binnedspace_box;
         if isfield(positionDecodingGLM,'dateRun')
         conditions = length(unique(behavior.events.trialConditions));
         for cell =1:length(positionDecodingGLM.results)
+            
         t_rate = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_rate',...
             'GroupingVariables',{'tau','condition'});
         t_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_phase_all',...
@@ -41,27 +56,41 @@ for i=1:length(d)
         pvals = join(t_phase_pval,t_rate_pval);
         
             for cond = 1:conditions
-                if sum(behavior.events.trialConditions==cond) >= 10
+                if sum(behavior.events.trialConditions==cond) >= 12 %%%%%%%%%%%%%%%%%%%%%%%%%%
+                    nTrials = size(firingMaps.rateMaps{cond},2);
+                    %% information theory stuff here
+                    rows = find(olypherInfo.results{cell}.condition==cond);
+                    cols = find(olypherInfo.results{cell}.discBins==4);
+                    rows = intersect(rows,cols);
+                    maxphaseInfo = max(olypherInfo.results{cell}.phasePeakInfo(rows)./nTrials);
+                    maxrateInfo = max(olypherInfo.results{cell}.ratePeakInfo(rows)./nTrials);
+                    
+                    
+                    
+                    %% carry on..
                rows = find(tab.condition==cond);
 %                if sqrt(tab.mean_mse_phase_all(rows(1)))./nBins < .3 
                 [a b] =min(tab.mean_mse_phase_all(rows));
                 [aa bb] =min(tab.mean_mse_rate(rows));
 
-                first500ms = find(ismember(tab.tau(rows),1:nBins/2));
+                first500ms = find(ismember(tab.tau(rows),1:nBins));
 
 %                 min_mse_rate = (min(tab.mean_mse_rate(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
 %                 min_mse_phase_all = (min(tab.mean_mse_phase_all(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
                 
-                min_mse_rate = (min(tab.mean_mse_rate(rows))./mean(tab.mean_mse_chance(rows)));
-                min_mse_phase_all = (min(tab.mean_mse_phase_all(rows))./mean(tab.mean_mse_chance(rows)));
+                min_mse_rate = (min(tab.mean_mse_rate(rows(first500ms)))./mean(tab.mean_mse_chance(rows)));
+                min_mse_phase_all = (min(tab.mean_mse_phase_all(rows(first500ms)))./mean(tab.mean_mse_chance(rows)));
 
-                min_mse_chance = (min(tab.mean_mse_chance(rows(first500ms))))./mean(tab.mean_mse_chance(rows(first500ms)));
+                min_mse_chance = (min(tab.mean_mse_chance(rows)))./mean(tab.mean_mse_chance(rows));
 
                 max_mse_rate = sqrt(max(tab.mean_mse_rate(rows(first500ms))))./nBins;
                 max_mse_phase_all = sqrt(max(tab.mean_mse_phase_all(rows(first500ms))))./nBins;
-            
+                if isempty(max_mse_phase_all)
+                    error();
+                end
 %                if min_mse_phase_all < .33 & min_mse_rate < .33
 %                if b ~= length(rows) & bb ~= length(rows) & b ~= 1 & bb ~= 1
+chance = [chance; min_mse_chance];
                if strcmp(positionDecodingGLM.region{cell},'hpc') 
 %                    if positionDecodingGLM.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
 %                            positionDecodingGLM.results{cell}.mse_rate_pval(rows(bb)) <.05
@@ -82,6 +111,8 @@ for i=1:length(d)
 %                    xlabel('optimal phase time scale')
 %                    
 %                    subplot(2,5,3)
+hpc_phase_info = [hpc_phase_info; maxphaseInfo];
+hpc_rate_info = [hpc_rate_info; maxrateInfo];
                    hpc_phase=[hpc_phase;min_mse_phase_all];
                    hpc_rate=[hpc_rate;min_mse_rate];
                    hpc_tau_phase = [hpc_tau_phase;tab.tau(rows(b))./nBins];
@@ -89,6 +120,8 @@ for i=1:length(d)
                    hpc_phase_pval = [hpc_phase_pval;pvals.mean_mse_phase_all_pval(rows(b),:)];
                    hpc_rate_pval = [hpc_rate_pval;pvals.mean_mse_rate_pval(rows(bb),:)];
                    hpc_rec = [hpc_rec; i];
+                   hpc_an = [hpc_an; sum(double(animal))];
+                   hpc_depth = [hpc_depth;str2num(sessionInfo.depth)];
 %                    histogram(hpc_phase,0:.01:1,'Normalization','pdf','FaceColor','g'); .4:.05:1;
 %                    hold on
 %                    histogram(hpc_rate,0:.01:1,'Normalization','pdf','FaceColor','r')
@@ -137,6 +170,8 @@ for i=1:length(d)
 %                    xlabel('optimal phase time scale')
 %                    
 %                    subplot(2,5,8)
+ls_phase_info = [ls_phase_info; maxphaseInfo];
+ls_rate_info = [ls_rate_info; maxrateInfo];
                    ls_phase=[ls_phase;min_mse_phase_all];
                    ls_rate=[ls_rate;min_mse_rate];
                    ls_tau_phase = [ls_tau_phase;tab.tau(rows(b))./nBins];
@@ -144,6 +179,8 @@ for i=1:length(d)
                    ls_phase_pval = [ls_phase_pval;pvals.mean_mse_phase_all_pval(rows(b),:)];
                    ls_rate_pval = [ls_rate_pval;pvals.mean_mse_rate_pval(rows(bb),:)];
                    ls_rec = [ls_rec; i];
+                   ls_an = [ls_an; sum(double(animal))];
+                   ls_depth = [ls_depth; str2num(sessionInfo.depth)];
 %                    histogram(ls_phase,0:.01:1,'Normalization','pdf','FaceColor','g')
 %                    hold on
 %                    histogram(ls_rate,0:.01:1,'Normalization','pdf','FaceColor','r')
@@ -189,5 +226,48 @@ for i=1:length(d)
         end
     end
 %     pause
-    cd /home/david/datasets/lsDataset/
+%     cd('D:\Dropbox\lsDataset\')
+cd('/home/david/datasets/lsDataset')
 end
+
+for i=1:length(d)
+f = find(ls_rec==i);
+ff = find(ls_phase(f)<1);
+if ~isempty(ff)
+anim(i) = ls_an(f(ff(1)));
+depths(i) = ls_depth(f(ff(1)));
+end
+end
+u = unique(anim);
+for i=1:length(d)
+f = find(hpc_rec==i);
+ff = find(hpc_phase(f)<1);
+hp(i) = mean(hpc_phase(f(ff)));
+hr(i) = mean(hpc_rate(f(ff)));
+f = find(ls_rec==i);
+ff = find(ls_phase(f)<1);
+if ~isempty(f(ff))
+lmp(i) = nanmedian(ls_phase(f(ff)));
+lmr(i) = nanmedian(ls_rate(f(ff)));
+lr(i) = nanmean(ls_rate(f(ff)));
+lp(i) = nanmean(ls_phase(f(ff)));
+else
+lmp(i) = 0;
+lmr(i) = 0;
+lr(i) = 0;
+lp(i) = 0; 
+end
+end
+offsets = [0 -3000 -800 0 0 0];
+for i=1:6
+subplot(3,2,i);hold on
+f = find(anim==u(i));
+plot(depths(f),lmp(f)-lmr(f),'.k')
+[a  b] = corr(depths(f)',lmp(f)'-lmr(f)');
+[x y] = polyfit(depths(f),lmp(f)-lmr(f),1);
+y1 = polyval(x,depths(f));
+plot(depths(f),y1,'r')
+title(a)
+end
+
+

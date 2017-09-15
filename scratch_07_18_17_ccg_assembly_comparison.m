@@ -1,7 +1,7 @@
-d  = dir('*201*');
-
-for i=3:length(d)
-cd(d(i).name) 
+% d  = dir('*201*');
+% 
+% for i=3:length(d)
+% cd(d(i).name) 
 
 
 xml = LoadParameters;
@@ -29,7 +29,7 @@ for cond = 1:length(unique(behavior.events.trialConditions))
         zerolag = 1;
     end
     
-    if imp > 1.5 & b > 7 & zerolag < 1.2 & mean(dev{cond}(:,pair))>100
+    if imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>100
         ls = pairs(pair,1);
         hpc = pairs(pair,2);
         subplot(4,2,1)
@@ -72,5 +72,5 @@ for cond = 1:length(unique(behavior.events.trialConditions))
 end
 end
 
-cd /home/david/datasets/lsDataset
-end
+% cd /home/david/datasets/lsDataset
+% end

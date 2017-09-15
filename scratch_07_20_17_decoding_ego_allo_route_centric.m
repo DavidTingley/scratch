@@ -1,23 +1,27 @@
-% d  = dir('*201*');
-% % ii=38;
-% 
-% for ii=1:length(d)
+d  = dir('*201*');
+% ii=38;
+
+for ii=1:23
+    cd(d(ii).name)
 xml = LoadParameters;
 load([xml.FileName '.behavior.mat'])
 load([xml.FileName '.sessionInfo.mat'])
 spikes = bz_GetSpikes;
+
+    if ~exist([spikes.sessionName '.referenceFrames.mat'])
+if isfield(behavior.events.trials{1},'direction')
 % lfp = bz_GetLFP(sessionInfo.thetaChans(2));
 %     
 conditions = unique(behavior.events.trialConditions);
 nCells = length(spikes.times);
 routeCentricSamplingRate = behavior.samplingRate;
 smoothingRange = 1:300:4000;
-% 
+
 % % find a better way to get spike phase relationship...
 % [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
 load([spikes.sessionName '.firingMaps.cellinfo.mat'])
 % % iterate through conditions and compile spike trains and spike-phase
-% % trains
+% % trainse
 routeCentric = [];
 conditionCentric = [];
 goalCentric = [];
@@ -28,6 +32,7 @@ for cond = conditions
     intervals = behavior.events.trialIntervals(trials,:);
     for t = 1:length(trials)
         trial = trials(t);
+        if isfield(behavior.events.trials{trial},'direction')
         spk_trains{cond}{t} = zeros(nCells,ceil((intervals(t,2)-intervals(t,1))*1000)); % assumes intervals are in seconds, rounds to nearest millisecond
         phase_trains{cond}{t} = zeros(nCells,ceil((intervals(t,2)-intervals(t,1))*1000));
         for cell = 1:nCells
@@ -107,6 +112,7 @@ for cond = conditions
         acc =  [zeros(1,6); diff(diff(allo)); zeros(1,6)];
         egoCentric = [egoCentric; acc , vels];
         alloCentric = [alloCentric;allo]; clear a
+        end
     end
 end
 
@@ -191,7 +197,7 @@ for wind = smoothingRange
 %         
 %         subplot(2,2,1)
 %         % allo
-%         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,1:6,:),2),3))))./mean(mse_chance_rate,2),'.k')
+%         plot(smoothingRange(1:c),((squeeze(nanmean(nanmean(mse_rate(:,1:6,:),2),3))))./mean(mse_chance_rate,2),'.k')
 %         hold on
 %         %route
 %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,7:10,:),2),3))))./mean(mse_chance_rate,2),'.r')
@@ -243,9 +249,10 @@ end
     clear mse mse_allo mse_cond mse_route mse_goal mse_chance_rate mse_chance_phase_cos mse_chance_phase_sin mse_rate mse_phase*
     save([spikes.sessionName '.referenceFrames.mat'],'mse*')
 end
-
-
-% end
+end
+    end
+cd /home/david/datasets/lsDataset
+end
 
 
 

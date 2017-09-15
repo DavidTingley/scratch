@@ -7,10 +7,12 @@ dd  = dir('*201*');
  
 %% compile data
 
-for ii=15:length(dd)
-   cd(dd(ii).name)
-   load([dd(ii).name '.behavior.mat'])
-   clf
+% for ii=15:length(dd)
+%    cd(dd(ii).name)
+%    load([dd(ii).name '.behavior.mat'])
+%    clf
+b = dir('*behavior*')
+load(b.name);
    bz_plotTrials(behavior);
    if ~strcmp(behavior.description,'linear')
            d = input(['directions [l/r]' ': '],'s');
@@ -59,4 +61,4 @@ for ii=15:length(dd)
    end
    clear behavior tt d
    cd /home/david/datasets/lsDataset/
-end
+% end

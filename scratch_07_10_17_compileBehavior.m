@@ -82,7 +82,7 @@ for ii=1:length(d)
           end
        end
    else
-       error('couldnt find behavior')
+       warning('couldnt find behavior')
    end
         cd /home/david/datasets/lsDataset/
 end
