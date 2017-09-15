@@ -1,4 +1,4 @@
-try
+% try
     xml = LoadParameters;
      load([xml.FileName '.behavior.mat'])
     load([xml.FileName '.sessionInfo.mat'])
@@ -118,7 +118,7 @@ load([sessionInfo.FileName '.firingMaps.cellinfo.mat'])
 positionDecodingGLM = positionDecodingGLM_binnedspace_box;
 conditions = length(unique(behavior.events.trialConditions));
 nBins = round(length(behavior.events.map{1}.x));
-for cell =1:length(positionDecodingGLM.results)
+for cell =1:length(ls)
 t_rate = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_rate',...
 'GroupingVariables',{'tau','condition'});
 t_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_phase_all',...
@@ -164,22 +164,22 @@ for cell=1:length(ls)
         [results dev] = glmfit([peers_smooth{cond}',zscore(phasetrains{cond}'),zscore(phasetrains_cos{cond}'),zscore(phasetrains_sin{cond}'),zscore(round(coords{cond}))'],response,'normal');
         [results_phase dev_phase] = glmfit([cos(peers_phase_smooth{cond}'),zscore(phasetrains{cond}'),zscore(phasetrains_cos{cond}'),zscore(phasetrains_sin{cond}'),zscore(round(coords{cond}))'],response,'normal');
         
-        subplot(2,2,1)
-        hold on
-        plot(NMSE_phases{cell}(cond),dev-dev_phase,'.k')
-        set(gca,'yscale','log')
-        axis([0.3 1 .0000002 .1])
-        ylabel('HPC rate-phase tuning')
-        xlabel('phase coding strength')
-        subplot(2,2,2)
-        plot(NMSE_rates{cell}(cond)-NMSE_phases{cell}(cond),dev-dev_phase,'.k'); hold on
-        set(gca,'yscale','log')
-        axis([0.3 1 .0000002 .1])
-        subplot(2,2,3)
-        plot(NMSE_rates{cell}(cond),dev-dev_phase,'.k'); hold on
-        set(gca,'yscale','log')
-        axis([-1 1 .0000002 .1])
-        pause(.1)
+%         subplot(2,2,1)
+%         hold on
+%         plot(NMSE_phases{cell}(cond),dev-dev_phase,'.k')
+%         set(gca,'yscale','log')
+%         axis([0.3 1 .0000002 .1])
+%         ylabel('HPC rate-phase tuning')
+%         xlabel('phase coding strength')
+%         subplot(2,2,2)
+%         plot(NMSE_rates{cell}(cond)-NMSE_phases{cell}(cond),dev-dev_phase,'.k'); hold on
+%         set(gca,'yscale','log')
+%         axis([0.3 1 .0000002 .1])
+%         subplot(2,2,3)
+%         plot(NMSE_rates{cell}(cond),dev-dev_phase,'.k'); hold on
+%         set(gca,'yscale','log')
+%         axis([-.5 .5 .0000002 .1])
+%         pause(.1)
 
         devs_rate{cell}(cond) = dev;
         devs_phase{cell}(cond) = dev_phase;
@@ -192,8 +192,8 @@ save([sessionInfo.FileName '.ls_phase_rate_tuning.mat'],'devs*','NMSE*')
 %         
 %         
 %         
-catch
-    end
+% catch
+%     end
 %         
         
         
