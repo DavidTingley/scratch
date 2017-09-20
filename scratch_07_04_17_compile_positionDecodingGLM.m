@@ -14,7 +14,9 @@ ls_depth=[];
 hpc_depth=[];
 ls_phase_info = []; hpc_phase_info =[];
 ls_rate_info =[]; hpc_rate_info = [];
-
+hpc_cell=[];
+ls_cell=[];
+hpc_shank = []; ls_shank = [];
                    
 hpc_mean_phase = zeros(101,1);
 ls_mean_phase = zeros(101,1);
@@ -24,14 +26,15 @@ d  = dir('*201*');
 for i=1:length(d)
     i
    cd(d(i).name) 
-%    animal = pwd;
-%    animal = strsplit(animal,'/');
-%    animal = animal{end-1};
-animal = 1;
-    if ~isempty(dir('*positionDecodingGLM_binnedspace_box.cell*')) & exist([d(i).name '.olypherInfo.cellinfo.mat'])
+   animal = pwd;
+   animal = strsplit(animal,'/');
+   animal = animal{end-1};
+% animal = 1;
+    if ~isempty(dir('*positionDecodingGLM_binnedspace_box.cell*')) 
         sessionInfo = bz_getSessionInfo;
         load([d(i).name '.firingMaps.cellinfo.mat'],'firingMaps') 
-        load([d(i).name '.olypherInfo.cellinfo.mat'],'olypherInfo') 
+        spikes = bz_GetSpikes;
+%         load([d(i).name '.olypherInfo.cellinfo.mat'],'olypherInfo') 
         b = dir('*.behavior.mat');
         load(b(1).name);
         nBins = round(length(behavior.events.map{1}.x));
@@ -59,11 +62,11 @@ animal = 1;
                 if sum(behavior.events.trialConditions==cond) >= 12 %%%%%%%%%%%%%%%%%%%%%%%%%%
                     nTrials = size(firingMaps.rateMaps{cond},2);
                     %% information theory stuff here
-                    rows = find(olypherInfo.results{cell}.condition==cond);
-                    cols = find(olypherInfo.results{cell}.discBins==4);
-                    rows = intersect(rows,cols);
-                    maxphaseInfo = max(olypherInfo.results{cell}.phasePeakInfo(rows)./nTrials);
-                    maxrateInfo = max(olypherInfo.results{cell}.ratePeakInfo(rows)./nTrials);
+%                     rows = find(olypherInfo.results{cell}.condition==cond);
+%                     cols = find(olypherInfo.results{cell}.discBins==4);
+%                     rows = intersect(rows,cols);
+%                     maxphaseInfo = max(olypherInfo.results{cell}.phasePeakInfo(rows)./nTrials);
+%                     maxrateInfo = max(olypherInfo.results{cell}.ratePeakInfo(rows)./nTrials);
                     
                     
                     
@@ -111,8 +114,8 @@ chance = [chance; min_mse_chance];
 %                    xlabel('optimal phase time scale')
 %                    
 %                    subplot(2,5,3)
-hpc_phase_info = [hpc_phase_info; maxphaseInfo];
-hpc_rate_info = [hpc_rate_info; maxrateInfo];
+% hpc_phase_info = [hpc_phase_info; maxphaseInfo];
+% hpc_rate_info = [hpc_rate_info; maxrateInfo];
                    hpc_phase=[hpc_phase;min_mse_phase_all];
                    hpc_rate=[hpc_rate;min_mse_rate];
                    hpc_tau_phase = [hpc_tau_phase;tab.tau(rows(b))./nBins];
@@ -121,7 +124,10 @@ hpc_rate_info = [hpc_rate_info; maxrateInfo];
                    hpc_rate_pval = [hpc_rate_pval;pvals.mean_mse_rate_pval(rows(bb),:)];
                    hpc_rec = [hpc_rec; i];
                    hpc_an = [hpc_an; sum(double(animal))];
-                   hpc_depth = [hpc_depth;str2num(sessionInfo.depth)];
+                   additionalDepth = find(sessionInfo.spikeGroups.groups{spikes.shankID(cell)}==spikes.maxWaveformCh(cell))*10;
+                   hpc_depth = [hpc_depth;str2num(sessionInfo.depth)+additionalDepth];
+                   hpc_cell = [hpc_cell; cell];
+                   hpc_shank = [hpc_shank;spikes.shankID(cell)];
 %                    histogram(hpc_phase,0:.01:1,'Normalization','pdf','FaceColor','g'); .4:.05:1;
 %                    hold on
 %                    histogram(hpc_rate,0:.01:1,'Normalization','pdf','FaceColor','r')
@@ -170,8 +176,8 @@ hpc_rate_info = [hpc_rate_info; maxrateInfo];
 %                    xlabel('optimal phase time scale')
 %                    
 %                    subplot(2,5,8)
-ls_phase_info = [ls_phase_info; maxphaseInfo];
-ls_rate_info = [ls_rate_info; maxrateInfo];
+% ls_phase_info = [ls_phase_info; maxphaseInfo];
+% ls_rate_info = [ls_rate_info; maxrateInfo];
                    ls_phase=[ls_phase;min_mse_phase_all];
                    ls_rate=[ls_rate;min_mse_rate];
                    ls_tau_phase = [ls_tau_phase;tab.tau(rows(b))./nBins];
@@ -180,7 +186,10 @@ ls_rate_info = [ls_rate_info; maxrateInfo];
                    ls_rate_pval = [ls_rate_pval;pvals.mean_mse_rate_pval(rows(bb),:)];
                    ls_rec = [ls_rec; i];
                    ls_an = [ls_an; sum(double(animal))];
-                   ls_depth = [ls_depth; str2num(sessionInfo.depth)];
+                   additionalDepth = find(sessionInfo.spikeGroups.groups{spikes.shankID(cell)}==spikes.maxWaveformCh(cell))*10;
+                   ls_depth = [ls_depth; str2num(sessionInfo.depth)+additionalDepth];
+                   ls_cell = [ls_cell; cell];
+                   ls_shank = [ls_shank;spikes.shankID(cell)];
 %                    histogram(ls_phase,0:.01:1,'Normalization','pdf','FaceColor','g')
 %                    hold on
 %                    histogram(ls_rate,0:.01:1,'Normalization','pdf','FaceColor','r')
@@ -258,9 +267,9 @@ lr(i) = 0;
 lp(i) = 0; 
 end
 end
-offsets = [0 -3000 -800 0 0 0];
-for i=1:6
-subplot(3,2,i);hold on
+% offsets = [0 0 -3000 -800 0 0 0];
+for i=1:8
+subplot(4,2,i);hold on
 f = find(anim==u(i));
 plot(depths(f),lmp(f)-lmr(f),'.k')
 [a  b] = corr(depths(f)',lmp(f)'-lmr(f)');

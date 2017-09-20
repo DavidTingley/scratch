@@ -1,15 +1,22 @@
 % 
 xml = LoadParameters;
 warning off
-load([xml.FileName '.behavior.mat'])
+if exist([xml.FileName '.interpolatedBehav.behavior.mat'])
+    load([xml.FileName '.interpolatedBehav.behavior.mat'])
+    behavior = interpolatedBehav;
+else
+    load([xml.FileName '.behavior.mat'])
+end
+
 load([xml.FileName '.sessionInfo.mat'])
 spikes = bz_GetSpikes;
-lfp = bz_GetLFP(sessionInfo.thetaChans(2));
+% lfp = bz_GetLFP(sessionInfo.thetaChans(2));
 nBins = round(max(behavior.events.trials{1}.mapping));
 % 
 
 % % %    % set up phase coding data
-[firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
+% [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
+load([xml.FileName '.firingMaps.cellinfo.mat']);
 rateMap =firingMaps.rateMaps;
 countMap =firingMaps.countMaps;
 occuMap =firingMaps.occupancy;
@@ -128,49 +135,49 @@ for smoothing = 1:round(nBins/2)
             
             count = 1+count;
             end
-            if cell == 80 && cond == 5
-%                 
-                figure(cond)
-                t_rate = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_rate',...
-                'GroupingVariables',{'tau','condition'});
-                t_phase = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_phase_all',...
-                'GroupingVariables',{'tau','condition'});
-                t_both = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_both',...
-                'GroupingVariables',{'tau','condition'});
-                t_chance = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_chance',...
-                'GroupingVariables',{'tau','condition'});   
-                t_std = varfun(@std,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_chance',...
-                'GroupingVariables',{'tau','condition'});  
-                tab = join(join(join(t_rate,t_phase),t_both),t_chance);
-                rows = find(tab.condition==cond);
-                subplot(2,2,1);
-%                 imagesc(phase_trains_smooth);
-%                 caxis([-pi pi])
-                subplot(2,2,2);
-                boundedline(tab.tau(rows),tab.mean_mse_chance(rows),3*t_std.std_mse_chance(rows),'k')
-                hold on
-%                 nans(smoothing) = sum(isnan(yfit));
-                plot(tab.tau(rows),tab.mean_mse_rate(rows),'r')
-                plot(tab.tau(rows),tab.mean_mse_both(rows),'k')
-                plot(tab.tau(rows),tab.mean_mse_phase_all(rows),'g')
-                
-
-%                 plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
-%                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_rate(rows,:)'),'r')
+%             if cell == 44 && cond == 7
+% %                 
+%                 figure(cond)
+%                 t_rate = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_rate',...
+%                 'GroupingVariables',{'tau','condition'});
+%                 t_phase = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_phase_all',...
+%                 'GroupingVariables',{'tau','condition'});
+%                 t_both = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_both',...
+%                 'GroupingVariables',{'tau','condition'});
+%                 t_chance = varfun(@mean,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_chance',...
+%                 'GroupingVariables',{'tau','condition'});   
+%                 t_std = varfun(@std,positionDecodingGLM_binnedspace_box.results{cell},'InputVariables','mse_chance',...
+%                 'GroupingVariables',{'tau','condition'});  
+%                 tab = join(join(join(t_rate,t_phase),t_both),t_chance);
+%                 rows = find(tab.condition==cond);
+%                 subplot(2,2,1);
+% %                 imagesc(phase_trains_smooth);
+% %                 caxis([-pi pi])
+%                 subplot(2,2,2);
+%                 boundedline(tab.tau(rows),tab.mean_mse_chance(rows),3*t_std.std_mse_chance(rows),'k')
 %                 hold on
+% %                 nans(smoothing) = sum(isnan(yfit));
+%                 plot(tab.tau(rows),tab.mean_mse_rate(rows),'r')
+%                 plot(tab.tau(rows),tab.mean_mse_both(rows),'k')
+%                 plot(tab.tau(rows),tab.mean_mse_phase_all(rows),'g')
+%                 
+% 
+% %                 plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
+% %                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_rate(rows,:)'),'r')
+% %                 hold on
+% %                 plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
+% %                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_phase_all(rows,:)'),'g')
 %                 plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
-%                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_phase_all(rows,:)'),'g')
-                plot(positionDecodingGLM_binnedspace_box.results{cell}.tau(rows),...
-                    mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_both(rows,:)'),'k')
-                hold off
-%                 subplot(2,2,3)
-%                 imagesc(rates_trains_smooth);
-%                 subplot(2,2,4)
-                
-                title([cell cond smoothing])
-
-                pause(.1)
-            end         
+%                     mean(positionDecodingGLM_binnedspace_box.results{cell}.mse_both(rows,:)'),'k')
+%                 hold off
+% %                 subplot(2,2,3)
+% %                 imagesc(rates_trains_smooth);
+% %                 subplot(2,2,4)
+%                 
+%                 title([cell cond smoothing])
+% 
+%                 pause(.1)
+%             end         
         end
         disp(['done with condition: ' num2str(cond) ' of ' num2str(length(unique(behavior.events.trialConditions)))]);
         end

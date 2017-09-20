@@ -10,6 +10,9 @@ for ii=1:length(d)
    if exist([d(ii).name '.olypherInfo.cellinfo.mat'])
    load([d(ii).name '.olypherInfo.cellinfo.mat'],'olypherInfo')  
    load([d(ii).name '.firingMaps.cellinfo.mat'],'firingMaps') 
+   load([d(ii).name '.behavior.mat']) 
+   nBins = round(max(behavior.events.trials{1}.mapping));
+   if exist([d(ii).name '.placeFields.mat'])
    load([d(ii).name '.placeFields.mat'])
    for cell=1:length(olypherInfo.results)
        for cond = 1:length(unique(olypherInfo.results{cell}.condition))
@@ -18,7 +21,7 @@ for ii=1:length(d)
             if strcmp(olypherInfo.region{cell},'hpc')
                 
             disc = unique(olypherInfo.results{cell}.discBins);
-            for dd = 1%:length(disc)
+            for dd = 5%:length(disc)
                 
             rows = find(olypherInfo.results{cell}.condition==cond);
             cols = find(olypherInfo.results{cell}.discBins==disc(dd));
@@ -45,8 +48,10 @@ for ii=1:length(d)
                 rateInfoScore(count,dd,:) = olypherInfo.results{cell}.ratePeakInfo(rows(1:40))./nTrials;
                  if ~isempty(fields{cond}{cell})
                      hasField(count) = 1;
+                     bins(count) = nBins;
                  else
                      hasField(count) = 0;
+                     bins(count) = nBins;
                  end
           
                 count = 1+count
@@ -58,13 +63,14 @@ for ii=1:length(d)
        end
    end
    end
+   end
    cd /home/david/datasets/lsDataset
 end
 
-subplot(2,2,1)
-boundedline(1:size(phaseInfoScore,2),smooth(nanmean(phaseInfoScore),3),nanstd(phaseInfoScore)./nanmean(phaseInfoScore),'g')
-boundedline(1:size(rateInfoScore,2),smooth(nanmean(rateInfoScore),3),nanstd(rateInfoScore)./nanmean(rateInfoScore),'r')
-
-subplot(2,2,2)
-plot(mean(phaseInfoScore)./mean(rateInfoScore),'k')
+% subplot(2,2,1)
+% boundedline(1:size(phaseInfoScore,2),smooth(nanmean(phaseInfoScore),3),nanstd(phaseInfoScore)./nanmean(phaseInfoScore),'g')
+% boundedline(1:size(rateInfoScore,2),smooth(nanmean(rateInfoScore),3),nanstd(rateInfoScore)./nanmean(rateInfoScore),'r')
+% 
+% subplot(2,2,2)
+% plot(mean(phaseInfoScore)./mean(rateInfoScore),'k')
 

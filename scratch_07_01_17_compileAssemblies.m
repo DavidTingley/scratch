@@ -11,10 +11,10 @@ nLS = [];
 rec=[];
 
 
-for i=1:length(d)
-cd(d(i).name)
-if exist('assembliesCrossRegion_split_w_theta.mat')
-load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs','coords')
+% for i=1:length(d)
+% cd(d(i).name)
+% if exist('assembliesCrossRegion_split_w_theta.mat')
+% load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs','coords')
 % if exist(['assembliesCrossRegionData.mat'])
 % load(['assembliesCrossRegionData.mat'])
 p=[];
@@ -64,8 +64,8 @@ for c = 1:length(dev)
     pairCount = 1 + pairCount;
    end    
 end
-end
-end
+% end
+% end
 
 % let's go hunting for assemblies with phase precession clouds...
 % spikes = bz_GetSpikes;
