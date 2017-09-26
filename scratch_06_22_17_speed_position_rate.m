@@ -9,7 +9,7 @@
     
 % % to be run from within a recording folder
 d= dir('*201*');
-for rec = 19%:length(d)
+for rec = 1:length(d)
     cd(d(rec).name)
 % try
     clearvars -except rec d rate_vel rate_acc center_of_mass  rate_vel_pval beh UID spk ratemaps veloc ratemaps fast_trials slow_trials
@@ -48,15 +48,15 @@ for rec = 19%:length(d)
                                                  % for lfp struct
     if strcmp(behavior.trackingType,'optitrack')
         tau = 5;
-        maxFieldWidth = 100;
-        minFieldWidth = 8;
+        maxFieldWidth = 110;
+        minFieldWidth = 7;
     else
 %        tau = 2; 
 %        maxFieldWidth = 40;
 %        minFieldWidth = 3;
         tau = 5;
-        maxFieldWidth = 100;
-        minFieldWidth = 8;
+        maxFieldWidth = 110;
+        minFieldWidth = 7;
     end
 %     [rateMap countMap opk_rate_vel_corruMap phaseMap] = bz_firingMap1D(spikes.times,behavior,lfp,tau);
     load([sessionInfo.FileName '.firingMaps.cellinfo.mat'])
@@ -71,7 +71,7 @@ for rec = 19%:length(d)
     end
     % find place fields
     for i =1:length(unique(behavior.events.trialConditions))
-        fields{i} = bz_getPlaceFields1D(firingMaps.rateMaps{i},'minPeakRate',5,'maxFieldWidth',maxFieldWidth,'minFieldWidth',minFieldWidth);
+        fields{i} = bz_getPlaceFields1D(firingMaps.rateMaps{i},'minPeakRate',4,'maxFieldWidth',maxFieldWidth,'minFieldWidth',minFieldWidth);
     end
     save([xml.FileName '.placeFields.mat'],'fields')
 %     %% END LOADING DATA
@@ -293,9 +293,9 @@ for rec = 19%:length(d)
 %     imagesc(di(o,:))
 %     
 %     pause(.2)
-%     cd /home/david/datasets/speedRate
+    cd /home/david/datasets/lsDataset
     end
-    cd ..
+%     cd ..
 end
 % save('speed_acc_metadata.mat')
 

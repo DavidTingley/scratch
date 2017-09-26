@@ -11,14 +11,14 @@ for ii=1:length(d)
    load([d(ii).name '.olypherInfo.cellinfo.mat'],'olypherInfo')  
    load([d(ii).name '.firingMaps.cellinfo.mat'],'firingMaps') 
    load([d(ii).name '.behavior.mat']) 
-   nBins = round(max(behavior.events.trials{1}.mapping));
+   nBins = length((behavior.events.trials{1}.mapping));
    if exist([d(ii).name '.placeFields.mat'])
    load([d(ii).name '.placeFields.mat'])
-   for cell=1:length(olypherInfo.results)
+   for cell=1:size(firingMaps.rateMaps{1},1)
        for cond = 1:length(unique(olypherInfo.results{cell}.condition))
            nTrials = size(firingMaps.rateMaps{cond},2);
 %            if ~isempty(fields{cond}{cell})
-            if strcmp(olypherInfo.region{cell},'hpc')
+            if strcmp(olypherInfo.region{cell},'ls')
                 
             disc = unique(olypherInfo.results{cell}.discBins);
             for dd = 5%:length(disc)
