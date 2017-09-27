@@ -5,6 +5,8 @@ plotting = 0;
 saveMat = 0;
 smoothingRange = [2 4 6 10 20 25 40 60 120 250 500 1000 3000];
 ls = bz_GetSpikes('region','ls');
+if septalCell <= length(ls.times)
+    
 spikes = bz_GetSpikes;
 sessionInfo = bz_getSessionInfo;
 load([sessionInfo.FileName '.behavior.mat'])
@@ -258,4 +260,5 @@ end
 
 end
 save(['/ifs/data/buzsakilab/lsDataset/' RECORDING '/' RECORDING '_cell_' num2str(septalCell) '.mat'],'lsDecodingHPC_POP_MaxCorr')
+end
 end
