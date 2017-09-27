@@ -259,6 +259,18 @@ for wind = smoothingRange
 end
 
 end
-save(['/ifs/data/buzsakilab/lsDataset/' RECORDING '/' RECORDING '_cell_' num2str(septalCell) '.mat'],'lsDecodingHPC_POP_MaxCorr')
+save([RECORDING '/' RECORDING '_cell_' num2str(septalCell) '.mat'],'lsDecodingHPC_POP_MaxCorr')
+
+% errorbar(2,mean(lsDecodingHPC_POP_MaxCorr.results.mse_rate),std(lsDecodingHPC_POP_MaxCorr.results.mse_rate),'r')
+% hold on
+% errorbar(3,mean(lsDecodingHPC_POP_MaxCorr.results.mse_phase_all),std(lsDecodingHPC_POP_MaxCorr.results.mse_phase_all),'g')
+% errorbar(1,mean(lsDecodingHPC_POP_MaxCorr.results.mse_chance),std(lsDecodingHPC_POP_MaxCorr.results.mse_chance),'k')
+% [a pc] = kstest2(lsDecodingHPC_POP_MaxCorr.results.mse_phase_all,lsDecodingHPC_POP_MaxCorr.results.mse_chance)
+% [a rc] = kstest2(lsDecodingHPC_POP_MaxCorr.results.mse_rate,lsDecodingHPC_POP_MaxCorr.results.mse_chance)
+% [a rp] = kstest2(lsDecodingHPC_POP_MaxCorr.results.mse_rate,lsDecodingHPC_POP_MaxCorr.results.mse_phase)
+% errorbar(4,mean(lsDecodingHPC_POP_MaxCorr.results.mse_chance_rate),std(lsDecodingHPC_POP_MaxCorr.results.mse_chance_rate),'k')
+% axis([0 5 0 9])
+% title([ num2str(pc) '   '  num2str(rc) '    ' num2str(rp)])
+% sigstar({[1,2], [1,3], [2,3]},[pc rc rp])
 end
 end
