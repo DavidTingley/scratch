@@ -110,7 +110,7 @@ for wind = smoothingRange
         cl = train(cl,[rates_trains_smooth_train; theta_train],round(position_train));
         
         for ts = 1:length(position_test)
-           yfit_rate(ts) = test(cl,[round(rates_trains_smooth_test(:,ts));theta_test(ts)]); 
+           yfit_rate(ts) = test(cl,[(rates_trains_smooth_test(:,ts));theta_test(ts)]); 
         end
         struct.mse_rate = mean((yfit_rate-position_test).^2);
         % chance rate
@@ -120,7 +120,7 @@ for wind = smoothingRange
         cl = train(cl,[rates_trains_smooth_train(:,rr); theta_train],round(position_train));
         
         for ts = 1:length(position_test)
-           yfit_chance_rate(ts) = test(cl,[round(rates_trains_smooth_test(:,rrr(ts)));theta_test(ts)]); 
+           yfit_chance_rate(ts) = test(cl,[(rates_trains_smooth_test(:,rrr(ts)));theta_test(ts)]); 
         end
         struct.mse_chance_rate = mean((yfit_chance_rate-position_test).^2);
         
@@ -259,7 +259,7 @@ for wind = smoothingRange
 end
 
 end
-save([RECORDING '/' RECORDING '_cell_' num2str(septalCell) '.mat'],'lsDecodingHPC_POP_MaxCorr')
+save([RECORDING '/' sessionInfo.FileName '_cell_' num2str(septalCell) '.mat'],'lsDecodingHPC_POP_MaxCorr')
 
 % errorbar(2,mean(lsDecodingHPC_POP_MaxCorr.results.mse_rate),std(lsDecodingHPC_POP_MaxCorr.results.mse_rate),'r')
 % hold on
