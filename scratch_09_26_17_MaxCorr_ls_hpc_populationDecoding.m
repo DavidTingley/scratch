@@ -1,7 +1,7 @@
 function [] = scratch_09_26_17_MaxCorr_ls_hpc_populationDecoding(RECORDING,septalCell)
 
 cd([RECORDING])
-plotting = 1;
+plotting = 0;
 saveMat = 0;
 smoothingRange = [2 4 6 10 20 25 40 60 120 250 500 1000 3000];
 
@@ -212,6 +212,7 @@ for wind = smoothingRange
         struct.iter = iter;
         struct.trialOrder = r;
         struct.fits = fits;
+        struct.response = septalResponse_test;
         lsDecodingHPC_POP_MaxCorr.results = [lsDecodingHPC_POP_MaxCorr.results;struct2table(struct)];
         if plotting
             clf
