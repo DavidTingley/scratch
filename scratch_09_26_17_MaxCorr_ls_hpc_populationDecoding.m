@@ -4,6 +4,7 @@ cd([RECORDING])
 plotting = 0;
 saveMat = 0;
 smoothingRange = [2 4 6 10 20 25 40 60 120 250 500 1000 3000];
+
 ls = bz_GetSpikes('region','ls');
 if septalCell <= length(ls.times)
     
@@ -82,7 +83,7 @@ lsDecodingHPC_POP_MaxCorr.results = table;
 for cond = conditions
 r = randperm(length(phase_trains{cond}));
 for iter = 1:length(r)
-r = circshift(r,1);r(end)
+r = [r(end) r(1:end-1)];r(end)
 for wind = smoothingRange
         for cell = 1:nCells
             phase_trains_smooth=[];
@@ -209,7 +210,7 @@ for wind = smoothingRange
         struct.tau = wind;
         struct.condition = cond;
         struct.iter = iter;
-        struct.trialOrder{1} = r;
+        struct.testTrial = r(end);
         struct.fits = fits;
         struct.septalCell = septalCell;
         lsDecodingHPC_POP_MaxCorr.results = [lsDecodingHPC_POP_MaxCorr.results;struct2table(struct)];
