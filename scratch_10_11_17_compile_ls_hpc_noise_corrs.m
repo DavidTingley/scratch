@@ -17,11 +17,16 @@ for c1 = 1:length(firingMaps.UID)
               end
               for bin = 1:size(t1,2)
                  noiseCorr(c1,c2,cond,bin) = corr(t1(:,bin),t2(:,bin),'rows','complete'); 
+                 for iter = 1:100
+                     r = randperm(trial);
+                     noiseCorr_shuffle(c1,c2,cond,iter,bin) = corr(t1(r,bin),t2(:,bin),'rows','complete'); 
+                 end
               end
+              clear t1 t2 m1 m2
           end             
       end         
   end
 end
     
-save([RECORDING '/' sessionInfo.FileName '.noiseCorrs.mat'])
+save([RECORDING '/' sessionInfo.FileName '.noiseCorrs.mat'],'noise*')
    
