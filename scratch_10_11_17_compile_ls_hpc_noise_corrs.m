@@ -28,5 +28,5 @@ for c1 = 1:length(firingMaps.UID)
   end
 end
     
-save([RECORDING '/' sessionInfo.FileName '.noiseCorrs.mat'],'noise*')
+save([RECORDING '/' sessionInfo.FileName '.noiseCorrs.mat'],'noiseCorr','noiseCorr_shuffle')
    
