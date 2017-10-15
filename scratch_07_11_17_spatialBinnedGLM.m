@@ -33,7 +33,7 @@ end
 for smoothing = 1:round(nBins/2)
     disp(['smoothing by: ' num2str(smoothing) ' bins']);
     for cond = 1:length(unique(behavior.events.trialConditions))
-        if size(binnedPhaseMap{cond},2) >= 4
+        if size(binnedPhaseMap{cond},2) >= 7
 %         figure(cond)
         % smooth data..
         for cell = 1:length(spikes.times)
