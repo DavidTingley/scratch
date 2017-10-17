@@ -11,7 +11,7 @@ end
 load([xml.FileName '.sessionInfo.mat'])
 spikes = bz_GetSpikes;
 % lfp = bz_GetLFP(sessionInfo.thetaChans(2));
-nBins = round(max(behavior.events.trials{1}.mapping));
+nBins = length(behavior.events.map{1}.x);
 % 
 
 % % %    % set up phase coding data

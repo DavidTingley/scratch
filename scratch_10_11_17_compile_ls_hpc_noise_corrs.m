@@ -3,11 +3,11 @@ function [] = scratch_10_11_17_compile_ls_hpc_noise_corrs(RECORDING)
 cd(RECORDING)
 d = dir('*firingMaps.cellinfo.mat');
 sessionInfo = bz_getSessionInfo;
-
+noiseCorr = [];
 load([d.name])
 for c1 = 1:length(firingMaps.UID)
   for c2 = 1:length(firingMaps.UID)
-      if strcmp(firingMaps.region{c1},'ls') & strcmp(firingMaps.region{c2},'hpc')
+      if strcmp(firingMaps.region{c1},'ls') & strcmp(firingMaps.region{c2},'hpc') | strcmp(firingMaps.region{c2},'ca1') | strcmp(firingMaps.region{c2},'ca3')
           for cond = 1:length(firingMaps.rateMaps)
               if sum(sum(firingMaps.countMaps{cond}(c1,:,:))) > 20 & sum(sum(firingMaps.countMaps{cond}(c2,:,:))) > 20 & size(firingMaps.rateMaps{cond},2) > 10
                   m1 = squeeze(mean(firingMaps.rateMaps{cond}(c1,:,:)));
@@ -28,7 +28,7 @@ for c1 = 1:length(firingMaps.UID)
           end             
       end         
   end
+if ~isempty(noiseCorr)
+save([RECORDING '/' sessionInfo.FileName '.noiseCorrs.mat'],'noiseCorr')
 end
-    
-save([RECORDING '/' sessionInfo.FileName '.noiseCorrs.mat'],'noiseCorr','noiseCorr_shuffle')
-   
+end

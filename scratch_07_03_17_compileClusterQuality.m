@@ -2,11 +2,11 @@
 
 % clf
 % 
-% d  = dir('*201*');
-% for ii=1:length(d)
-%    cd(d(ii).name) 
+d  = dir('*201*');
+for ii=35:length(d)
+   cd(d(ii).name) 
 %    load([d(ii).name '.isolationMetrics.cellinfo.mat'])
-%     if ~exist([d(ii).name '.isolationMetrics.cellinfo.mat'])
+    if ~exist([d(ii).name '.isolationMetrics.cellinfo.mat'])
         spikes = bz_GetSpikes;
         if ~isempty(spikes)
         isolationMetrics.UID = spikes.UID;
@@ -45,9 +45,9 @@
         isolationMetrics.waveformUnits = 'uV';
         save([isolationMetrics.sessionName '.isolationMetrics.cellinfo.mat'],'isolationMetrics')
         clear isolationMetrics
-%     end
-%  cd /home/david/datasets/lsDataset/
-% end
+    end
+ cd /home/david/datasets/lsDataset/
+end
 
 
 % 
