@@ -1,9 +1,9 @@
-
+add
 
 % clf
 % 
 d  = dir('*201*');
-for ii=35:length(d)
+for ii=1:length(d)
    cd(d(ii).name) 
 %    load([d(ii).name '.isolationMetrics.cellinfo.mat'])
     if ~exist([d(ii).name '.isolationMetrics.cellinfo.mat'])

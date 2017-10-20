@@ -26,9 +26,10 @@ d  = dir('*201*');
 for i=1:length(d)
     i
    cd(d(i).name) 
-   animal = pwd;
-   animal = strsplit(animal,'/');
-   animal = animal{end-1};
+   sessionInfo = bz_getSessionInfo;
+   animal = sessionInfo.animal;
+%    animal = strsplit(animal,'/');
+%    animal = animal{end-1};
 % animal = 1;
     if ~isempty(dir('*positionDecodingGLM_binnedspace_box.cell*')) 
         sessionInfo = bz_getSessionInfo;
@@ -235,7 +236,7 @@ chance = [chance; min_mse_chance];
         end
     end
 %     pause
-%     cd('D:\Dropbox\lsDataset\')
+%     cd('D:\Dropbox\datasets\lsDataset\')
 cd('/home/david/datasets/lsDataset')
 end
 
@@ -268,7 +269,7 @@ lp(i) = 0;
 end
 end
 % offsets = [0 0 -3000 -800 0 0 0];
-for i=1:8
+for i=1:length(u)
 subplot(4,2,i);hold on
 f = find(anim==u(i));
 plot(depths(f),lmp(f)-lmr(f),'.k')

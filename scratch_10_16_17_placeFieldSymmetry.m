@@ -1,5 +1,5 @@
 clear all
-d = dir('*/*placeField*');
+d = dir('*/*placeFields.2*');
 f = dir('*/*firingMaps*');
 c=1;
 
@@ -7,6 +7,7 @@ for i =1:length(d)
     cd(d(i).folder)
    load([d(i).folder '/' d(i).name]) 
    sessionInfo = bz_getSessionInfo;
+   load([d(i).folder '/' sessionInfo.FileName '.behavior.mat'])
    load([d(i).folder '/' sessionInfo.FileName '.firingMaps.cellinfo.mat'])
    for cell = 1:length(firingMaps.region)
        for cond = 1:length(firingMaps.rateMaps)
@@ -15,13 +16,11 @@ for i =1:length(d)
            if size(fields{cond},2)>=cell
            if ~strcmp(firingMaps.region{cell},'ls') & ~isempty(fields{cond}{cell})
            for field = 1:length(fields{cond}{cell})
-               if fields{cond}{cell}{field}.start > 5 & fields{cond}{cell}{field}.stop < 195
+               if fields{cond}{cell}{field}.start > 40 & fields{cond}{cell}{field}.stop < 160
                if size(firingMaps.rateMaps{cond},2) > 10
+                   if strcmp(behavior.events.conditionType{cond},'wheel')
                meanRate = squeeze(mean(firingMaps.rateMaps{cond}(cell,:,:)));
                   plot(meanRate)
-                  if mean(meanRate)>100
-                     disp() 
-                  end
                   com = fields{cond}{cell}{field}.COM;
                   start = fields{cond}{cell}{field}.start;
                   stop = fields{cond}{cell}{field}.stop;
@@ -33,6 +32,7 @@ for i =1:length(d)
                   title([num2str(frai(c)) '     '   num2str(sk(c))])
                   pause(.1)
                   c=1+c;
+                   end
                end
                end
            end
@@ -41,5 +41,5 @@ for i =1:length(d)
        end
    end
     clear fields firingMaps
-    cd /home/david/datasets/lsDataset
+    cd D:\Dropbox\datasets\lsDataset
 end

@@ -1,5 +1,7 @@
 % 
 xml = LoadParameters;
+
+if ~exist([xml.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'])
 warning off
 if exist([xml.FileName '.interpolatedBehav.behavior.mat'])
     load([xml.FileName '.interpolatedBehav.behavior.mat'])
@@ -185,4 +187,4 @@ for smoothing = 1:round(nBins/2)
     positionDecodingGLM_binnedspace_box.dateRun = date;  % this can take a very long time so lets save each loop...
 save([xml.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'],'positionDecodingGLM_binnedspace_box')
 end
-
+end
