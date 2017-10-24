@@ -132,9 +132,9 @@ for ii=1:length(d)
     for i=1:3
         figure(i)
     subplot(3,2,1)
-    plot(nanmean(coh_ca3_z(ca3_ind==i,:)),'r')
+    plot(nanmean(coh_ca3_theta_gamma_z(ca3_ind==i,:)),'r')
     hold on
-    plot(nanmean(coh_ca1_z(ca1_ind==i,:)),'k')
+    plot(nanmean(coh_ca1_theta_gamma_z(ca1_ind==i,:)),'k')
     hold off
     subplot(3,2,2)
     plot(nanmean(coh_ca3_phase_z(ca3_ind==i,:)),'r')
@@ -142,9 +142,9 @@ for ii=1:length(d)
     plot(nanmean(coh_ca1_phase_z(ca1_ind==i,:)),'k')
     hold off
     subplot(3,2,3)
-    imagesc(coh_ca3_phase_z(ca3_ind==i,:))
+    imagesc(coh_ca3_theta_gamma_z(ca3_ind==i,:))
     subplot(3,2,4)
-    imagesc(coh_ca1_phase_z(ca1_ind==i,:))
+    imagesc(coh_ca1_theta_gamma_z(ca1_ind==i,:))
     subplot(3,2,5)
     plot(nanmean(coh_ca1_ca3_phase_z(ca1_ca3_ind==i,:)),'b')
     title('ca1/ca3 coherence')

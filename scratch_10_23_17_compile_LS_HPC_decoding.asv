@@ -1,4 +1,3 @@
-clear all
 d = dir('*201*');
 tau = 25;
 count=1;
@@ -12,20 +11,20 @@ for ii=1:length(d)
     for cell=1:length(spikes.times)
         if strcmp(spikes.region{cell},'ls')
             if exist([sessionInfo.FileName '_cell_' num2str(cell) '.mat'])
-            load([sessionInfo.FileName '_cell_' num2str(cell) '.mat'],'lsDecodingHPC_POP_MaxCorr')
-            if ~isempty(lsDecodingHPC_POP_MaxCorr.results)
-            conditions = unique(lsDecodingHPC_POP_MaxCorr.results.condition);
+            load([sessionInfo.FileName '_cell_' num2str(cell) '.mat'],'lsRateDecodingHPC_POP_MaxCorr')
+            if ~isempty(lsRateDecodingHPC_POP_MaxCorr.results)
+            conditions = unique(lsRateDecodingHPC_POP_MaxCorr.results.condition);
             for cond = 1:length(conditions)
-                if isempty(strmatch('fits',lsDecodingHPC_POP_MaxCorr.results.Properties.VariableNames))
+                if isempty(strmatch('fits',lsRateDecodingHPC_POP_MaxCorr.results.Properties.VariableNames))
                     warning(['missing .fits for ' sessionInfo.FileName ', cell #' num2str(cell)])
                 else
-                if strcmp(behavior.events.conditionType{cond},'wheel') 
-                rows = find(lsDecodingHPC_POP_MaxCorr.results.tau==tau);
-                cols = find(lsDecodingHPC_POP_MaxCorr.results.condition== cond);
+                if strcmp(behavior.events.conditionType{cond},'central') 
+                rows = find(lsRateDecodingHPC_POP_MaxCorr.results.tau==tau);
+                cols = find(lsRateDecodingHPC_POP_MaxCorr.results.condition== cond);
                 rows = intersect(rows,cols);
-                mse_rate = lsDecodingHPC_POP_MaxCorr.results.mse_rate(rows);
-                mse_chance_rate = lsDecodingHPC_POP_MaxCorr.results.mse_chance_rate(rows);
-                fits_rate = lsDecodingHPC_POP_MaxCorr.results.fits(rows);
+                mse_rate = lsRateDecodingHPC_POP_MaxCorr.results.mse_rate(rows);
+                mse_chance_rate = lsRateDecodingHPC_POP_MaxCorr.results.mse_chance_rate(rows);
+                fits_rate = lsRateDecodingHPC_POP_MaxCorr.results.fits(rows);
                 for trial = 1:length(fits_rate)
                    se_r(trial,:) = makeLength((fits_rate(trial).rate-fits_rate(trial).response).^2,1000); 
                    se_p(trial,:) = makeLength((fits_rate(trial).phase_all-fits_rate(trial).response).^2,1000);  

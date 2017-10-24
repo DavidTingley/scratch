@@ -84,6 +84,7 @@ nCells = nCells - (length(ls.times)+1);
 lsDecodingHPC_POP_MaxCorr.results = table;
 
 for cond = conditions
+    if length(phase_trains{cond}) > 10
 r = randperm(length(phase_trains{cond}));
 for iter = 1:length(r)
 r = [r(end) r(1:end-1)];r(end)
@@ -282,5 +283,6 @@ save([RECORDING '/' sessionInfo.FileName '_cell_' num2str(septalCell) '.mat'],'l
 % axis([0 5 0 9])
 % title([ num2str(pc) '   '  num2str(rc) '    ' num2str(rp)])
 % sigstar({[1,2], [1,3], [2,3]},[pc rc rp])
+    end
 end
 end
