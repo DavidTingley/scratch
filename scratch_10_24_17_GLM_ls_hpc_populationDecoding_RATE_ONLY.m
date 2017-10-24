@@ -3,7 +3,7 @@ function [] = scratch_09_26_17_MaxCorr_ls_hpc_populationDecoding_RATE_ONLY(RECOR
 cd([RECORDING])
 plotting = 0;
 saveMat = 0;
-smoothingRange = [4 10 25 60 250  1000 ];
+smoothingRange = [10 25 35 60 250  1000 ];
 
 ls = bz_GetSpikes('region','ls');
 if septalCell <= length(ls.times)
@@ -122,7 +122,7 @@ for wind = smoothingRange
 %         for ts = 1:length(septalResponse_test)
 %            yfit_rate(ts) = test(cl,[(rates_trains_smooth_test(:,ts));theta_test(ts)]); 
 %         end
-        struct.mse_rate = mean((yfit_rate-septalResponse_test).^2);
+        struct.mse_rate = mean((yfit_rate'-septalResponse_test).^2);
         % chance rate
         rr = randperm(length(theta_train));
         rrr = randperm(length(theta_test));
@@ -136,19 +136,19 @@ for wind = smoothingRange
 %         for ts = 1:length(septalResponse_test)
 %            yfit_chance_rate(ts) = test(cl,[(rates_trains_smooth_test(:,rrr(ts)));theta_test(ts)]); 
 %         end
-        struct.mse_chance_rate = mean((yfit_chance_rate-septalResponse_test).^2);
+        struct.mse_chance_rate = mean((yfit_chance_rate'-septalResponse_test).^2);
         
      
         
         %% put data into struct/table
-        fits = cell2struct({yfit_rate,septalResponse_test,yfit_chance_rate},{'rate','response','chance'},3);
+        fits = cell2struct({yfit_rate,septalResponse_test,yfit_chance_rate},{'rate','response','chance'},2);
         struct.tau = wind;
         struct.condition = cond;
         struct.iter = iter;
         struct.testTrial = r(end);
         struct.fits = fits;
         struct.septalCell = septalCell;
-        lsRateDecodingHPC_POP_MaxCorr.results = [lsRateDecodingHPC_POP_MaxCorr.results;struct2table(struct)];
+        lsRateDecodingHPC_POP_MaxCorr.results = join(lsRateDecodingHPC_POP_MaxCorr.results,struct2table(struct));
        
         clear *train *test yfit*
         disp(['finished with window: ' num2str(wind) ' out of ' num2str(smoothingRange(end)) ' total'])
