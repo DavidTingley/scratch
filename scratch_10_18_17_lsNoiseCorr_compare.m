@@ -1,4 +1,4 @@
-cd D:\Dropbox\datasets\lsDataset
+cd /home/david/Dropbox/datasets/lsDataset
 clear all
 count = 1;
 cellCount = 1;
@@ -28,11 +28,12 @@ for ii=1:length(d)
                         rows = find(positionDecodingGLM_binnedspace_box.results{ls}.condition == cond);
                         cols = find(positionDecodingGLM_binnedspace_box.results{ls}.tau == 50);
                         rows = intersect(rows,cols);
+                        if ~isempty(rows)
                         [a b] = kstest2(positionDecodingGLM_binnedspace_box.results{ls}.mse_phase_all(rows),positionDecodingGLM_binnedspace_box.results{ls}.mse_chance);
                         % check here for trial type (linear, central,
                         % wheel)
                         pvals(cellCount,cond) = b;
-                        if strcmp(behavior.events.conditionType{cond},'central') && b < .01
+                        if strcmp(behavior.events.conditionType{cond},'wheel') && b < .01
 %                         fields{cond} = bz_getPlaceFields1D(firingMaps.rateMaps{cond},'minPeakRate',2,'percentThresh',.1);
         
                         if sum(sum(firingMaps.countMaps{cond}(ls,:,:))) > 20  % ls neuron has to fire this many spikes to bother 
@@ -40,6 +41,7 @@ for ii=1:length(d)
                            nc(count,:) = squeeze(noiseCorr(ls,cell,cond,:)); 
                            meanRate(count,:) = squeeze(mean(firingMaps.rateMaps{cond}(cell,:,:)));
 %                            com(count) = fields{cond}{cell}{1}.COM;
+                           signalCorr(count) = corr(meanRate(count,:)',squeeze(mean(firingMaps.rateMaps{cond}(ls,:,:))));
                            animal(count) = sum(double(sessionInfo.animal));
                            precess(count) = 1;
                            
@@ -52,20 +54,21 @@ for ii=1:length(d)
 %                         end
                         end
                         end
+                        end
                     end
                 end
             end
             end
         end
     end
-    cd D:\Dropbox\datasets\lsDataset
+    cd /home/david/Dropbox/datasets/lsDataset
    
 end
 
 
 %% plotting
 % remove nan/0/1 first?
-nc(nc==1)=nan;
+nc(nc>.999)=nan;
 nc(nc==0)=nan;
 
 for i=1:200
@@ -80,9 +83,11 @@ for i=1:200
 c1 = find(region==1);
 c3 = find(region==3);
 subplot(2,2,1)
-errorbar(i,nanmedian(nanmedian(nc(c1,i))'),nanstd(nanmedian(nc(c1,i))'),'.k')
+% errorbar(i,nanmedian(nanmedian(nc(c1,i))'),nanstd(nanmedian(nc(c1,i))'),'.k')
+plot(i,nanmedian(nanmedian(nc(c1,i))'),'.k')
 hold on
 errorbar(i,nanmedian(nanmedian(nc(c3,i))'),nanstd(nanmedian(nc(c3,i))'),'.r')
+plot(i,nanmedian(nanmedian(nc(c3,i))'),'.r')
 ca1(i) = nanmedian(nanmedian(nc(c1,i))');
 ca3(i) = nanmedian(nanmedian(nc(c3,i))');
 

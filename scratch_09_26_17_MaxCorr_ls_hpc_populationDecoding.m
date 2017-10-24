@@ -49,6 +49,9 @@ for cond = conditions
             sp = find(InIntervals(spikes.times{cell},intervals(t,:)));
             spk_trains{cond}{t}(cell,ceil((spikes.times{cell}(sp)-intervals(t,1))*1000+.00001))=1;
         end 
+        if size(spk_trains{cond}{t},2) > size(phase_trains{cond}{t},2)
+            spk_trains{cond}{t} = spk_trains{cond}{t}(:,1:size(phase_trains{cond}{t},2));
+        end
         
 %         position{cond}{t} = interp1(1:length(behavior.events.trials{trial}.x)...
 %             ,behavior.events.trials{trial}.mapping,1:positionSamplingRate/1000:length(...

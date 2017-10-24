@@ -17,13 +17,15 @@ for c1 = 1:length(firingMaps.UID)
                      t1(trial,:) = [squeeze(firingMaps.rateMaps{cond}(c1,trial,:))-m1]; 
                      t2(trial,:) = [squeeze(firingMaps.rateMaps{cond}(c2,trial,:))-m2]; 
                   end
-                  for bin = 1:size(t1,2)
+                  for bin = 1:size(t1,2)-15
                       if m1(bin) > .5 & m2(bin) > .5  % mean rate needs to be higher than this to even compute
-                     noiseCorr(c1,c2,cond,bin) = corr(t1(:,bin),t2(:,bin),'rows','complete'); 
-                     for iter = 1:100
-                         r = randperm(trial);
-                         noiseCorr_shuffle(c1,c2,cond,iter,bin) = corr(t1(r,bin),t2(:,bin),'rows','complete'); 
-                     end
+                     tt1 = reshape(t1(:,bin:bin+15),size(t1,1)*16,1);
+                     tt2 = reshape(t2(:,bin:bin+15),size(t2,1)*16,1);
+                       noiseCorr(c1,c2,cond,bin) = corr(tt1,tt2,'rows','complete'); 
+%                      for iter = 1:100
+%                          r = randperm(trial);
+%                          noiseCorr_shuffle(c1,c2,cond,iter,bin) = corr(t1(r,bin),t2(:,bin),'rows','complete'); 
+%                      end
                       end
                   end
                   clear t1 t2 m1 m2

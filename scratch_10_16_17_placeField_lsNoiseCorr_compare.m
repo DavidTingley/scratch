@@ -2,9 +2,8 @@ cd D:\Dropbox\datasets\lsDataset
 clear all
 count = 1;
 d  = dir('*201*');
-placeFieldPctThresh = 1; % 1 - percent diff b/w peak and trough to be defined as PF
+placeFieldPctThresh = 10; % 1 - percent diff b/w peak and trough to be defined as PF
 
- 
 %% compile data
 
 for ii=1:length(d)
@@ -13,6 +12,7 @@ for ii=1:length(d)
         disp(['working on ' d(ii).name ''])
         sessionInfo = bz_getSessionInfo;
         load([d(ii).name '.noiseCorrs.mat'],'noiseCorr')
+        noiseCorr(noiseCorr==0)=nan;
         load([d(ii).name '.positionDecodingGLM_binnedspace_box.cellinfo.mat'])
         load([d(ii).name '.behavior.mat'],'behavior')
         load([d(ii).name '.placeFields.' num2str(placeFieldPctThresh,'%0.2i') '_pctThresh.mat'],'fields') % use PF defs with diff thresholds
@@ -31,7 +31,8 @@ for ii=1:length(d)
 %                         [a b] = kstest2(positionDecodingGLM_binnedspace_box.results{ls}.mse_phase_all(rows),positionDecodingGLM_binnedspace_box.results{ls}.mse_chance);
                         % check here for trial type (linear, central,
                         % wheel)
-                        if strcmp(behavior.events.conditionType{cond},'central')% && b < .01
+                        if strcmp(behavior.events.conditionType{cond},'central') 
+                        if size(firingMaps.rateMaps{cond},2) > 10 %&& b < .01
 %                         fields{cond} = bz_getPlaceFields1D(firingMaps.rateMaps{cond},'minPeakRate',2,'percentThresh',.1);
         
                         if sum(sum(firingMaps.countMaps{cond}(ls,:,:))) > 10  % ls neuron has to fire this many spikes to bother 
@@ -39,24 +40,27 @@ for ii=1:length(d)
                            nc(count,:) = squeeze(noiseCorr(ls,cell,cond,:));  
                            meanRate(count,:) = squeeze(mean(firingMaps.rateMaps{cond}(cell,:,:)));
                            com(count) = fields{cond}{cell}{1}.COM;
+                           signalCorr(count) = corr(meanRate(count,:)',squeeze(mean(firingMaps.rateMaps{cond}(ls,:,:))));
                            animal(count) = sum(double(sessionInfo.animal));
+                           recording(count) = ii;
                            if ~isempty(sessionInfo.ca3)
                               region(count) = 3;
                            else
                               region(count) = 1;
                            end
-                           subplot(2,2,1);
-                           plot(squeeze(noiseCorr(ls,cell,cond,:)));
-                           subplot(2,2,2);
-                           plot(meanRate(count,:))
-                           subplot(2,2,3);
-                           plot(squeeze(mean(firingMaps.rateMaps{cond}(ls,:,:))))
-                           pause
+%                            subplot(2,2,1);
+%                            plot(squeeze(noiseCorr(ls,cell,cond,:)));
+%                            subplot(2,2,2);
+%                            plot(meanRate(count,:))
+%                            subplot(2,2,3);
+%                            plot(squeeze(mean(firingMaps.rateMaps{cond}(ls,:,:))))
+%                            pause
                            count=1+count;
                         end
+                        end
+                        end
+                        end
 %                         end
-                        end
-                        end
                     end
                 end
             end
@@ -70,9 +74,9 @@ end
 
 %% plotting
 % remove nan/0/1 first?
-nc(nc==1)=nan;
+nc(nc>.999)=nan;
 nc(nc==0)=nan;
-
+% nc = abs(nc);
 for i=1:200
     if i < 21 
         ii = 21;
@@ -85,9 +89,12 @@ for i=1:200
 c1 = intersect(b,find(region==1));
 c3 = intersect(b,find(region==3));
 subplot(2,2,1)
-errorbar(i,nanmean(nanmean(nc(c1,ii-20:ii+20))'),nanstd(nanmean(nc(c1,ii-20:ii+20))'),'.k')
+% errorbar(i,nanmean(nanmean(nc(c1,ii-20:ii+20))'),nanstd(nanmean(nc(c1,ii-20:ii+20))'),'.k')
 hold on
-errorbar(i,nanmean(nanmean(nc(c3,ii-20:ii+20))'),nanstd(nanmean(nc(c3,ii-20:ii+20))'),'.r')
+plot(i,nanmean(nanmean(nc(c1,i))'),'.k')
+hold on
+plot(i,nanmean(nanmean(nc(c3,i))'),'.r')
+% errorbar(i,nanmean(nanmean(nc(c3,ii-20:ii+20))'),nanstd(nanmean(nc(c3,ii-20:ii+20))'),'.r')
 ca1(i) = nanmean(nanmean(nc(c1,ii-20:ii+20))');
 ca3(i) = nanmean(nanmean(nc(c3,ii-20:ii+20))');
 
