@@ -3,7 +3,7 @@ function [] = scratch_09_26_17_MaxCorr_ls_hpc_populationDecoding_RATE_ONLY(RECOR
 cd([RECORDING])
 plotting = 0;
 saveMat = 0;
-smoothingRange = [10 25 35 60 250  1000 ];
+smoothingRange = [10 25 35 60 250 1000];
 
 ls = bz_GetSpikes('region','ls');
 if septalCell <= length(ls.times)
@@ -148,7 +148,7 @@ for wind = smoothingRange
         struct.testTrial = r(end);
         struct.fits = fits;
         struct.septalCell = septalCell;
-        lsRateDecodingHPC_POP_MaxCorr.results = [lsRateDecodingHPC_POP_MaxCorr.results,struct2table(struct)];
+        lsRateDecodingHPC_POP_MaxCorr.results = [lsRateDecodingHPC_POP_MaxCorr.results;struct2table(struct)];
        
         clear *train *test yfit*
         disp(['finished with window: ' num2str(wind) ' out of ' num2str(smoothingRange(end)) ' total'])
