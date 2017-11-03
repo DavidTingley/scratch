@@ -9,7 +9,7 @@ load([xml.FileName '.behavior.mat'])
 
 load([xml.FileName '.sessionInfo.mat'])
 spikes = bz_GetSpikes;
-% lfp = bz_GetLFP(sessionInfo.thetaChans(2));
+% lfp = bz_GetLFP(sessionInfo.thetaChans(2));cd
 nBins = length(behavior.events.map{1}.x);
 % 
 
@@ -60,7 +60,7 @@ for smoothing = 1:round(nBins/2)
                 rates_trains_smooth = [rates_trains_smooth; ...
                                        squeeze(maps.rateMaps_box{cond}(cell,t,:))];    
                 pos = [pos,[1:nBins]];                   
-            end
+            end 
 %             subplot(2,1,1)
 %             plot(rates_trains_smooth(1:200))
 %             subplot(2,1,2)
@@ -137,9 +137,9 @@ for smoothing = 1:round(nBins/2)
             
             count = 1+count;
             end
-%             if cell == 2 && cond == 2
+%             if cell == 80 && cond == 5
 % %                 
-%                 figure(1)
+%                 figure(cond)
 %                 t_rate = varfun(@mean,positionDecodingGLM_binnedspace_box_median.results{cell},'InputVariables','mse_rate',...
 %                 'GroupingVariables',{'tau','condition'});
 %                 t_phase = varfun(@mean,positionDecodingGLM_binnedspace_box_median.results{cell},'InputVariables','mse_phase_all',...
