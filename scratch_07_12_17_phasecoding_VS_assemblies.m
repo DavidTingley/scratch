@@ -9,11 +9,16 @@ phaseonly_chance = [];
 ls_rec =[]; hpc_rec = [];
 ass_rate=[];
 noAss_rate =[];
+PF_loc = [];
+region = [];
+animal = [];
+behav =[];
 d  = dir('*201*');
-
-for i=1:length(d)
-    figure(1)
+    figure
     clf
+    
+for i=1:length(d)
+
 %     
 % ass = [];
 % noAss = [];
@@ -23,16 +28,22 @@ for i=1:length(d)
 % ass_phaseonly = [];
 
 cd(d(i).name) 
-spikes = bz_GetSpikes;
-load([d(i).name '.behavior.mat'],'behavior')
-b = dir('*.behavior.mat');
-load(b.name);
-nBins = length(behavior.events.map{1}.x);
-xml = LoadParameters;
-if exist('assembliesCrossRegion_split_w_theta.mat') & exist([xml.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat']) ...
+sessionInfo = bz_getSessionInfo;
 
-    load([xml.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'])
-    load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');
+spikes = bz_GetSpikes('noprompt',true);
+load([d(i).name '.behavior.mat'],'behavior')
+nBins = length(behavior.events.map{1}.x);
+
+if exist('assembliesCrossRegion_split_w_theta_03-Nov-2017.mat') || exist('assembliesCrossRegion_split_w_theta.mat') && exist([sessionInfo.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat']) 
+
+    load([sessionInfo.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'])
+    try
+        load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');%c
+    catch
+        load('assembliesCrossRegion_split_w_theta_03-Nov-2017.mat','dev*','pairs');%load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');
+    end
+    if exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
+    load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'],'fields');
     positionDecodingGLM=positionDecodingGLM_binnedspace_box;
     if isfield(positionDecodingGLM,'dateRun') & length(pairs)>1 & exist('dev')==1
     conditions = length(unique(positionDecodingGLM.results{1}.condition));
@@ -44,7 +55,7 @@ if exist('assembliesCrossRegion_split_w_theta.mat') & exist([xml.FileName '.posi
         t_chance = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_chance',...
             'GroupingVariables',{'tau','condition'});
         tab = join(join(t_rate,t_phase),t_chance);
-        for cond = 1:conditions
+      for cond = 1:conditions
             if cond <= length(dev)  && sum(behavior.events.trialConditions==cond) > 7
             % grab phase/rate coding variables
             rows = find(tab.condition==cond);
@@ -81,7 +92,7 @@ if exist('assembliesCrossRegion_split_w_theta.mat') & exist([xml.FileName '.posi
             if zerolag < 1 
                 zerolag = 1;
             end
-            if imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>100
+            if imp > 1.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>40
                 p = [p; pairs(pair,:)];
                 h = [h; imp];
                 ii = [ii;b];
@@ -109,16 +120,28 @@ if exist('assembliesCrossRegion_split_w_theta.mat') & exist([xml.FileName '.posi
                 if zerolag < 1 
                 zerolag = 1;
                 end
-
-                if imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>100
-                p = [p; pairs(pair,:)];
-                h = [h; imp];
-                ii = [ii;b];
-                z=[z;zerolag];
-                stren = [stren; imp imp2 b (min_mse_phase_all(pairs(pair,1),cond)-min_mse_rate(pairs(pair,1),cond)) ...
-                ./ (min_mse_phase_all(pairs(pair,1),cond)+min_mse_rate(pairs(pair,1),cond)) ...
-                (min_mse_phase_all(pairs(pair,1),cond))];
-                devs = [devs;dev{cond}(:,pair)'];
+                % imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>100
+                if imp > 1.5 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40  
+                    p = [p; pairs(pair,:)];
+                    h = [h; imp];
+                    ii = [ii;b];
+                    z=[z;zerolag];
+                    if ~isempty(fields{cond}{pairs(pair,2)})
+                        PF_loc = [PF_loc; fields{cond}{pairs(pair,2)}{1}.COM];
+                    else
+                        PF_loc = [PF_loc; nan];
+                    end
+                    if isempty(sessionInfo.ca3)
+                        region = [region;1];
+                    else
+                        region = [region;3];
+                    end
+                    behav = [behav; sum(double(behavior.events.conditionType{cond}))];
+                    animal = [animal; sum(double(sessionInfo.animal))];
+                    stren = [stren; imp imp2 b (min_mse_phase_all(pairs(pair,1),cond)-min_mse_rate(pairs(pair,1),cond)) ...
+                    ./ (min_mse_phase_all(pairs(pair,1),cond)+min_mse_rate(pairs(pair,1),cond)) ...
+                    (min_mse_phase_all(pairs(pair,1),cond))];
+                    devs = [devs;dev{cond}(:,pair)'];
                 end
                 pairCount = 1 + pairCount;
                 end 
@@ -148,6 +171,7 @@ if exist('assembliesCrossRegion_split_w_theta.mat') & exist([xml.FileName '.posi
             end
 
     end
+    end
        
 if ~isempty(stren)
     noAss_phaseonly(noAss_phaseonly>1)=1;
@@ -155,44 +179,44 @@ if ~isempty(stren)
     ass_phaseonly(ass_phaseonly>1)=1;
     ass(ass>1)=1;
     
-subplot(2,2,1)
-histogram(ass,[-1:.02:1],'Normalization','pdf','FaceColor','g')
-hold on
-histogram(noAss,[-1:.02:1],'Normalization','pdf','FaceColor','r')
-line([mean(ass) mean(ass)],[0 40],'color','g')
-line([mean(noAss) mean(noAss)],[0 40],'color','r')
-xlabel('phase coding only             neither/both             rate code only')
-% set(gca,'yscale','log')
-ylabel('probability')
-title(length(pairs))
-% title('phase coding strength for gamma assemblies or no assembly')
-hold off
-subplot(2,2,2)
-scatter(stren(:,2),stren(:,5),'.')
-xlabel('improvement val')
-ylabel('phase-rate comparison')
-
-subplot(2,2,3);
-% histogram([ass_phaseonly; noAss_phaseonly],[50],'Normalization','pdf','FaceColor','k')
-hold on
-histogram(ass_phaseonly,0:.01:1,'Normalization','pdf','FaceColor','g')
-histogram(noAss_phaseonly,0:.01:1,'Normalization','pdf','FaceColor','r')
-xlabel('phase coding                               no phase coding')
-% set(gca,'yscale','log')
-line([mean(ass_phaseonly) mean(ass_phaseonly)],[0 25],'color','g')
-line([mean(noAss_phaseonly) mean(noAss_phaseonly)],[0 25],'color','r')
-ylabel('probability')
-title([num2str(size(stren,1)) ' assemblies detected'])
-hold off
-
-subplot(2,2,4)
-scatter(stren(:,1),stren(:,5),'.')
-xlabel('improvement val')
-ylabel('phase coding val')
-title(d(i).name)
-[a b] = kstest2(ass_phaseonly,noAss_phaseonly);
-subplot(2,2,2)
-title(b);
+% subplot(2,2,1)
+% histogram(ass,[-1:.02:1],'Normalization','pdf','FaceColor','g')
+% hold on
+% histogram(noAss,[-1:.02:1],'Normalization','pdf','FaceColor','r')
+% line([mean(ass) mean(ass)],[0 40],'color','g')
+% line([mean(noAss) mean(noAss)],[0 40],'color','r')
+% xlabel('phase coding only             neither/both             rate code only')
+% % set(gca,'yscale','log')
+% ylabel('probability')
+% title(length(pairs))
+% % title('phase coding strength for gamma assemblies or no assembly')
+% hold off
+% subplot(2,2,2)
+% scatter(stren(:,2),stren(:,5),'.')
+% xlabel('improvement val')
+% ylabel('phase-rate comparison')
+% 
+% subplot(2,2,3);
+% % histogram([ass_phaseonly; noAss_phaseonly],[50],'Normalization','pdf','FaceColor','k')
+% hold on
+% histogram(ass_phaseonly,0:.01:1,'Normalization','pdf','FaceColor','g')
+% histogram(noAss_phaseonly,0:.01:1,'Normalization','pdf','FaceColor','r')
+% xlabel('phase coding                               no phase coding')
+% % set(gca,'yscale','log')
+% line([mean(ass_phaseonly) mean(ass_phaseonly)],[0 25],'color','g')
+% line([mean(noAss_phaseonly) mean(noAss_phaseonly)],[0 25],'color','r')
+% ylabel('probability')
+% title([num2str(size(stren,1)) ' assemblies detected'])
+% hold off
+% 
+% subplot(2,2,4)
+% scatter(stren(:,1),stren(:,5),'.')
+% xlabel('improvement val')
+% ylabel('phase coding val')
+% title(d(i).name)
+% [a b] = kstest2(ass_phaseonly,noAss_phaseonly);
+% subplot(2,2,2)
+% title(b);
 
 
 % figure(100)
@@ -211,7 +235,7 @@ title(b);
 % title('phase coding diff vs # of assemblies')
 % hold on
 
-pause(.01)
+% pause(.01)
 end
  clear pairs dev devControl
 end
@@ -225,32 +249,71 @@ end
 
 
 
-
-
-
-
-
-figure
-clear a n c ap np cp 
-for iter = 1:1000
-r = randperm(length(ass_phaseonly));
-a(iter,:) = ass_phaseonly(r(1:round(prctile(1:length(ass_phaseonly),60))));
-r = randperm(length(noAss_phaseonly));
-n(iter,:) = noAss_phaseonly(r(1:round(prctile(1:length(noAss_phaseonly),60))));
-r = randperm(length(phaseonly_chance));
-c(iter,:) = phaseonly_chance(r(1:round(prctile(1:length(phaseonly_chance),60))));
-for j = 1:100
-ap(iter,j) = prctile(a(iter,:),j);
-np(iter,j) = prctile(n(iter,:),j);
-cp(iter,j) = prctile(c(iter,:),j);
+clf
+subplot(2,2,1)
+for i=1:200
+f = intersect(find(abs(PF_loc-i)<80),find(region==1));
+errorbar(i,(mean(stren(f,1))),(std(stren(f,1)))./sqrt(length(f)),'.k')
+hold on
 end
-boundedline(1:100,mean(ap),3*std(ap),'g');
-boundedline(1:100,mean(np),3*std(np),'r');
-boundedline(1:100,mean(cp),3*std(cp),'k');
-axis([0 100 .5 1])
-title(iter)
-pause(.0001);
+hold on
+for i=1:200
+f = intersect(find(abs(PF_loc-i)<80),find(region==3));
+errorbar(i,(mean(stren(f,1))),(std(stren(f,1)))./sqrt(length(f)),'.r')
+hold on
 end
+ylabel('assembly strength')
+xlabel('positon')
+title('ca3(red) ca1(black) LS assemblies vs position')
+
+subplot(2,2,2)
+for i=1:200
+f = intersect(find(abs(PF_loc-i)<80),find(region==3));
+ca3(i) = (mean(stren(f,1)));
+ca3_sem(i) = (std(stren(f,1)))./sqrt(length(f));
+f = intersect(find(abs(PF_loc-i)<80),find(region==1));
+ca1(i) = (mean(stren(f,1)));
+ca1_sem(i) = (std(stren(f,1)))./sqrt(length(f));
+end
+boundedline(1:200,(ca1),(ca1_sem),'k')
+boundedline(1:200,(ca3),(ca3_sem),'r')
+ylabel('assembly strength')
+xlabel('positon')
+title('ca3(red) ca1(black) LS assemblies vs position')
+
+subplot(2,2,3)
+plot(sort(PF_loc(region==1)),1:sum(region==1),'.k')
+title('ca1 field COMs')
+
+subplot(2,2,4)
+plot(sort(PF_loc(region==3)),1:sum(region==3),'.r')
+title('ca3 field COMs')
+
+
+
+
+
+% figure
+% clear a n c ap np cp 
+% for iter = 1:1000
+% r = randperm(length(ass_phaseonly));
+% a(iter,:) = ass_phaseonly(r(1:round(prctile(1:length(ass_phaseonly),60))));
+% r = randperm(length(noAss_phaseonly));
+% n(iter,:) = noAss_phaseonly(r(1:round(prctile(1:length(noAss_phaseonly),60))));
+% r = randperm(length(phaseonly_chance));
+% c(iter,:) = phaseonly_chance(r(1:round(prctile(1:length(phaseonly_chance),60))));
+% for j = 1:100
+% ap(iter,j) = prctile(a(iter,:),j);
+% np(iter,j) = prctile(n(iter,:),j);
+% cp(iter,j) = prctile(c(iter,:),j);
+% end
+% boundedline(1:100,mean(ap),3*std(ap),'g');
+% boundedline(1:100,mean(np),3*std(np),'r');
+% boundedline(1:100,mean(cp),3*std(cp),'k');
+% axis([0 100 .5 1])
+% title(iter)
+% pause(.0001);
+% end
 
 
 

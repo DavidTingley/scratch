@@ -9,12 +9,14 @@ rate=[];
 nHPC = [];
 nLS = [];
 rec=[];
+region = [];
 
 
-% for i=1:length(d)
-% cd(d(i).name)
-% if exist('assembliesCrossRegion_split_w_theta.mat')
-% load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs','coords')
+for i=1:length(d)
+cd(d(i).name)
+if exist('assembliesCrossRegion_split_w_theta.mat')
+load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs','coords')
+sessionInfo = bz_getSessionInfo;
 % if exist(['assembliesCrossRegionData.mat'])
 % load(['assembliesCrossRegionData.mat'])
 p=[];
@@ -31,7 +33,8 @@ for c = 1:length(dev)
         zerolag = 1;
     end
     
-    if imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{c}(:,pair))>100
+    if imp > 3 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{c}(:,pair))>40
+        %imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{c}(:,pair))>100
        subplot(2,2,1)
        scatter(b,imp,'.k')
        hold on
@@ -45,6 +48,11 @@ for c = 1:length(dev)
        nHPC=[nHPC; length(unique(pairs(:,2)))];
        nLS=[nLS; length(unique(pairs(:,1)))];
        rec = [rec; i];
+       if ~isempty(sessionInfo.ca3)
+           region = [region;3];
+       else
+           region = [region;1];
+       end
        line([median(ii) median(ii)],[0 25],'color','r')
        line([mean(ii) mean(ii)],[0 25],'color','g')
        ylabel('improvement (min-mean) ./ (minc-meanc)')
@@ -59,13 +67,13 @@ for c = 1:length(dev)
        plot(mean(devControl{c}(:,pair,:),3));
        title([imp zerolag ])
        hold off
-       pause
+       pause(.01)
     end
     pairCount = 1 + pairCount;
    end    
 end
-% end
-% end
+end
+end
 
 % let's go hunting for assemblies with phase precession clouds...
 % spikes = bz_GetSpikes;

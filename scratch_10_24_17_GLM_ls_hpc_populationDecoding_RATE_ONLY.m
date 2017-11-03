@@ -1,4 +1,4 @@
-function [] = scratch_09_26_17_MaxCorr_ls_hpc_populationDecoding_RATE_ONLY(RECORDING,septalCell)
+function [] = scratch_09_26_17_GLM_ls_hpc_populationDecoding_RATE_ONLY(RECORDING,septalCell)
 
 cd([RECORDING])
 plotting = 0;

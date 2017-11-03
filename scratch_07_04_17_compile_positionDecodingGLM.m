@@ -17,6 +17,7 @@ ls_rate_info =[]; hpc_rate_info = [];
 hpc_cell=[];
 ls_cell=[];
 hpc_shank = []; ls_shank = [];
+hpc_field = [];
                    
 hpc_mean_phase = zeros(101,1);
 ls_mean_phase = zeros(101,1);
@@ -31,9 +32,10 @@ for i=1:length(d)
 %    animal = strsplit(animal,'/');
 %    animal = animal{end-1};
 % animal = 1;
-    if ~isempty(dir('*positionDecodingGLM_binnedspace_box.cell*')) 
+    if ~isempty(dir('*positionDecodingGLM_binnedspace_box.cell*')) & exist([d(i).name '.placeFields.01_pctThresh.mat'])
         sessionInfo = bz_getSessionInfo;
         load([d(i).name '.firingMaps.cellinfo.mat'],'firingMaps') 
+        load([d(i).name '.placeFields.01_pctThresh.mat'],'fields') 
         spikes = bz_GetSpikes;
 %         load([d(i).name '.olypherInfo.cellinfo.mat'],'olypherInfo') 
         b = dir('*.behavior.mat');
@@ -76,26 +78,28 @@ for i=1:length(d)
 %                if sqrt(tab.mean_mse_phase_all(rows(1)))./nBins < .3 
                 [a b] =min(tab.mean_mse_phase_all(rows));
                 [aa bb] =min(tab.mean_mse_rate(rows));
-
-                first500ms = find(ismember(tab.tau(rows),1:nBins));
+                
+%                 rows = intersect(rows,find(tab.tau==60));
+                
+                first500ms = find(ismember(tab.tau(rows),30:70));
 
 %                 min_mse_rate = (min(tab.mean_mse_rate(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
 %                 min_mse_phase_all = (min(tab.mean_mse_phase_all(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
                 
-                min_mse_rate = (min(tab.mean_mse_rate(rows(first500ms)))./mean(tab.mean_mse_chance(rows)));
-                min_mse_phase_all = (min(tab.mean_mse_phase_all(rows(first500ms)))./mean(tab.mean_mse_chance(rows)));
+                [min_mse_rate] = (median(tab.mean_mse_rate(rows(first500ms)))-median(tab.mean_mse_chance(rows)));
+                [min_mse_phase_all] = (median(tab.mean_mse_phase_all(rows(first500ms)))-median(tab.mean_mse_chance(rows)));
 
                 min_mse_chance = (min(tab.mean_mse_chance(rows)))./mean(tab.mean_mse_chance(rows));
 
-                max_mse_rate = sqrt(max(tab.mean_mse_rate(rows(first500ms))))./nBins;
-                max_mse_phase_all = sqrt(max(tab.mean_mse_phase_all(rows(first500ms))))./nBins;
-                if isempty(max_mse_phase_all)
-                    error();
-                end
+%                 max_mse_rate = sqrt(max(tab.mean_mse_rate(rows(first500ms))))./nBins;
+%                 max_mse_phase_all = sqrt(max(tab.mean_mse_phase_all(rows(first500ms))))./nBins;
+%                 if isempty(max_mse_phase_all)
+%                     error();
+%                 end
 %                if min_mse_phase_all < .33 & min_mse_rate < .33
 %                if b ~= length(rows) & bb ~= length(rows) & b ~= 1 & bb ~= 1
 chance = [chance; min_mse_chance];
-               if strcmp(positionDecodingGLM.region{cell},'hpc') 
+               if strcmp(positionDecodingGLM.region{cell},'hpc') | strcmp(positionDecodingGLM.region{cell},'ca3')  | strcmp(positionDecodingGLM.region{cell},'ca1') 
 %                    if positionDecodingGLM.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
 %                            positionDecodingGLM.results{cell}.mse_rate_pval(rows(bb)) <.05
                    
@@ -129,6 +133,11 @@ chance = [chance; min_mse_chance];
                    hpc_depth = [hpc_depth;str2num(sessionInfo.depth)+additionalDepth];
                    hpc_cell = [hpc_cell; cell];
                    hpc_shank = [hpc_shank;spikes.shankID(cell)];
+                   if ~isempty(fields{cond}{cell})
+                       hpc_field = [hpc_field;fields{cond}{cell}{1}.COM];
+                   else
+                       hpc_field = [hpc_field;nan];
+                   end
 %                    histogram(hpc_phase,0:.01:1,'Normalization','pdf','FaceColor','g'); .4:.05:1;
 %                    hold on
 %                    histogram(hpc_rate,0:.01:1,'Normalization','pdf','FaceColor','r')
