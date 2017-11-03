@@ -14,7 +14,7 @@ nBins = length(behavior.events.map{1}.x);
 % 
 
 % % %    % set up phase coding data
-% [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
+% [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,lfp4);
 load([xml.FileName '.firingMaps.cellinfo.mat']);
 rateMap =firingMaps.rateMaps;
 countMap =firingMaps.countMaps;
@@ -32,12 +32,12 @@ end
 
 for smoothing = 1:round(nBins/2)
     disp(['smoothing by: ' num2str(smoothing) ' bins']);
-    for cond = 2%1:length(unique(behavior.events.trialConditions))
+    for cond = 1:length(unique(behavior.events.trialConditions))
         if size(binnedPhaseMap{cond},2) >= 10
 %         figure(cond)
         % smooth data..
         maps = bz_firingMap1D(spikes,behavior,smoothing);
-        for cell = 2%1:length(spikes.times)
+        for cell = 1:length(spikes.times)
                        %smoothing
             phase_trains_smooth=[];
             cos_phase_trains_smooth=[];
