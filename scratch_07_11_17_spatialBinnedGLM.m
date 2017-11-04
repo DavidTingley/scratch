@@ -5,19 +5,32 @@ xml = LoadParameters;
 warning off
 
 load([xml.FileName '.behavior.mat'])
+sessionInfo = bz_getSessionInfo;
 
-
-load([xml.FileName '.sessionInfo.mat'])
-spikes = bz_GetSpikes;
 % lfp = bz_GetLFP(sessionInfo.thetaChans(2));cd
 nBins = length(behavior.events.map{1}.x);
 % 
 
 % % %    % set up phase coding data
 % [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,lfp4);
-
-load([xml.FileName '.firingMaps.cellinfo.mat']);
-load([xml.FileName '.phaseMaps.cellinfo.mat']);
+if ~exist([xml.FileName '.firingMaps.cellinfo.mat'])
+    spikes = bz_GetSpikes;
+    load([sessionInfo.FileName '.behavior.mat'])
+    if ~isempty(sessionInfo.ca1)
+    lfp = bz_GetLFP(sessionInfo.ca1);
+    elseif ~isempty(sessionInfo.ca3)
+    lfp = bz_GetLFP(sessionInfo.ca3);
+    else
+    lfp = bz_GetLFP(sessionInfo.thetaChans(end));
+    end
+    if ~isempty(spikes)
+    [firingMaps] = bz_firingMap1D(spikes,behavior,5);
+    [phaseMaps] = bz_phaseMap1D(spikes,behavior,lfp,5);
+    end
+else
+    load([xml.FileName '.firingMaps.cellinfo.mat']);
+    load([xml.FileName '.phaseMaps.cellinfo.mat']);
+end
 rateMap =firingMaps.rateMaps;
 countMap =firingMaps.countMaps;
 occuMap =firingMaps.occupancy;
