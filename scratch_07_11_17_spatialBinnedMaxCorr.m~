@@ -48,12 +48,12 @@ end
 
 for smoothing = 1:round(nBins/2)
     disp(['smoothing by: ' num2str(smoothing) ' bins']);
-    for cond = 2%1:length(unique(behavior.events.trialConditions))
+    for cond = 5%1:length(unique(behavior.events.trialConditions))
         if size(binnedPhaseMap{cond},2) >= 10
 %         figure(cond)
         % smooth data..
         maps = bz_firingMap1D(spikes,behavior,smoothing);
-        for cell = 2%1:length(spikes.times)
+        for cell = 80%1:length(spikes.times)
                        %smoothing
             phase_trains_smooth=[];
             cos_phase_trains_smooth=[];
@@ -134,10 +134,10 @@ for smoothing = 1:round(nBins/2)
             struct.mse_phase_cos = nanmedian((pos_test'-yfit).^2);
 %             struct.mse_phase_cos_pval = stats.p';
             %phase sin
-            cl = max_correlation_coefficient_CL;
-            cl = train(cl,[p_sin_train'],pos_train');
-            yfit = test(cl,[p_sin_test']);
-            struct.mse_phase_sin = nanmedian((pos_test'-yfit).^2);
+%             cl = max_correlation_coefficient_CL;
+%             cl = train(cl,[p_sin_train'],pos_train');
+%             yfit = test(cl,[p_sin_test']);
+%             struct.mse_phase_sin = nanmedian((pos_test'-yfit).^2);
 %             struct.mse_phase_sin_pval = stats.p';
             % all predictors
             cl = max_correlation_coefficient_CL;
@@ -160,7 +160,7 @@ for smoothing = 1:round(nBins/2)
             
             count = 1+count;
             end
-            if cell == 2 && cond == 2
+            if cell == 80 && cond == 5
 %                 
                 figure(cond)
                 t_rate = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_rate',...
@@ -169,9 +169,7 @@ for smoothing = 1:round(nBins/2)
                 'GroupingVariables',{'tau','condition'});
                 t_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase',...
                 'GroupingVariables',{'tau','condition'});
-                t_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase',...
-                'GroupingVariables',{'tau','condition'});
-                t_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase',...
+                t_phase_cos = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase_cos',...
                 'GroupingVariables',{'tau','condition'});
                 t_both = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_both',...
                 'GroupingVariables',{'tau','condition'});
@@ -179,7 +177,7 @@ for smoothing = 1:round(nBins/2)
                 'GroupingVariables',{'tau','condition'});   
                 t_std = varfun(@std,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_chance',...
                 'GroupingVariables',{'tau','condition'});  
-                tab = join(join(join(join(t_rate,t_phase_all),t_both),t_chance),t_phase);
+                tab = join(join(join(join(join(join(t_rate,t_phase_all),t_both),t_chance),t_phase),t_phase_cos),t_phase_sin);
                 rows = find(tab.condition==cond);
                 subplot(2,2,1);
                 plot(tab.tau(rows),tab.mean_mse_phase(rows),'g')
@@ -219,6 +217,6 @@ for smoothing = 1:round(nBins/2)
         end
     end
     positionDecodingMaxCorr_binned_box_median.dateRun = date;  % this can take a very long time so lets save each loop...
-% save([xml.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat'],'positionDecodingMaxCorr_binned_box_median')
+save([xml.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat'],'positionDecodingMaxCorr_binned_box_median')
 end
 % end

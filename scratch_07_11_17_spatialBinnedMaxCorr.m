@@ -134,10 +134,10 @@ for smoothing = 1:round(nBins/2)
             struct.mse_phase_cos = nanmedian((pos_test'-yfit).^2);
 %             struct.mse_phase_cos_pval = stats.p';
             %phase sin
-            cl = max_correlation_coefficient_CL;
-            cl = train(cl,[p_sin_train'],pos_train');
-            yfit = test(cl,[p_sin_test']);
-            struct.mse_phase_sin = nanmedian((pos_test'-yfit).^2);
+%             cl = max_correlation_coefficient_CL;
+%             cl = train(cl,[p_sin_train'],pos_train');
+%             yfit = test(cl,[p_sin_test']);
+%             struct.mse_phase_sin = nanmedian((pos_test'-yfit).^2);
 %             struct.mse_phase_sin_pval = stats.p';
             % all predictors
             cl = max_correlation_coefficient_CL;
@@ -160,7 +160,7 @@ for smoothing = 1:round(nBins/2)
             
             count = 1+count;
             end
-%             if cell == 2 && cond == 2
+%             if cell == 80 && cond == 5
 % %                 
 %                 figure(cond)
 %                 t_rate = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_rate',...
@@ -168,8 +168,6 @@ for smoothing = 1:round(nBins/2)
 %                 t_phase_all = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase_all',...
 %                 'GroupingVariables',{'tau','condition'});
 %                 t_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase',...
-%                 'GroupingVariables',{'tau','condition'});
-%                 t_phase_sin = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase_sin',...
 %                 'GroupingVariables',{'tau','condition'});
 %                 t_phase_cos = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase_cos',...
 %                 'GroupingVariables',{'tau','condition'});
@@ -179,7 +177,7 @@ for smoothing = 1:round(nBins/2)
 %                 'GroupingVariables',{'tau','condition'});   
 %                 t_std = varfun(@std,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_chance',...
 %                 'GroupingVariables',{'tau','condition'});  
-%                 tab = join(join(join(join(join(join(t_rate,t_phase_all),t_both),t_chance),t_phase),t_phase_cos),t_phase_sin);
+%                 tab = join(join(join(join(join(t_rate,t_phase_all),t_both),t_chance),t_phase),t_phase_cos);
 %                 rows = find(tab.condition==cond);
 %                 subplot(2,2,1);
 %                 plot(tab.tau(rows),tab.mean_mse_phase(rows),'g')
