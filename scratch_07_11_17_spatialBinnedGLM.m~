@@ -15,14 +15,20 @@ nBins = length(behavior.events.map{1}.x);
 
 % % %    % set up phase coding data
 % [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,lfp4);
-
+try
+load([xml.FileName '.firingMaps.cellinfo.mat']);
+rateMap =firingMaps.rateMaps;
+countMap =firingMaps.countMaps;
+occuMap =firingMaps.occupancy;
+phaseMap=firingMaps.phaseMaps;
+catch
 load([xml.FileName '.firingMaps.cellinfo.mat']);
 load([xml.FileName '.phaseMaps.cellinfo.mat']);
 rateMap =firingMaps.rateMaps;
 countMap =firingMaps.countMaps;
 occuMap =firingMaps.occupancy;
 phaseMap=phaseMaps.phaseMaps;
-
+end
 spikes = bz_GetSpikes;
 [binnedPhaseMap] = bz_phaseMap2Bins(phaseMap,rateMap,behavior);
     
@@ -188,6 +194,6 @@ for smoothing = 1:round(nBins/2)
         end
     end
     positionDecodingGLM_binnedspace_box_median.dateRun = date;  % this can take a very long time so lets save each loop...
-% save([xml.FileName '.positionDecodingGLM_binnedspace_box_median.cellinfo.mat'],'positionDecodingGLM_binnedspace_box_median')
+save([xml.FileName '.positionDecodingGLM_binnedspace_box_median.cellinfo.mat'],'positionDecodingGLM_binnedspace_box_median')
 end
 % end

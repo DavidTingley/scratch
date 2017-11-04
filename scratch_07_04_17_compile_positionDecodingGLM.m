@@ -34,7 +34,7 @@ for i=1:length(d)
 % animal = 1;
     if ~isempty(dir('*positionDecodingGLM_binnedspace_box_median.cell*')) & exist([d(i).name '.placeFields.10_pctThresh.mat'])
         sessionInfo = bz_getSessionInfo;
-        load([d(i).name '.firingMaps.cellinfo.mat'],'firingMaps') 
+%         load([d(i).name '.firingMaps.cellinfo.mat'],'firingMaps') 
         load([d(i).name '.placeFields.10_pctThresh.mat'],'fields') 
         spikes = bz_GetSpikes;
 %         load([d(i).name '.olypherInfo.cellinfo.mat'],'olypherInfo') 
@@ -63,7 +63,7 @@ for i=1:length(d)
         
             for cond = 1:conditions
                 if sum(behavior.events.trialConditions==cond) >= 12 %%%%%%%%%%%%%%%%%%%%%%%%%%
-                    nTrials = size(firingMaps.rateMaps{cond},2);
+                    nTrials = sum(behavior.events.trialConditions==cond);
                     %% information theory stuff here
 %                     rows = find(olypherInfo.results{cell}.condition==cond);
 %                     cols = find(olypherInfo.results{cell}.discBins==4);
@@ -81,7 +81,7 @@ for i=1:length(d)
                 
 %                 rows = intersect(rows,find(tab.tau==60));
                 
-                first500ms = find(ismember(tab.tau(rows),4:15));
+                first500ms = find(ismember(tab.tau(rows),40:70));
 
 %                 min_mse_rate = (min(tab.mean_mse_rate(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
 %                 min_mse_phase_all = (min(tab.mean_mse_phase_all(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
@@ -96,9 +96,11 @@ for i=1:length(d)
 %                 if isempty(max_mse_phase_all)
 %                     error();
 %                 end
-if min_mse_phase_all < -5000
-    error() 
-end
+                if mean(tab.mean_mse_chance(rows)) > 3800
+                   min_mse_rate = nan;
+                   min_mse_phase_all = nan;
+                   min_mse_chance = nan;
+                end
 %                if min_mse_phase_all < .33 & min_mse_rate < .33
 %                if b ~= length(rows) & bb ~= length(rows) & b ~= 1 & bb ~= 1
                 chance = [chance; min_mse_chance];
@@ -136,7 +138,7 @@ end
                    hpc_depth = [hpc_depth;str2num(sessionInfo.depth)+additionalDepth];
                    hpc_cell = [hpc_cell; cell];
                    hpc_shank = [hpc_shank;spikes.shankID(cell)];
-                   if ~isempty(fields{cond}{cell})
+                   if ~isempty(fields{cond}{cell}) & length(fields{cond}{cell}) == 1
                        hpc_field = [hpc_field;fields{cond}{cell}{1}.COM];
                    else
                        hpc_field = [hpc_field;nan];
