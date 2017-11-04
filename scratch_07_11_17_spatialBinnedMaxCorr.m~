@@ -1,7 +1,7 @@
 % 
 xml = LoadParameters;
 
-% if ~exist([xml.FileName '.positionDecodingGLM_binnedspace_box_median.cellinfo.mat'])
+% if ~exist([xml.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat'])
 warning off
 
 load([xml.FileName '.behavior.mat'])
@@ -39,11 +39,11 @@ phaseMap=phaseMaps.phaseMaps;
 spikes = bz_GetSpikes;
 [binnedPhaseMap] = bz_phaseMap2Bins(phaseMap,rateMap,behavior);
     
-positionDecodingGLM_binnedspace_box_median.region = spikes.region;
-positionDecodingGLM_binnedspace_box_median.sessionName = spikes.sessionName;
-positionDecodingGLM_binnedspace_box_median.UID = spikes.UID;
+positionDecodingMaxCorr_binned_box_median.region = spikes.region;
+positionDecodingMaxCorr_binned_box_median.sessionName = spikes.sessionName;
+positionDecodingMaxCorr_binned_box_median.UID = spikes.UID;
 for cell=1:length(spikes.times)
-    positionDecodingGLM_binnedspace_box_median.results{cell} = table;
+    positionDecodingMaxCorr_binned_box_median.results{cell} = table;
 end
 
 for smoothing = 1:round(nBins/2)
@@ -109,66 +109,84 @@ for smoothing = 1:round(nBins/2)
             
             pos_train = pos(rr(1:pct));
             pos_test = pos(rr(pct+1:end));
-            % rate
-            [b dev stats] = glmfit([r_train],pos_train','normal');
-            yfit = glmval(b,r_test,'identity');
+            % rate 
+            cl = max_correlation_coefficient_CL;
+            cl = train(cl,[r_train'],pos_train');
+            yfit = test(cl,[r_test']);
             struct.mse_rate = nanmedian((pos_test'-yfit).^2);
-            struct.mse_rate_pval = stats.p';
+%             struct.mse_rate_pval = stats.p';
             % phase all
-            [b dev stats] = glmfit([p_train p_cos_train p_sin_train],pos_train','normal');
-            yfit = glmval(b,[p_test p_cos_test p_sin_test],'identity');
+            cl = max_correlation_coefficient_CL;
+            cl = train(cl,[p_cos_train'; p_sin_train';p_train'],pos_train');
+            yfit = test(cl,[p_cos_test'; p_sin_test';p_test']);
             struct.mse_phase_all = nanmedian((pos_test'-yfit).^2);
-            struct.mse_phase_all_pval = stats.p';
+%             struct.mse_phase_all_pval = stats.p';
             %phase
-            [b dev stats] = glmfit([p_train],pos_train','normal');
-            yfit = glmval(b,[p_test ],'identity');
+            cl = max_correlation_coefficient_CL;
+            cl = train(cl,[p_train'],pos_train');
+            yfit = test(cl,[p_test']);
             struct.mse_phase = nanmedian((pos_test'-yfit).^2);
-            struct.mse_phase_pval = stats.p';
+%             struct.mse_phase_pval = stats.p';
             %phase cos
-            [b dev stats] = glmfit([p_cos_train ],pos_train','normal');
-            yfit = glmval(b,[ p_cos_test ],'identity');
+            cl = max_correlation_coefficient_CL;
+            cl = train(cl,[p_cos_train'],pos_train');
+            yfit = test(cl,[p_cos_test']);
             struct.mse_phase_cos = nanmedian((pos_test'-yfit).^2);
-            struct.mse_phase_cos_pval = stats.p';
+%             struct.mse_phase_cos_pval = stats.p';
             %phase sin
-            [b dev stats] = glmfit([ p_sin_train],pos_train','normal');
-            yfit = glmval(b,[ p_sin_test],'identity');
+            cl = max_correlation_coefficient_CL;
+            cl = train(cl,[p_sin_train'],pos_train');
+            yfit = test(cl,[p_sin_test']);
             struct.mse_phase_sin = nanmedian((pos_test'-yfit).^2);
-            struct.mse_phase_sin_pval = stats.p';
+%             struct.mse_phase_sin_pval = stats.p';
             % all predictors
-            [b dev stats] = glmfit([r_train p_train p_cos_train p_sin_train],pos_train','normal');
-            yfit = glmval(b,[r_test p_test p_cos_test p_sin_test],'identity');
+            cl = max_correlation_coefficient_CL;
+            cl = train(cl,[p_cos_train'; p_sin_train';p_train';r_train'],pos_train');
+            yfit = test(cl,[p_cos_test'; p_sin_test';p_test';r_test']);
             struct.mse_both  = nanmedian((pos_test'-yfit).^2);
-            struct.mse_both_pval = stats.p';
+%             struct.mse_both_pval = stats.p';
             
-            [b dev stats] = glmfit([r_train(randperm(length(r_train)))],pos_train','normal');
-            yfit = glmval(b,[r_test(randperm(length(r_test)))],'identity');
+            cl = max_correlation_coefficient_CL;
+            cl = train(cl,[r_train'],pos_train');
+            yfit = test(cl,[r_test(randperm(length(r_test)))']);
             struct.mse_chance  = nanmedian((pos_test'-yfit).^2);
             
             % store peripherals
             struct.iter = count;
-            struct.dfe = stats.dfe;
+%             struct.dfe = stats.dfe;
             struct.tau = smoothing;
             struct.condition = cond;
-            positionDecodingGLM_binnedspace_box_median.results{cell} = [positionDecodingGLM_binnedspace_box_median.results{cell}; struct2table(struct)];
+            positionDecodingMaxCorr_binned_box_median.results{cell} = [positionDecodingMaxCorr_binned_box_median.results{cell}; struct2table(struct)];
             
             count = 1+count;
             end
             if cell == 2 && cond == 2
 %                 
                 figure(cond)
-                t_rate = varfun(@mean,positionDecodingGLM_binnedspace_box_median.results{cell},'InputVariables','mse_rate',...
+                t_rate = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_rate',...
                 'GroupingVariables',{'tau','condition'});
-                t_phase = varfun(@mean,positionDecodingGLM_binnedspace_box_median.results{cell},'InputVariables','mse_phase_all',...
+                t_phase_all = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase_all',...
                 'GroupingVariables',{'tau','condition'});
-                t_both = varfun(@mean,positionDecodingGLM_binnedspace_box_median.results{cell},'InputVariables','mse_both',...
+                t_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase',...
                 'GroupingVariables',{'tau','condition'});
-                t_chance = varfun(@mean,positionDecodingGLM_binnedspace_box_median.results{cell},'InputVariables','mse_chance',...
+                t_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase',...
+                'GroupingVariables',{'tau','condition'});
+                t_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase',...
+                'GroupingVariables',{'tau','condition'});
+                t_both = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_both',...
+                'GroupingVariables',{'tau','condition'});
+                t_chance = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_chance',...
                 'GroupingVariables',{'tau','condition'});   
-                t_std = varfun(@std,positionDecodingGLM_binnedspace_box_median.results{cell},'InputVariables','mse_chance',...
+                t_std = varfun(@std,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_chance',...
                 'GroupingVariables',{'tau','condition'});  
-                tab = join(join(join(t_rate,t_phase),t_both),t_chance);
+                tab = join(join(join(join(t_rate,t_phase_all),t_both),t_chance),t_phase);
                 rows = find(tab.condition==cond);
                 subplot(2,2,1);
+                plot(tab.tau(rows),tab.mean_mse_phase(rows),'g')
+                hold on
+                plot(tab.tau(rows),tab.mean_mse_phase_cos(rows),'g')
+                plot(tab.tau(rows),tab.mean_mse_phase_sin(rows),'g')
+                hold off
 %                 imagesc(phase_trains_smooth);
 %                 caxis([-pi pi])
                 subplot(2,2,2);
@@ -180,13 +198,13 @@ for smoothing = 1:round(nBins/2)
                 plot(tab.tau(rows),tab.mean_mse_phase_all(rows),'g')
                 
 
-%                 plot(positionDecodingGLM_binnedspace_box_median.results{cell}.tau(rows),...
-%                     mean(positionDecodingGLM_binnedspace_box_median.results{cell}.mse_rate(rows,:)'),'r')
+%                 plot(positionDecodingMaxCorr_binned_box_median.results{cell}.tau(rows),...
+%                     mean(positionDecodingMaxCorr_binned_box_median.results{cell}.mse_rate(rows,:)'),'r')
 %                 hold on
-%                 plot(positionDecodingGLM_binnedspace_box_median.results{cell}.tau(rows),...
-%                     mean(positionDecodingGLM_binnedspace_box_median.results{cell}.mse_phase_all(rows,:)'),'g')
-                plot(positionDecodingGLM_binnedspace_box_median.results{cell}.tau(rows),...
-                    mean(positionDecodingGLM_binnedspace_box_median.results{cell}.mse_both(rows,:)'),'k')
+%                 plot(positionDecodingMaxCorr_binned_box_median.results{cell}.tau(rows),...
+%                     mean(positionDecodingMaxCorr_binned_box_median.results{cell}.mse_phase_all(rows,:)'),'g')
+                plot(positionDecodingMaxCorr_binned_box_median.results{cell}.tau(rows),...
+                    mean(positionDecodingMaxCorr_binned_box_median.results{cell}.mse_both(rows,:)'),'k')
                 hold off
 %                 subplot(2,2,3)
 %                 imagesc(rates_trains_smooth);
@@ -200,7 +218,7 @@ for smoothing = 1:round(nBins/2)
         disp(['done with condition: ' num2str(cond) ' of ' num2str(length(unique(behavior.events.trialConditions)))]);
         end
     end
-    positionDecodingGLM_binnedspace_box_median.dateRun = date;  % this can take a very long time so lets save each loop...
-save([xml.FileName '.positionDecodingGLM_binnedspace_box_median.cellinfo.mat'],'positionDecodingGLM_binnedspace_box_median')
+    positionDecodingMaxCorr_binned_box_median.dateRun = date;  % this can take a very long time so lets save each loop...
+% save([xml.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat'],'positionDecodingMaxCorr_binned_box_median')
 end
 % end
