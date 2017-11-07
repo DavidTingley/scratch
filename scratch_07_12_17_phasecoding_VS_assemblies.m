@@ -34,17 +34,19 @@ spikes = bz_GetSpikes('noprompt',true);
 load([d(i).name '.behavior.mat'],'behavior')
 nBins = length(behavior.events.map{1}.x);
 
-if exist('assembliesCrossRegion_split_w_theta_03-Nov-2017.mat') || exist('assembliesCrossRegion_split_w_theta.mat') && exist([sessionInfo.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat']) 
-
-    load([sessionInfo.FileName '.positionDecodingGLM_binnedspace_box.cellinfo.mat'])
+if exist('assembliesCrossRegion_split_w_theta_07-Nov-2017.mat') || exist('assembliesCrossRegion_split_w_theta.mat') 
+   if ~exist([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat']) 
+    error
+   end
+    load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat'])
     try
         load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');%c
     catch
-        load('assembliesCrossRegion_split_w_theta_03-Nov-2017.mat','dev*','pairs');%load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');
+        load('assembliesCrossRegion_split_w_theta_07-Nov-2017.mat','dev*','pairs');%load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');
     end
     if exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
     load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'],'fields');
-    positionDecodingGLM=positionDecodingGLM_binnedspace_box;
+    positionDecodingGLM=positionDecodingMaxCorr_binned_box_median;
     if isfield(positionDecodingGLM,'dateRun') & length(pairs)>1 & exist('dev')==1
     conditions = length(unique(positionDecodingGLM.results{1}.condition));
     for cell =1:length(positionDecodingGLM.results)
@@ -238,7 +240,8 @@ if ~isempty(stren)
 % pause(.01)
 end
  clear pairs dev devControl
-end
+   end
+
 % 
 
     cd('/home/david/datasets/lsDataset')
