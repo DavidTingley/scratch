@@ -10,13 +10,14 @@ nHPC = [];
 nLS = [];
 rec=[];
 region = [];
-
+PF_loc = [];
 
 for i=1:length(d)
 cd(d(i).name)
 if exist('assembliesCrossRegion_split_w_theta.mat')
 load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs','coords')
 sessionInfo = bz_getSessionInfo;
+load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'],'fields');
 % if exist(['assembliesCrossRegionData.mat'])
 % load(['assembliesCrossRegionData.mat'])
 p=[];
@@ -53,6 +54,11 @@ for c = 1:length(dev)
        else
            region = [region;1];
        end
+        if ~isempty(fields{c}{pairs(pair,2)})
+        PF_loc = [PF_loc; fields{c}{pairs(pair,2)}{1}.COM];
+        else
+        PF_loc = [PF_loc; nan];
+        end
        line([median(ii) median(ii)],[0 25],'color','r')
        line([mean(ii) mean(ii)],[0 25],'color','g')
        ylabel('improvement (min-mean) ./ (minc-meanc)')

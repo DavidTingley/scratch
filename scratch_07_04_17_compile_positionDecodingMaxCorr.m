@@ -42,22 +42,22 @@ for i=1:length(d)
         load(b(1).name);
         nBins = round(length(behavior.events.map{1}.x));
         load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat'])
-        positionDecodingGLM=positionDecodingMaxCorr_binned_box_median;
-        if isfield(positionDecodingGLM,'dateRun')
+        positionDecodingMaxCorr=positionDecodingMaxCorr_binned_box_median;
+        if isfield(positionDecodingMaxCorr,'dateRun')
         conditions = length(unique(behavior.events.trialConditions));
-        for cell =1:length(positionDecodingGLM.results)
-            if ~isempty(positionDecodingGLM.results{cell})
-        t_rate = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_rate',...
+        for cell =1:length(positionDecodingMaxCorr.results)
+            if ~isempty(positionDecodingMaxCorr.results{cell})
+        t_rate = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_rate',...
             'GroupingVariables',{'tau','condition'});
-        t_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_phase_all',...
+        t_phase = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_phase_all',...
             'GroupingVariables',{'tau','condition'});
-        t_chance = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_chance',...
+        t_chance_rate = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_chance_rate',...
             'GroupingVariables',{'tau','condition'});
-        tab = join(join(t_rate,t_phase),t_chance);
+        tab = join(join(t_rate,t_phase),t_chance_rate);
         
-%         t_phase_pval = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_phase_all_pval',...
+%         t_phase_pval = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_phase_all_pval',...
 %             'GroupingVariables',{'tau','condition'});
-%         t_rate_pval = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_rate_pval',...
+%         t_rate_pval = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_rate_pval',...
 %             'GroupingVariables',{'tau','condition'});       
 %         pvals = join(t_phase_pval,t_rate_pval);
         
@@ -81,15 +81,15 @@ for i=1:length(d)
                 
 %                 rows = intersect(rows,find(tab.tau==60));
                 
-                first500ms = find(ismember(tab.tau(rows),1:13));
+                first500ms = find(ismember(tab.tau(rows),1));
 
 %                 min_mse_rate = (min(tab.mean_mse_rate(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
 %                 min_mse_phase_all = (min(tab.mean_mse_phase_all(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
                 
-                [min_mse_rate] = tab.mean_mse_rate(first500ms); (mean(tab.mean_mse_rate(rows(first500ms)))-mean(tab.mean_mse_chance(rows)));
-                [min_mse_phase_all] = tab.mean_mse_phase_all(first500ms); (mean(tab.mean_mse_phase_all(rows(first500ms)))-mean(tab.mean_mse_chance(rows)));
+                [min_mse_rate] = tab.mean_mse_rate(first500ms); (mean(tab.mean_mse_rate(rows(first500ms)))-mean(tab.mean_mse_chance_rate(rows)));
+                [min_mse_phase_all] = tab.mean_mse_phase_all(first500ms); (mean(tab.mean_mse_phase_all(rows(first500ms)))-mean(tab.mean_mse_chance_rate(rows)));
 
-                min_mse_chance = tab.mean_mse_chance(first500ms); (mean(tab.mean_mse_chance(first500ms)))-mean(tab.mean_mse_chance(rows));
+                min_mse_chance = tab.mean_mse_chance_rate(first500ms); (mean(tab.mean_mse_chance_rate(first500ms)))-mean(tab.mean_mse_chance_rate(rows));
 %                 min_mse_chance = tab.mean_mse_chance(first500ms); 
 %                 max_mse_rate = sqrt(max(tab.mean_mse_rate(rows(first500ms))))./nBins;
 %                 max_mse_phase_all = sqrt(max(tab.mean_mse_phase_all(rows(first500ms))))./nBins;
@@ -105,9 +105,9 @@ for i=1:length(d)
 %                if min_mse_phase_all < .33 & min_mse_rate < .33
 %                if b ~= length(rows) & bb ~= length(rows) & b ~= 1 & bb ~= 1
                 chance = [chance; min_mse_chance];
-               if strcmp(positionDecodingGLM.region{cell},'hpc') | strcmp(positionDecodingGLM.region{cell},'ca3')  | strcmp(positionDecodingGLM.region{cell},'ca1') 
-%                    if positionDecodingGLM.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
-%                            positionDecodingGLM.results{cell}.mse_rate_pval(rows(bb)) <.05
+               if strcmp(positionDecodingMaxCorr.region{cell},'hpc') | strcmp(positionDecodingMaxCorr.region{cell},'ca3')  | strcmp(positionDecodingMaxCorr.region{cell},'ca1') 
+%                    if positionDecodingMaxCorr.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
+%                            positionDecodingMaxCorr.results{cell}.mse_rate_pval(rows(bb)) <.05
                    
 %                    subplot(2,5,1)
 %                    scatter(min_mse_phase_all,min_mse_rate,'.k')
@@ -173,9 +173,9 @@ for i=1:length(d)
                    
 %                    title('tau vs mse trough')
 %                    end
-               elseif strcmp(positionDecodingGLM.region{cell},'ls') 
-%                      if positionDecodingGLM.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
-%                            positionDecodingGLM.results{cell}.mse_rate(rows(bb)) <.05
+               elseif strcmp(positionDecodingMaxCorr.region{cell},'ls') 
+%                      if positionDecodingMaxCorr.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
+%                            positionDecodingMaxCorr.results{cell}.mse_rate(rows(bb)) <.05
 %                    subplot(2,5,6)
 %                    scatter(min_mse_phase_all,min_mse_rate,'.k')
 %                    ylabel('rate')

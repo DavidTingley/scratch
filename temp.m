@@ -35,47 +35,17 @@ load([d(i).name '.behavior.mat'],'behavior')
 nBins = length(behavior.events.map{1}.x);
 
 if exist('assembliesCrossRegion_split_w_theta_07-Nov-2017.mat') || exist('assembliesCrossRegion_split_w_theta.mat') 
-   if ~exist([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat']) 
-    error
-   end
-    load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat'])
     try
-        load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');%c
+        load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');
     catch
         load('assembliesCrossRegion_split_w_theta_07-Nov-2017.mat','dev*','pairs');%load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');
     end
-    if exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
-    load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'],'fields');
-    positionDecodingGLM=positionDecodingMaxCorr_binned_box_median;
-    if isfield(positionDecodingGLM,'dateRun') & length(pairs)>1 & exist('dev')==1
-    conditions = length(unique(positionDecodingGLM.results{1}.condition));
-    for cell =1:length(positionDecodingGLM.results)
-        t_rate = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_rate',...
-            'GroupingVariables',{'tau','condition'});
-        t_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_phase_all',...
-            'GroupingVariables',{'tau','condition'});
-        t_chance_rate = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_chance_rate',...
-            'GroupingVariables',{'tau','condition'});
-        tab = join(join(t_rate,t_phase),t_chance_rate);
-      for cond = 1:conditions
-            if cond <= length(dev)  && sum(behavior.events.trialConditions==cond) > 7
-            % grab phase/rate coding variables
-            rows = find(tab.condition==cond);
-            first500ms = find(ismember(tab.tau(rows),1:nBins/4));
-            
-%             min_mse_rate(cell,cond) = sqrt(min(tab.mean_mse_rate(rows(first500ms))))./nBins;
-%             min_mse_phase_all(cell,cond) = sqrt(min(tab.mean_mse_phase_all(rows(first500ms))))./nBins;
-            min_mse_rate(cell,cond) = (min(tab.mean_mse_rate(rows(first500ms)))./mean(tab.mean_mse_chance_rate(rows(first500ms))));
-            min_mse_phase_all(cell,cond) = (min(tab.mean_mse_phase_all(rows(first500ms)))./mean(tab.mean_mse_chance_rate(rows(first500ms))));
-            
-            
-            min_mse_chance(cell,cond) = (min(tab.mean_mse_chance_rate(rows(first500ms))))./mean(tab.mean_mse_chance_rate(rows(first500ms)));
-            
-            max_mse_rate(cell,cond) = sqrt(max(tab.mean_mse_rate(rows(first500ms))))./nBins;
-            max_mse_phase_all(cell,cond) = sqrt(max(tab.mean_mse_phase_all(rows(first500ms))))./nBins;
-            end
-        end
-    end
+    if exist([sessionInfo.FileName '.placeFields.10_pctThresh.mat'])
+    load([sessionInfo.FileName '.placeFields.10_pctThresh.mat'],'fields');
+
+    if  length(pairs)>1 & exist('dev')==1
+    conditions = length(fields);
+
   
         pairCount = 0;
         h=[];
@@ -140,9 +110,7 @@ if exist('assembliesCrossRegion_split_w_theta_07-Nov-2017.mat') || exist('assemb
                     end
                     behav = [behav; sum(double(behavior.events.conditionType{cond}))];
                     animal = [animal; sum(double(sessionInfo.animal))];
-                    stren = [stren; imp imp2 b (min_mse_phase_all(pairs(pair,1),cond)-min_mse_rate(pairs(pair,1),cond)) ...
-                    ./ (min_mse_phase_all(pairs(pair,1),cond)+min_mse_rate(pairs(pair,1),cond)) ...
-                    (min_mse_phase_all(pairs(pair,1),cond))];
+                    stren = [stren; imp imp2 b];
                     devs = [devs;dev{cond}(:,pair)'];
                 end
                 pairCount = 1 + pairCount;
@@ -155,19 +123,12 @@ if exist('assembliesCrossRegion_split_w_theta_07-Nov-2017.mat') || exist('assemb
                 end
             end
             if ~isempty(p)
-                ass = [ass; (min_mse_phase_all(p(:,1),cond)-min_mse_rate(p(:,1),cond)) ./ (min_mse_phase_all(p(:,1),cond)+min_mse_rate(p(:,1),cond))];
-                ass_phaseonly = [ass_phaseonly; (min_mse_phase_all(p(:,1),cond)) ];
-                ass_rate = [ass_rate; (min_mse_rate(p(:,1),cond)) ];
-                phaseonly_chance = [phaseonly_chance; min_mse_chance(p(:,1),cond)];
                 ff = f(~ismember(f,p(:,1)));
                 ls_rec = [ls_rec;  repmat(i,size(p,1),1)];
             else
                 ff = f;
             end
-            noAss = [noAss; (min_mse_phase_all(ff,cond)-min_mse_rate(ff,cond)) ./ (min_mse_phase_all(ff,cond)+min_mse_rate(ff,cond))];        
-            noAss_phaseonly = [noAss_phaseonly; (min_mse_phase_all(ff,cond)) ];  
-            noAss_rate = [noAss_rate; (min_mse_rate(ff,cond)) ];  
-            phaseonly_chance = [phaseonly_chance; min_mse_chance(ff,cond)];
+
             ls_rec = [ls_rec; repmat(i,length(ff),1)];
             end
             end
