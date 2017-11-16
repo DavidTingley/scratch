@@ -49,7 +49,7 @@ for i=1:length(d)
             if ~isempty(positionDecodingMaxCorr.results{cell})
         t_rate = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_rate',...
             'GroupingVariables',{'tau','condition'});
-        t_phase = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_phase_all',...
+        t_phase = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_phase',...
             'GroupingVariables',{'tau','condition'});
         t_chance_rate = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_chance_rate',...
             'GroupingVariables',{'tau','condition'});
@@ -76,18 +76,18 @@ for i=1:length(d)
                     %% carry on..
                rows = find(tab.condition==cond);
 %                if sqrt(tab.mean_mse_phase_all(rows(1)))./nBins < .3 
-                [a b] =min(tab.mean_mse_phase_all(rows));
+                [a b] =min(tab.mean_mse_phase(rows));
                 [aa bb] =min(tab.mean_mse_rate(rows));
                 
 %                 rows = intersect(rows,find(tab.tau==60));
                 
-                first500ms = find(ismember(tab.tau(rows),1));
-
+                first500ms = find(ismember(tab.tau(rows),1:100));
+                if length(first500ms) == 100
 %                 min_mse_rate = (min(tab.mean_mse_rate(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
 %                 min_mse_phase_all = (min(tab.mean_mse_phase_all(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
                 
                 [min_mse_rate] = tab.mean_mse_rate(first500ms); (mean(tab.mean_mse_rate(rows(first500ms)))-mean(tab.mean_mse_chance_rate(rows)));
-                [min_mse_phase_all] = tab.mean_mse_phase_all(first500ms); (mean(tab.mean_mse_phase_all(rows(first500ms)))-mean(tab.mean_mse_chance_rate(rows)));
+                [min_mse_phase_all] = tab.mean_mse_phase(first500ms); (mean(tab.mean_mse_phase(rows(first500ms)))-mean(tab.mean_mse_chance_rate(rows)));
 
                 min_mse_chance = tab.mean_mse_chance_rate(first500ms); (mean(tab.mean_mse_chance_rate(first500ms)))-mean(tab.mean_mse_chance_rate(rows));
 %                 min_mse_chance = tab.mean_mse_chance(first500ms); 
@@ -104,7 +104,7 @@ for i=1:length(d)
 %                 end
 %                if min_mse_phase_all < .33 & min_mse_rate < .33
 %                if b ~= length(rows) & bb ~= length(rows) & b ~= 1 & bb ~= 1
-                chance = [chance; min_mse_chance];
+                chance = [chance, min_mse_chance];
                if strcmp(positionDecodingMaxCorr.region{cell},'hpc') | strcmp(positionDecodingMaxCorr.region{cell},'ca3')  | strcmp(positionDecodingMaxCorr.region{cell},'ca1') 
 %                    if positionDecodingMaxCorr.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
 %                            positionDecodingMaxCorr.results{cell}.mse_rate_pval(rows(bb)) <.05
@@ -246,6 +246,7 @@ for i=1:length(d)
 %                end
 %                 end
 %             pause(.01)
+                end
                 end
             end
             end

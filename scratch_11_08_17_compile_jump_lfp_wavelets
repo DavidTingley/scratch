@@ -1,0 +1,33 @@
+d = dir('*201*')
+for rec = 1:length(d)
+    
+load([d(i).name '.jump.behavior.mat'])
+sessionInfo = bz_getSessionInfo;
+lfp = bz_GetLFP(sessionInfo.ca1);
+
+if ~isempty(sessionInfo.ca1)
+    ints = mean(behavior.events.trialIntervals,2);
+    for i=1:length(behavior.events.trialConditions)
+    if ~isnan(ints(i))
+    [aa bb] = min(abs(lfp.timestamps-ints(i)));
+    [freqs,t,spec] = WaveSpec(double(lfp.data(bb-1250*3:bb+1250*3)),[1 200],200,3,1/1250,'lin');
+    specs(i,:,:) = abs(spec);
+    subplot(2,2,1)
+    imagesc(squeeze(mean(specs)))
+    subplot(2,2,2)
+    for j=1:200
+    ss(i,j,:) = zscore(abs(specs(i,j,:)));
+    end
+    imagesc(squeeze(mean(ss)))
+    pause(.01)
+    end
+    end
+    s = squeeze(median(ss));
+    for i=1:200
+    sss(i,:) = smooth(zscore(s(i,:)),50);
+    end
+    lfp_wavelet{rec} = sss;
+end
+    
+    
+end

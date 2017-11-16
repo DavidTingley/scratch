@@ -1,4 +1,5 @@
 cd /home/david/datasets/lsDataset
+% cd('D:\Dropbox\datasets\lsDataset')
 clear
 d  = dir('*201*');
 count = 1;
@@ -7,13 +8,13 @@ count = 1;
 
 for ii=1:length(d)
    cd(d(ii).name)
-   if exist([d(ii).name '.olypherInfo.cellinfo.mat'])
-   load([d(ii).name '.olypherInfo.cellinfo.mat'],'olypherInfo')  
+   if exist([d(ii).name '.olypherInfo_allSmoothing.cellinfo.mat'])
+   load([d(ii).name '.olypherInfo_allSmoothing.cellinfo.mat'],'olypherInfo')  
    load([d(ii).name '.firingMaps.cellinfo.mat'],'firingMaps') 
    load([d(ii).name '.behavior.mat']) 
    nBins = length((behavior.events.trials{1}.mapping));
-   if exist([d(ii).name '.placeFields.mat'])
-   load([d(ii).name '.placeFields.mat'])
+   if exist([d(ii).name '.placeFields.20_pctThresh.mat'])
+   load([d(ii).name '.placeFields.20_pctThresh.mat'])
    for cell=1:size(firingMaps.rateMaps{1},1)
        for cond = 1:length(unique(olypherInfo.results{cell}.condition))
            nTrials = size(firingMaps.rateMaps{cond},2);
@@ -21,13 +22,14 @@ for ii=1:length(d)
             if strcmp(olypherInfo.region{cell},'ls')
                 
             disc = unique(olypherInfo.results{cell}.discBins);
-            for dd = 5%:length(disc)
+            if length(disc) > 15
+            for dd = 7%1:length(disc)
                 
             rows = find(olypherInfo.results{cell}.condition==cond);
             cols = find(olypherInfo.results{cell}.discBins==disc(dd));
             rows = intersect(rows,cols);
             
-            if length(rows)>40
+%             if length(rows)>15
                 % subplot(2,2,1);
                 % imagesc(squeeze(rateMap{cond}(cell,:,:)));
 %                 subplot(2,2,2);
@@ -44,8 +46,8 @@ for ii=1:length(d)
 %                 plot(olypherInfo.results{cell}.smoothing(rows),olypherInfo.results{cell}.phasePeakInfo(rows),'g')
 %                 hold off
 
-                phaseInfoScore(count,dd,:) = olypherInfo.results{cell}.phasePeakInfo(rows(1:40))./nTrials;
-                rateInfoScore(count,dd,:) = olypherInfo.results{cell}.ratePeakInfo(rows(1:40))./nTrials;
+                phaseInfoScore(count,dd,:) = olypherInfo.results{cell}.phasePeakInfo(rows(1:5))./nTrials;
+                rateInfoScore(count,dd,:) = olypherInfo.results{cell}.ratePeakInfo(rows(1:5))./nTrials;
                  if ~isempty(fields{cond}{cell})
                      hasField(count) = 1;
                      bins(count) = nBins;
@@ -56,6 +58,7 @@ for ii=1:length(d)
           
                 count = 1+count
             pause(.01)
+%             end
             end
             end
            end
@@ -65,6 +68,7 @@ for ii=1:length(d)
    end
    end
    cd /home/david/datasets/lsDataset
+% cd('D:\Dropbox\datasets\lsDataset')
 end
 
 % subplot(2,2,1)

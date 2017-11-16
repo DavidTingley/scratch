@@ -46,10 +46,10 @@ for cell=1:length(spikes.times)
     positionDecodingMaxCorr_binned_box_median.results{cell} = table;
 end
 
-for smoothing = 1:round(nBins)
+for smoothing = 1:round(nBins/2)
     disp(['smoothing by: ' num2str(smoothing) ' bins']);
     for cond = 1:length(unique(behavior.events.trialConditions))
-        if size(binnedPhaseMap{cond},2) >= 5
+        if size(binnedPhaseMap{cond},2) >= 10
 %         figure(cond)
         % smooth data..
         maps = bz_firingMap1D(spikes,behavior,smoothing);
@@ -93,7 +93,7 @@ for smoothing = 1:round(nBins)
             p_sin = sin(phase_trains_smooth);
              
             count = 1;
-            for iter = 1:20
+            for iter = 1:10
             rr = randperm(length(r));
             pct = round(prctile(1:length(r),60));
             
@@ -165,7 +165,7 @@ for smoothing = 1:round(nBins)
             
             count = 1+count;
             end
-%             if cell == 2 && cond == 2
+%             if cell == 80 && cond == 5
 % %                 
 % %                 figure(cond)
 %                 t_rate = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_rate',...
@@ -189,7 +189,7 @@ for smoothing = 1:round(nBins)
 %                 tab = join(join(join(join(join(join(t_rate,t_phase_all),t_both),t_chance_rate),t_phase),t_phase_cos),t_chance_phase);
 %                 rows = find(tab.condition==cond);
 %                 subplot(2,2,1);
-%                 plot(tab.tau(rows),tab.mean_mse_phase(rows),'.g')
+%                 plot(tab.tau(rows),tab.mean_mse_phase(rows),'g')
 %                 hold on
 %                 plot(tab.tau(rows),tab.mean_mse_phase_cos(rows),'g')
 %                 hold off

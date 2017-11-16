@@ -40,40 +40,11 @@ if exist('assembliesCrossRegion_split_w_theta_07-Nov-2017.mat') || exist('assemb
     catch
         load('assembliesCrossRegion_split_w_theta_07-Nov-2017.mat','dev*','pairs');%load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');
     end
-    if exist([sessionInfo.FileName '.placeFields.10_pctThresh.mat'])
-    load([sessionInfo.FileName '.placeFields.10_pctThresh.mat'],'fields');
+    if exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
+    load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'],'fields');
 
     if  length(pairs)>1 & exist('dev')==1
     conditions = length(fields);
-
-  
-        pairCount = 0;
-        h=[];
-        z=[];
-        ii=[];
-        p=[];
-        for cond = 1:conditions
-            if cond <= length(dev) && sum(behavior.events.trialConditions==cond) > 7 % check that assemblies have run and there are enough trials
-            % now grab assemblies
-            for pair = 1:size(dev{cond},2)
-            [a b] =  min(dev{cond}(:,pair));
-            [aa bb] = min(mean(devControl{cond}(:,pair,:),3));
-            imp = (a-mean(dev{cond}(:,pair))) ./ (aa - mean(mean(devControl{cond}(:,pair,:),3)));
-            imp2 = a ./ max(mean(mean(devControl{cond}(:,pair,:),3)));
-            zerolag = (min(dev{cond}(1:6,pair)) - mean(dev{cond}(:,pair))) ./ (aa - mean(mean(devControl{cond}(1,pair,:),3)));
-            if zerolag < 1 
-                zerolag = 1;
-            end
-            if imp > 1.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>40
-                p = [p; pairs(pair,:)];
-                h = [h; imp];
-                ii = [ii;b];
-                z=[z;zerolag];
-            end
-            pairCount = 1 + pairCount;
-            end
-            end
-        end
         for cond = 1:conditions
             if cond <= length(dev) && sum(behavior.events.trialConditions==cond) > 10 % check that assemblies have run and there are enough trials
             % now grab assemblies

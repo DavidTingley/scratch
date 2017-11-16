@@ -42,10 +42,10 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
     try
         load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');%c
     catch
-        load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs');%load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat','dev*','pairs');
+        load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs');%load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');
     end
-    if exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
-    load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'],'fields');
+    if exist([sessionInfo.FileName '.placeFields.10_pctThresh.mat'])
+    load([sessionInfo.FileName '.placeFields.10_pctThresh.mat'],'fields');
     positionDecodingGLM=positionDecodingMaxCorr_binned_box_median;
     if isfield(positionDecodingGLM,'dateRun') & length(pairs)>1 & exist('dev')==1
     conditions = length(unique(positionDecodingGLM.results{1}.condition));
@@ -83,7 +83,29 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
         ii=[];
         p=[];
         for cond = 1:conditions
-            if cond <= length(dev) && sum(behavior.events.trialConditions==cond) > 12 % check that assemblies have run and there are enough trials
+            if cond <= length(dev) && sum(behavior.events.trialConditions==cond) > 7 % check that assemblies have run and there are enough trials
+            % now grab assemblies
+            for pair = 1:size(dev{cond},2)
+            [a b] =  min(dev{cond}(:,pair));
+            [aa bb] = min(mean(devControl{cond}(:,pair,:),3));
+            imp = (a-mean(dev{cond}(:,pair))) ./ (aa - mean(mean(devControl{cond}(:,pair,:),3)));
+            imp2 = a ./ max(mean(mean(devControl{cond}(:,pair,:),3)));
+            zerolag = (min(dev{cond}(1:6,pair)) - mean(dev{cond}(:,pair))) ./ (aa - mean(mean(devControl{cond}(1,pair,:),3)));
+            if zerolag < 1 
+                zerolag = 1;
+            end
+            if imp > 1.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>40
+                p = [p; pairs(pair,:)];
+                h = [h; imp];
+                ii = [ii;b];
+                z=[z;zerolag];
+            end
+            pairCount = 1 + pairCount;
+            end
+            end
+        end
+        for cond = 1:conditions
+            if cond <= length(dev) && sum(behavior.events.trialConditions==cond) > 10 % check that assemblies have run and there are enough trials
             % now grab assemblies
 %             if length(h) > 8
                 pairCount = 0;
@@ -101,7 +123,7 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
                 zerolag = 1;
                 end
                 % imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>100
-                if imp > 1.5 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40
+                if imp > 1.5 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40  
                     p = [p; pairs(pair,:)];
                     h = [h; imp];
                     ii = [ii;b];
@@ -233,13 +255,13 @@ end
 clf
 subplot(2,2,1)
 for i=1:200
-f = (intersect(find(abs(PF_loc-i)<50),find(region==1)));
+f = intersect(intersect(find(abs(PF_loc-i)<80),find(region==1)),find(behav==745));
 errorbar(i,(mean(stren(f,1))),(std(stren(f,1)))./sqrt(length(f)),'.k')
 hold on
 end
 hold on
 for i=1:200
-f = (intersect(find(abs(PF_loc-i)<50),find(region==3)));
+f = intersect(intersect(find(abs(PF_loc-i)<80),find(region==3)),find(behav==745));
 errorbar(i,(mean(stren(f,1))),(std(stren(f,1)))./sqrt(length(f)),'.r')
 hold on
 end
@@ -249,15 +271,15 @@ title('ca3(red) ca1(black) LS assemblies vs position')
 
 subplot(2,2,2)
 for i=1:200
-f = intersect(find(abs(PF_loc-i)<50),find(region==3));
+f = intersect(find(abs(PF_loc-i)<80),find(region==3));
 ca3(i) = (mean(stren(f,1)));
 ca3_sem(i) = (std(stren(f,1)))./sqrt(length(f));
-f = intersect(find(abs(PF_loc-i)<50),find(region==1));
+f = intersect(find(abs(PF_loc-i)<80),find(region==1));
 ca1(i) = (mean(stren(f,1)));
 ca1_sem(i) = (std(stren(f,1)))./sqrt(length(f));
 end
-boundedline(1:200,smooth(ca1,50),smooth(ca1_sem,50),'k')
-boundedline(1:200,smooth(ca3,50),smooth(ca3_sem,50),'r')
+boundedline(1:200,(ca1),(ca1_sem),'k')
+boundedline(1:200,(ca3),(ca3_sem),'r')
 ylabel('assembly strength')
 xlabel('positon')
 title('ca3(red) ca1(black) LS assemblies vs position')
