@@ -1,16 +1,23 @@
-% d  = dir('*201*');
-% 
-% for i=3:length(d)
-% cd(d(i).name) 
+d  = dir('*201*');
 
+for i=17:length(d)
+cd(d(i).name) 
 
+if exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
 xml = LoadParameters;
 load([xml.FileName '.sessionInfo.mat'])
 load([xml.FileName '.spikes.cellinfo.mat'])
 load([xml.FileName '.behavior.mat'])
-load('assembliesCrossRegion_split_w_theta.mat')
-lfp = bz_GetLFP(sessionInfo.thetaChans(2));
-[firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
+load([xml.FileName '.placeFields.20_pctThresh.mat'])
+load([xml.FileName '.firingMaps.cellinfo.mat'])
+load([xml.FileName '.phaseMaps.cellinfo.mat'])
+try
+    load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat')
+catch
+    load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
+end
+% lfp = bz_GetLFP(sessionInfo.thetaChans(2));
+% [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
 
 for cond = 1:length(unique(behavior.events.trialConditions))
     for cell = 1:length(spikes.times)
@@ -28,8 +35,8 @@ for cond = 1:length(unique(behavior.events.trialConditions))
     if zerolag < 1 
         zerolag = 1;
     end
-    
-    if imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>100
+    if ~isempty(fields{cond}{pairs(pair,2)})
+    if imp > 4 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>50
         ls = pairs(pair,1);
         hpc = pairs(pair,2);
         subplot(4,2,1)
@@ -37,20 +44,21 @@ for cond = 1:length(unique(behavior.events.trialConditions))
         title(ls)
         subplot(4,2,2)
         imagesc(squeeze(firingMaps.rateMaps{cond}(hpc,:,:)))
+        
         title(hpc)
         subplot(4,2,3)
-%         plot(t,smooth(ccg(:,ls,hpc),20)).
-        scatter(firingMaps.phaseMaps{cond}{ls}(:,1),(firingMaps.phaseMaps{cond}{ls}(:,end)),'.k');
+        
+        scatter(phaseMaps.phaseMaps{cond}{ls}(:,1),(phaseMaps.phaseMaps{cond}{ls}(:,end)),'.k');
         hold on
-        scatter(firingMaps.phaseMaps{cond}{ls}(:,1),(firingMaps.phaseMaps{cond}{ls}(:,end))+2*pi,'.k');
+        scatter(phaseMaps.phaseMaps{cond}{ls}(:,1),(phaseMaps.phaseMaps{cond}{ls}(:,end))+2*pi,'.k');
         title(firingMaps.sessionName)
         axis([0 200 -pi pi*3])
         hold off
         subplot(4,2,4)
         
-        scatter(firingMaps.phaseMaps{cond}{hpc}(:,1),(firingMaps.phaseMaps{cond}{hpc}(:,end)),'.k');
+        scatter(phaseMaps.phaseMaps{cond}{hpc}(:,1),(phaseMaps.phaseMaps{cond}{hpc}(:,end)),'.k');
         hold on
-        scatter(firingMaps.phaseMaps{cond}{hpc}(:,1),(firingMaps.phaseMaps{cond}{hpc}(:,end))+2*pi,'.k');
+        scatter(phaseMaps.phaseMaps{cond}{hpc}(:,1),(phaseMaps.phaseMaps{cond}{hpc}(:,end))+2*pi,'.k');
         hold off
         axis([0 200 -pi pi*3])
         subplot(4,2,5)
@@ -66,11 +74,16 @@ for cond = 1:length(unique(behavior.events.trialConditions))
         title(imp)
         hold off
         
+        subplot(4,2,7)
+        plot(t,smooth(ccg(:,ls,hpc),20))
+        title(['cond: ' num2str(cond)])
         pause
     end
     end
+    end
+end
 end
 end
 
-% cd /home/david/datasets/lsDataset
-% end
+cd /home/david/datasets/lsDataset
+end

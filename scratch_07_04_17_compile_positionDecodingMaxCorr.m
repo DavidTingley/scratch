@@ -18,6 +18,9 @@ hpc_cell=[];
 ls_cell=[];
 hpc_shank = []; ls_shank = [];
 hpc_field = [];
+hpc_reg = [];
+ls_chance_rate = []; hpc_chance_rate = [];
+ls_chance_phase = []; hpc_chance_phase = [];
                    
 hpc_mean_phase = zeros(101,1);
 ls_mean_phase = zeros(101,1);
@@ -32,10 +35,10 @@ for i=1:length(d)
 %    animal = strsplit(animal,'/');
 %    animal = animal{end-1};
 % animal = 1;         positionDecodingMaxCorr_binned_box_median.
-    if ~isempty(dir('*positionDecodingMaxCorr_binned_box_median.cell*')) & exist([d(i).name '.placeFields.20_pctThresh.mat'])
-        sessionInfo = bz_getSessionInfo;
+    if ~isempty(dir('*positionDecodingMaxCorr_binned_box_median.cell*')) & exist([d(i).name '.placeFields.10_pctThresh.mat'])
+        sessionInfo = bz_getSessionInfo(pwd,'noprompts',true);
 %         load([d(i).name '.firingMaps.cellinfo.mat'],'firingMaps') 
-        load([d(i).name '.placeFields.20_pctThresh.mat'],'fields') 
+        load([d(i).name '.placeFields.10_pctThresh.mat'],'fields') 
         spikes = bz_GetSpikes;
 %         load([d(i).name '.olypherInfo.cellinfo.mat'],'olypherInfo') 
         b = dir('*.behavior.mat');
@@ -51,9 +54,11 @@ for i=1:length(d)
             'GroupingVariables',{'tau','condition'});
         t_phase = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_phase',...
             'GroupingVariables',{'tau','condition'});
-        t_chance_rate = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_chance_rate',...
+        t_chance_phase = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_chance_rate',...
             'GroupingVariables',{'tau','condition'});
-        tab = join(join(t_rate,t_phase),t_chance_rate);
+        t_chance_rate = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_chance_phase',...
+            'GroupingVariables',{'tau','condition'});
+        tab = join(join(join(t_rate,t_phase),t_chance_rate),t_chance_phase);
         
 %         t_phase_pval = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_phase_all_pval',...
 %             'GroupingVariables',{'tau','condition'});
@@ -81,16 +86,17 @@ for i=1:length(d)
                 
 %                 rows = intersect(rows,find(tab.tau==60));
                 
-                first500ms = find(ismember(tab.tau(rows),1:100));
-                if length(first500ms) == 100
+                first500ms = find(ismember(tab.tau(rows),1:10));
+                if length(first500ms) == 10
 %                 min_mse_rate = (min(tab.mean_mse_rate(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
 %                 min_mse_phase_all = (min(tab.mean_mse_phase_all(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
                 
-                [min_mse_rate] = tab.mean_mse_rate(first500ms); (mean(tab.mean_mse_rate(rows(first500ms)))-mean(tab.mean_mse_chance_rate(rows)));
-                [min_mse_phase_all] = tab.mean_mse_phase(first500ms); (mean(tab.mean_mse_phase(rows(first500ms)))-mean(tab.mean_mse_chance_rate(rows)));
+                [min_mse_rate] = tab.mean_mse_rate(rows(first500ms));% (mean(tab.mean_mse_rate(rows(first500ms)))-mean(tab.mean_mse_chance_rate(rows)));
+                [min_mse_phase_all] = tab.mean_mse_phase(rows(first500ms));% (mean(tab.mean_mse_phase(rows(first500ms)))-mean(tab.mean_mse_chance_rate(rows)));
 
-                min_mse_chance = tab.mean_mse_chance_rate(first500ms); (mean(tab.mean_mse_chance_rate(first500ms)))-mean(tab.mean_mse_chance_rate(rows));
-%                 min_mse_chance = tab.mean_mse_chance(first500ms); 
+                min_mse_chance_rate = tab.mean_mse_chance_rate(rows(first500ms));% (mean(tab.mean_mse_chance_rate(first500ms)))-mean(tab.mean_mse_chance_rate(rows));
+                min_mse_chance_phase = tab.mean_mse_chance_phase(rows(first500ms));
+%                   min_mse_chance = tab.mean_mse_chance(first500ms); 
 %                 max_mse_rate = sqrt(max(tab.mean_mse_rate(rows(first500ms))))./nBins;
 %                 max_mse_phase_all = sqrt(max(tab.mean_mse_phase_all(rows(first500ms))))./nBins;
 %                 if isempty(max_mse_phase_all)
@@ -101,10 +107,10 @@ for i=1:length(d)
 %                    min_mse_rate = nan;
 %                    min_mse_phase_all = nan;
 %                    min_mse_chance = nan;
-%                 end
+%                 endthi
 %                if min_mse_phase_all < .33 & min_mse_rate < .33
 %                if b ~= length(rows) & bb ~= length(rows) & b ~= 1 & bb ~= 1
-                chance = [chance, min_mse_chance];
+%                 chance = [chance, min_mse_chance];
                if strcmp(positionDecodingMaxCorr.region{cell},'hpc') | strcmp(positionDecodingMaxCorr.region{cell},'ca3')  | strcmp(positionDecodingMaxCorr.region{cell},'ca1') 
 %                    if positionDecodingMaxCorr.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
 %                            positionDecodingMaxCorr.results{cell}.mse_rate_pval(rows(bb)) <.05
@@ -135,12 +141,18 @@ for i=1:length(d)
 %                    hpc_rate_pval = [hpc_rate_pval;pvals.mean_mse_rate_pval(rows(bb),:)];
                    hpc_rec = [hpc_rec; i];
                    hpc_an = [hpc_an; sum(double(animal))];
+                   if ~isempty(sessionInfo.ca3)
+                       hpc_reg = [hpc_reg; 3];
+                   else
+                       hpc_reg = [hpc_reg; 3];
+                   end
                    additionalDepth = find(sessionInfo.spikeGroups.groups{spikes.shankID(cell)}==spikes.maxWaveformCh(cell))*10;
                    hpc_depth = [hpc_depth;str2num(sessionInfo.depth)+additionalDepth];
                    hpc_cell = [hpc_cell; cell];
                    hpc_shank = [hpc_shank;spikes.shankID(cell)];
-                   
-                   if ~isempty(fields{cond}{cell}) & length(fields{cond}{cell}) == 1
+                   hpc_chance_rate = [hpc_chance_rate; min_mse_chance_rate'];
+                   hpc_chance_phase = [hpc_chance_phase; min_mse_chance_phase'];
+                   if ~isempty(fields{cond}{cell}) %& length(fields{cond}{cell}) == 1
                        hpc_field = [hpc_field;fields{cond}{cell}{1}.COM];
                    else
                        hpc_field = [hpc_field;nan];
@@ -207,6 +219,8 @@ for i=1:length(d)
                    ls_depth = [ls_depth; str2num(sessionInfo.depth)+additionalDepth];
                    ls_cell = [ls_cell; cell];
                    ls_shank = [ls_shank;spikes.shankID(cell)];
+                   ls_chance_rate = [ls_chance_rate; min_mse_chance_rate'];
+                   ls_chance_phase = [ls_chance_phase; min_mse_chance_phase'];
 %                    histogram(ls_phase,0:.01:1,'Normalization','pdf','FaceColor','g')
 %                    hold on
 %                    histogram(ls_rate,0:.01:1,'Normalization','pdf','FaceColor','r')
@@ -246,6 +260,8 @@ for i=1:length(d)
 %                end
 %                 end
 %             pause(.01)
+                else
+                    error('something is wrong')
                 end
                 end
             end
@@ -260,25 +276,25 @@ end
 
 for i=1:length(d)
 f = find(ls_rec==i);
-ff = find(ls_phase(f)<1);
-if ~isempty(ff)
-anim(i) = ls_an(f(ff(1)));
-depths(i) = ls_depth(f(ff(1)));
+% ff = find(ls_phase(f,10)<1);
+if ~isempty(f)
+anim(i) = ls_an(f(1));
+depths(i) = ls_depth(f(1));
 end
 end
 u = unique(anim);
 for i=1:length(d)
 f = find(hpc_rec==i);
-ff = find(hpc_phase(f)<1);
-hp(i) = mean(hpc_phase(f(ff)));
-hr(i) = mean(hpc_rate(f(ff)));
+% ff = find(hpc_phase(f)<1);
+hp(i) = mean(mean(hpc_phase(f,1:3)));
+hr(i) = mean(mean(hpc_rate(f,1:3)));
 f = find(ls_rec==i);
-ff = find(ls_phase(f)<1);
-if ~isempty(f(ff))
-lmp(i) = nanmedian(ls_phase(f(ff)));
-lmr(i) = nanmedian(ls_rate(f(ff)));
-lr(i) = nanmean(ls_rate(f(ff)));
-lp(i) = nanmean(ls_phase(f(ff)));
+% ff = find(ls_phase(f)<1);
+if ~isempty(f)
+lmp(i) = nanmedian(nanmedian(ls_phase(f,1:3)));
+lmr(i) = nanmedian(nanmedian(ls_rate(f,1:3)));
+lr(i) = nanmean(nanmean(ls_rate(f,1:3)));
+lp(i) = nanmean(nanmean(ls_phase(f,1:3)));
 else
 lmp(i) = 0;
 lmr(i) = 0;
@@ -286,16 +302,23 @@ lr(i) = 0;
 lp(i) = 0; 
 end
 end
-% offsets = [0 0 -3000 -800 0 0 0];
+offsets = [0 0 -3000 -800 0 0 0];
+offsets = [0 500 200 0 2500 600];
 for i=1:length(u)
 subplot(4,2,i);hold on
 f = find(anim==u(i));
-plot(depths(f),lmp(f)-lmr(f),'.k')
-[a  b] = corr(depths(f)',lmp(f)'-lmr(f)');
-[x y] = polyfit(depths(f),lmp(f)-lmr(f),1);
+if i == 2
+    f = f(1:end-3);
+elseif i == 3
+    f = f(1:end-3);
+end
+plot((lp(f))-(lr(f)),-depths(f),'.k')
+[a  b] = corr(depths(f)',(lp(f)')-(lr(f))');
+[x y] = polyfit(depths(f),(lp(f))-(lr(f)),1);
 y1 = polyval(x,depths(f));
-plot(depths(f),y1,'r')
+plot(y1,-depths(f),'r')
 title(a)
+axis([-1500 1500 -3600 0])
 end
 
 

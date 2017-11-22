@@ -80,6 +80,8 @@ for i=1:length(dd)-1
     end
 end
 fdists(fdists<30) = nan;
+amplitudes(abs(amplitudes)<30) = nan;
+region(region==315)=245;
 
 subplot(3,2,1)
 histogram(fdists(region==223),0:5:700)

@@ -14,12 +14,13 @@ PF_loc = [];
 
 for i=1:length(d)
 cd(d(i).name)
-if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat')
-% try
-    load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs','coords');%c
-% catch
-%     load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs','coords');%load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat','dev*','pairs');
-% end
+if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
+
+try
+load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs','coords');
+catch
+load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat','dev*','pairs');%c
+end
 
 sessionInfo = bz_getSessionInfo;
 load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'],'fields');
@@ -38,9 +39,8 @@ for c = 1:length(dev)
     if zerolag < 1 
         zerolag = 1;
     end
-    
-    if imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{c}(:,pair))>100
-        %imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{c}(:,pair))>100
+
+    if imp > 4.2 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{c}(:,pair))>50
        subplot(2,2,1)
        scatter(b,imp,'.k')
        hold on

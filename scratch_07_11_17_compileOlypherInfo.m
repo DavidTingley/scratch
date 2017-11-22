@@ -1,4 +1,4 @@
-cd /home/david/datasets/lsDataset
+whos rcd /home/david/datasets/lsDataset
 % cd('D:\Dropbox\datasets\lsDataset')
 clear
 d  = dir('*201*');
@@ -8,28 +8,30 @@ count = 1;
 
 for ii=1:length(d)
    cd(d(ii).name)
-   if exist([d(ii).name '.olypherInfo_allSmoothing.cellinfo.mat'])
-   load([d(ii).name '.olypherInfo_allSmoothing.cellinfo.mat'],'olypherInfo')  
+   if exist([d(ii).name '.olypherInfo_w_disc.cellinfo.mat'])
+   load([d(ii).name '.olypherInfo_w_disc.cellinfo.mat'],'olypherInfo')  
    load([d(ii).name '.firingMaps.cellinfo.mat'],'firingMaps') 
    load([d(ii).name '.behavior.mat']) 
+   sessionInfo = bz_getSessionInfo;
    nBins = length((behavior.events.trials{1}.mapping));
-   if exist([d(ii).name '.placeFields.20_pctThresh.mat'])
-   load([d(ii).name '.placeFields.20_pctThresh.mat'])
+   if exist([d(ii).name '.placeFields.10_pctThresh.mat'])
+   load([d(ii).name '.placeFields.10_pctThresh.mat'])
    for cell=1:size(firingMaps.rateMaps{1},1)
        for cond = 1:length(unique(olypherInfo.results{cell}.condition))
+           if sum(behavior.events.trialConditions==cond) >= 12
            nTrials = size(firingMaps.rateMaps{cond},2);
 %            if ~isempty(fields{cond}{cell})
-            if strcmp(olypherInfo.region{cell},'ls')
+            if strcmp(olypherInfo.region{cell},'hpc') | strcmp(olypherInfo.region{cell},'ca1') | strcmp(olypherInfo.region{cell},'ca3')
                 
             disc = unique(olypherInfo.results{cell}.discBins);
-            if length(disc) > 15
-            for dd = 7%1:length(disc)
+            if length(disc) >= 1
+            for dd = 1%1:length(disc)
                 
-            rows = find(olypherInfo.results{cell}.condition==cond);
+            rows = find(olypherInfo.results{cell}.condition==condehod);
             cols = find(olypherInfo.results{cell}.discBins==disc(dd));
             rows = intersect(rows,cols);
             
-%             if length(rows)>15
+            if length(rows)>=50
                 % subplot(2,2,1);
                 % imagesc(squeeze(rateMap{cond}(cell,:,:)));
 %                 subplot(2,2,2);
@@ -45,9 +47,13 @@ for ii=1:length(d)
 %                 hold on
 %                 plot(olypherInfo.results{cell}.smoothing(rows),olypherInfo.results{cell}.phasePeakInfo(rows),'g')
 %                 hold off
-
-                phaseInfoScore(count,dd,:) = olypherInfo.results{cell}.phasePeakInfo(rows(1:5))./nTrials;
-                rateInfoScore(count,dd,:) = olypherInfo.results{cell}.ratePeakInfo(rows(1:5))./nTrials;
+                if ~isempty(sessionInfo.ca3)
+                    region(count) = 3;
+                else
+                    region(count) = 1;
+                end
+                phaseInfoScore(count,dd,:) = olypherInfo.results{cell}.phasePeakInfo(rows(1:50))./nTrials;
+                rateInfoScore(count,dd,:) = olypherInfo.results{cell}.ratePeakInfo(rows(1:50))./nTrials;
                  if ~isempty(fields{cond}{cell})
                      hasField(count) = 1;
                      bins(count) = nBins;
@@ -55,19 +61,27 @@ for ii=1:length(d)
                      hasField(count) = 0;
                      bins(count) = nBins;
                  end
-          
-                count = 1+count
+           recording(count) =  ii;
+                
             pause(.01)
-%             end
+            if dd == length(disc)
+            count = 1+count;
+            end
+            elseif cell == 1 & cond == 1
+                warning(['not using ' d(ii).name])
+            end
             end
             end
            end
-%            end
+           end
        end
    end
    end
+   else
+       warning(['missed ' d(ii).name])
    end
    cd /home/david/datasets/lsDataset
+   clear olypherInfo
 % cd('D:\Dropbox\datasets\lsDataset')
 end
 

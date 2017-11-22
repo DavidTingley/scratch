@@ -68,8 +68,19 @@ for ii=1:length(d)
             coh_ca1_z(c1,:) = zscore(coh_ca1(c1,:));
             coh_ca1_phase_z(c1,:) = zscore(coh_ca1_phase(c1,:));
             
-            [coherogram phase t f] = bz_MTCoherogram(fastrms(FiltFiltM(bbb,aaa,double(ls.data(start:stop,1))),60),angle(hilbert(FiltFiltM(b,a,double(ca1.data(start:stop,1))))),'range',[4 12],'window',.15,'step',.05);
-            coh_ca1_theta_gamma(c1,:) = makeLength(mean(coherogram),1000);
+            t = fastrms(FiltFiltM(bbb,aaa,double(ls.data(start:stop,1))),60);
+            tt = angle(hilbert(FiltFiltM(b,a,double(ca1.data(start:stop,1)))));
+            for temp = 1:length(t)
+                if temp > length(t) - 150
+                    c(temp) = circ_corrcl(tt(temp-150:end),t(temp-150:end));
+                elseif temp < 151
+                    c(temp) = circ_corrcl(tt(1:temp+150),t(1:temp+150));
+                else
+                	c(temp) = circ_corrcl(tt(temp-150:temp+150),t(temp-150:temp+150));
+                end
+            end
+%             [coherogram phase t f] = bz_MTCoherogram(fastrms(FiltFiltM(bbb,aaa,double(ls.data(start:stop,1))),60),angle(hilbert(FiltFiltM(b,a,double(ca1.data(start:stop,1))))),'range',[4 12],'window',.15,'step',.05);
+            coh_ca1_theta_gamma(c1,:) = makeLength(c,1000); clear c
             coh_ca1_theta_gamma_z(c1,:) = zscore(coh_ca1_theta_gamma(c1,:));
             ca1_animal(c1) = sum(double(sessionInfo.animal));
             ca1_recording(c1) = ii;
@@ -97,8 +108,18 @@ for ii=1:length(d)
             coh_ca3_z(c3,:) = zscore(coh_ca3(c3,:));
             coh_ca3_phase_z(c3,:) = zscore(coh_ca3_phase(c3,:));
             
-            [coherogram phase t f] = bz_MTCoherogram(fastrms(FiltFiltM(bbb,aaa,double(ls.data(start:stop,1))),60),angle(hilbert(FiltFiltM(b,a,double(ca3.data(start:stop,1))))),'range',[4 12],'window',.15,'step',.05);
-            coh_ca3_theta_gamma(c3,:) = makeLength(mean(coherogram),1000);
+            t = fastrms(FiltFiltM(bbb,aaa,double(ls.data(start:stop,1))),60);
+            tt = angle(hilbert(FiltFiltM(b,a,double(ca3.data(start:stop,1)))));
+            for temp = 1:length(t)
+                if temp > length(t) - 150
+                    c(temp) = circ_corrcl(tt(temp-150:end),t(temp-150:end));
+                elseif temp < 151
+                    c(temp) = circ_corrcl(tt(1:temp+150),t(1:temp+150));
+                else
+                	c(temp) = circ_corrcl(tt(temp-150:temp+150),t(temp-150:temp+150));
+                end
+            end
+            coh_ca3_theta_gamma(c3,:) = makeLength(c,1000); clear c
             coh_ca3_theta_gamma_z(c3,:) = zscore(coh_ca3_theta_gamma(c3,:));
             ca3_recording(c3) = ii;
             ca3_animal(c3) = sum(double(sessionInfo.animal));
