@@ -46,7 +46,7 @@ for cell=1:length(spikes.times)
     positionDecodingMaxCorr_binned_box_median.results{cell} = table;
 end
 
-for smoothing = 1:round(nBins)
+for smoothing = 20%1:round(nBins)
     disp(['smoothing by: ' num2str(smoothing) ' bins']);
     for cond = 1:length(unique(behavior.events.trialConditions))
         if size(binnedPhaseMap{cond},2) >= 5
@@ -165,9 +165,9 @@ for smoothing = 1:round(nBins)
             
             count = 1+count;
             end
-%             if cell == 44 && cond == 7
-% %                 
-% %                 figure(cond)
+%             if cell == 80 && cond == 5
+% % %                 
+% % %                 figure(cond)
 %                 t_rate = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_rate',...
 %                 'GroupingVariables',{'tau','condition'});
 %                 t_phase_all = varfun(@mean,positionDecodingMaxCorr_binned_box_median.results{cell},'InputVariables','mse_phase_all',...
@@ -227,6 +227,6 @@ for smoothing = 1:round(nBins)
         end
     end
     positionDecodingMaxCorr_binned_box_median.dateRun = date;  % this can take a very long time so lets save each loop...
-save([xml.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat'],'positionDecodingMaxCorr_binned_box_median')
+save([xml.FileName '.positionDecodingMaxCorr_binned_box_median_20.cellinfo.mat'],'positionDecodingMaxCorr_binned_box_median')
 end
 % end

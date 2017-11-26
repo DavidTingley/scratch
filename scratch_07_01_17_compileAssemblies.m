@@ -14,12 +14,12 @@ PF_loc = [];
 
 for i=1:length(d)
 cd(d(i).name)
-if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat')
+if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assembliesCrossRegion_split_w_theta.mat')
 
 try
 load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs','coords');
 catch
-load('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat','dev*','pairs');%c
+load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');%c
 end
 
 sessionInfo = bz_getSessionInfo;

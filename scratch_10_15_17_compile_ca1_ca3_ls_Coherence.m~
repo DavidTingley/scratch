@@ -23,7 +23,7 @@ c3=1;
 [b a] = butter(3,[4/625 12/625],'bandpass');
 
 [bbb aaa] = butter(3,[50/625 500/625],'bandpass');
-for ii=1:length(d)
+for ii=19:length(d)
     cd(d(ii).name)
     sessionInfo = bz_getSessionInfo;
     disp(['working on: ' sessionInfo.FileName])
@@ -120,7 +120,7 @@ for ii=1:length(d)
                 end
             end
 %             [coherogram phase t f] = bz_MTCoherogram(fastrms(FiltFiltM(bbb,aaa,double(ls.data(start:stop,1))),60),angle(hilbert(FiltFiltM(b,a,double(ca1.data(start:stop,1))))),'range',[4 12],'window',.15,'step',.05);
-            coh_ca3_theta_gamma(c3,:) = makeLength(c(251:end),1000); clear c
+            coh_ca3_theta_gamma(c1,:) = makeLength(c(251:end),1000); clear c
             coh_ca3_theta_gamma_z(c3,:) = zscore(coh_ca3_theta_gamma(c3,:));
             ca3_recording(c3) = ii;
             ca3_animal(c3) = sum(double(sessionInfo.animal));

@@ -17,7 +17,7 @@ d  = dir('*201*');
     figure
     clf
     
-for i=1:length(d)
+for i=51:length(d)
 
 %     
 % ass = [];
@@ -35,10 +35,10 @@ load([d(i).name '.behavior.mat'],'behavior')
 nBins = length(behavior.events.map{1}.x);
 
 if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assembliesCrossRegion_split_w_theta.mat') 
-   if ~exist([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat']) 
+   if ~exist([sessionInfo.FileName '.positionDecodingGLM_binnedspace_box_median.cellinfo.mat']) 
     error
    end
-    load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat'])
+    load([sessionInfo.FileName '.positionDecodingGLM_binnedspace_box_median.cellinfo.mat'])
     load([sessionInfo.FileName '.firingMaps.cellinfo.mat'])
     try
         load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs');%
@@ -47,7 +47,7 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
     end
     if exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
     load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'],'fields');
-    positionDecodingGLM=positionDecodingMaxCorr_binned_box_median;
+    positionDecodingGLM=positionDecodingGLM_binnedspace_box_median;
     if isfield(positionDecodingGLM,'dateRun') & length(pairs)>1 & exist('dev')==1
     conditions = length(unique(positionDecodingGLM.results{1}.condition));
     for cell =1:length(positionDecodingGLM.results)
@@ -55,7 +55,7 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
             'GroupingVariables',{'tau','condition'});
         t_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_phase_cos',...
             'GroupingVariables',{'tau','condition'});
-        t_chance_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_chance_phase',...
+        t_chance_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_chance',...
             'GroupingVariables',{'tau','condition'});
         tab = join(join(t_rate,t_phase),t_chance_phase);
       for cond = 1:conditions
@@ -70,7 +70,7 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
             min_mse_rate(cell,cond) = min(tab.mean_mse_rate(rows(first500ms)));%-mean(tab.mean_mse_chance_phase(rows(first500ms)));
             min_mse_phase_all(cell,cond) = min(tab.mean_mse_phase_cos(rows(first500ms)));%-mean(tab.mean_mse_chance_phase(rows(first500ms)));
             
-            min_mse_chance(cell,cond) = min(tab.mean_mse_chance_phase(rows(first500ms)));%-mean(tab.mean_mse_chance_phase(rows(first500ms)));
+            min_mse_chance(cell,cond) = min(tab.mean_mse_chance(rows(first500ms)));%-mean(tab.mean_mse_chance_phase(rows(first500ms)));
 %             max_mse_rate(cell,cond) = (max(tab.mean_mse_rate(rows(first500ms))));
 %             max_mse_phase_all(cell,cond) = (max(tab.mean_mse_phase_cos(rows(first500ms))));
                 else
@@ -106,7 +106,7 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
                 zerolag = 1;
                 end
                 % imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>100
-                if imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40
+                if imp > 1.5 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40
                     p = [p; pairs(pair,:)];
                     h = [h; imp];
                     ii = [ii;b];
@@ -281,7 +281,7 @@ title('ca3 field COMs')
 
 figure
 clear a n c ap np cp 
-for iter = 1:10
+for iter = 1:1000
 r = randperm(length(ass_phaseonly));
 a(iter,:) = ass_phaseonly(r(1:round(prctile(1:length(ass_phaseonly),60))));
 r = randperm(length(noAss_phaseonly));

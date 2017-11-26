@@ -21,13 +21,13 @@ for ii=1:length(d)
            if sum(behavior.events.trialConditions==cond) >= 12
            nTrials = size(firingMaps.rateMaps{cond},2);
 %            if ~isempty(fields{cond}{cell})
-            if strcmp(olypherInfo.region{cell},'hpc') | strcmp(olypherInfo.region{cell},'ca1') | strcmp(olypherInfo.region{cell},'ca3')
+            if strcmp(olypherInfo.region{cell},'ls')%strcmp(olypherInfo.region{cell},'hpc') | strcmp(olypherInfo.region{cell},'ca1') | strcmp(olypherInfo.region{cell},'ca3')
                 
             disc = unique(olypherInfo.results{cell}.discBins);
             if length(disc) >= 1
             for dd = 1%1:length(disc)
                 
-            rows = find(olypherInfo.results{cell}.condition==condehod);
+            rows = find(olypherInfo.results{cell}.condition==cond);
             cols = find(olypherInfo.results{cell}.discBins==disc(dd));
             rows = intersect(rows,cols);
             
