@@ -1,4 +1,4 @@
-whos rcd /home/david/datasets/lsDataset
+cd /home/david/datasets/lsDataset
 % cd('D:\Dropbox\datasets\lsDataset')
 clear
 d  = dir('*201*');
@@ -14,15 +14,17 @@ for ii=1:length(d)
    load([d(ii).name '.behavior.mat']) 
    sessionInfo = bz_getSessionInfo;
    nBins = length((behavior.events.trials{1}.mapping));
-   if exist([d(ii).name '.placeFields.10_pctThresh.mat'])
-   load([d(ii).name '.placeFields.10_pctThresh.mat'])
+   if exist([d(ii).name '.placeFields.20_pctThresh.mat'])
+   load([d(ii).name '.placeFields.20_pctThresh.mat'])
+   conditions = length(unique(behavior.events.trialConditions));
+   
    for cell=1:size(firingMaps.rateMaps{1},1)
-       for cond = 1:length(unique(olypherInfo.results{cell}.condition))
-           if sum(behavior.events.trialConditions==cond) >= 12
+       for cond = 1:conditions
+           if sum(behavior.events.trialConditions==cond) >= 10
            nTrials = size(firingMaps.rateMaps{cond},2);
 %            if ~isempty(fields{cond}{cell})
-            if strcmp(olypherInfo.region{cell},'ls')%strcmp(olypherInfo.region{cell},'hpc') | strcmp(olypherInfo.region{cell},'ca1') | strcmp(olypherInfo.region{cell},'ca3')
-                
+            if strcmp(olypherInfo.region{cell},'hpc') | strcmp(olypherInfo.region{cell},'ca1') | strcmp(olypherInfo.region{cell},'ca3')
+                %  strcmp(olypherInfo.region{cell},'ls')%
             disc = unique(olypherInfo.results{cell}.discBins);
             if length(disc) >= 1
             for dd = 1%1:length(disc)
@@ -64,13 +66,15 @@ for ii=1:length(d)
            recording(count) =  ii;
                 
             pause(.01)
-            if dd == length(disc)
+%             if dd == length(disc)
             count = 1+count;
-            end
-            elseif cell == 1 & cond == 1
+%             end
+            else%if cell == 1 & cond == 1
                 warning(['not using ' d(ii).name])
             end
             end
+            else
+                error('missing something..')
             end
            end
            end

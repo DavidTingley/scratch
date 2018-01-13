@@ -13,11 +13,17 @@ PF_loc = [];
 region = [];
 animal = [];
 behav =[];
+rate = [];
+rate_not = [];
+ID = [];
+
+% what is the assembly strength threshold?
+thresh = 4;
 d  = dir('*201*');
-    figure
-    clf
+%     figure
+%     clf
     
-for i=51:length(d)
+for i=1:length(d)
 
 %     
 % ass = [];
@@ -35,49 +41,56 @@ load([d(i).name '.behavior.mat'],'behavior')
 nBins = length(behavior.events.map{1}.x);
 
 if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assembliesCrossRegion_split_w_theta.mat') 
-   if ~exist([sessionInfo.FileName '.positionDecodingGLM_binnedspace_box_median.cellinfo.mat']) 
-    error
-   end
-    load([sessionInfo.FileName '.positionDecodingGLM_binnedspace_box_median.cellinfo.mat'])
+   if exist([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat']) 
+%     error
+%    end
+    load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
     load([sessionInfo.FileName '.firingMaps.cellinfo.mat'])
+%     try
+%     load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs','coords');
+%     catch
+%     load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');%c
+%     end
     try
-        load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs');%
+    load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');
     catch
-        load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');%cload('assembliesCrossRegionData_w_theta_sin_cos_coord_vel.mat','dev*','pairs');
+    load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs','coords');%c
     end
     if exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
     load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'],'fields');
-    positionDecodingGLM=positionDecodingGLM_binnedspace_box_median;
+    positionDecodingGLM=positionDecodingMaxCorr_binned_box_mean;
     if isfield(positionDecodingGLM,'dateRun') & length(pairs)>1 & exist('dev')==1
     conditions = length(unique(positionDecodingGLM.results{1}.condition));
     for cell =1:length(positionDecodingGLM.results)
         t_rate = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_rate',...
             'GroupingVariables',{'tau','condition'});
-        t_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_phase_cos',...
+        t_phase_cos = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_phase_cos',...
             'GroupingVariables',{'tau','condition'});
-        t_chance_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_chance',...
+        t_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_phase',...
             'GroupingVariables',{'tau','condition'});
-        tab = join(join(t_rate,t_phase),t_chance_phase);
+        t_chance_phase = varfun(@mean,positionDecodingGLM.results{cell},'InputVariables','mse_chance_phase',...
+            'GroupingVariables',{'tau','condition'});
+        tab = join(join(join(t_rate,t_phase),t_chance_phase),t_phase_cos);
       for cond = 1:conditions
             if cond <= length(dev)  && sum(behavior.events.trialConditions==cond) > 10
-                if sum(sum(firingMaps.countMaps{cond}(cell,:,:))) > 1.5 * sum(behavior.events.trialConditions==cond)
+%                 if sum(sum(firingMaps.countMaps{cond}(cell,:,:))) > 1.5 * sum(behavior.events.trialConditions==cond)
             % grab phase/rate coding variables
             rows = find(tab.condition==cond);
-            first500ms = find(ismember(tab.tau(rows),25));
+            first500ms = find(ismember(tab.tau(rows),20));
             
 %             min_mse_rate(cell,cond) = sqrt(min(tab.mean_mse_rate(rows(first500ms))))./nBins;
 %             min_mse_phase_all(cell,cond) = sqrt(min(tab.mean_mse_phase_all(rows(first500ms))))./nBins;
             min_mse_rate(cell,cond) = min(tab.mean_mse_rate(rows(first500ms)));%-mean(tab.mean_mse_chance_phase(rows(first500ms)));
-            min_mse_phase_all(cell,cond) = min(tab.mean_mse_phase_cos(rows(first500ms)));%-mean(tab.mean_mse_chance_phase(rows(first500ms)));
+            min_mse_phase_all(cell,cond) = min([tab.mean_mse_phase_cos(rows(first500ms)),tab.mean_mse_phase(rows(first500ms))]);%-mean(tab.mean_mse_chance_phase(rows(first500ms)));
             
-            min_mse_chance(cell,cond) = min(tab.mean_mse_chance(rows(first500ms)));%-mean(tab.mean_mse_chance_phase(rows(first500ms)));
+            min_mse_chance(cell,cond) = mean(tab.mean_mse_chance_phase(rows(first500ms)));%-mean(tab.mean_mse_chance_phase(rows(first500ms)));
 %             max_mse_rate(cell,cond) = (max(tab.mean_mse_rate(rows(first500ms))));
 %             max_mse_phase_all(cell,cond) = (max(tab.mean_mse_phase_cos(rows(first500ms))));
                 else
             min_mse_rate(cell,cond) = nan;
             min_mse_phase_all(cell,cond) = nan;
             min_mse_chance(cell,cond) = nan;
-                end
+%                 end
             end
         end
     end
@@ -96,6 +109,7 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
                 z=[];
                 ii=[];
                 p=[];
+                pp=[];
                 for pair = 1:size(dev{cond},2)
                 [a b] =  min(dev{cond}(:,pair));
                 [aa bb] = min(mean(devControl{cond}(:,pair,:),3));
@@ -106,7 +120,7 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
                 zerolag = 1;
                 end
                 % imp > 4.5 & b > 7 & b < 150 &  zerolag < 1.2 & mean(dev{cond}(:,pair))>100
-                if imp > 1.5 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40
+                if imp > thresh & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40
                     p = [p; pairs(pair,:)];
                     h = [h; imp];
                     ii = [ii;b];
@@ -121,12 +135,16 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
                     else
                         region = [region;3];
                     end
+                    ID = [ID; i cond pairs(pair,:)];
                     behav = [behav; sum(double(behavior.events.conditionType{cond}))];
                     animal = [animal; sum(double(sessionInfo.animal))];
                     stren = [stren; imp imp2 b (min_mse_phase_all(pairs(pair,1),cond)-min_mse_rate(pairs(pair,1),cond)) ...
                     ./ (min_mse_phase_all(pairs(pair,1),cond)+min_mse_rate(pairs(pair,1),cond)) ...
                     (min_mse_phase_all(pairs(pair,1),cond))];
                     devs = [devs;dev{cond}(:,pair)'];
+                    rate = [rate; squeeze(sum(sum(firingMaps.countMaps{cond}(pairs(pair,1),:,:),2),3))./size(firingMaps.countMaps{cond},2)];
+                elseif imp <= thresh & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40
+                    pp = [pp; pairs(pair,:)];
                 end
                 pairCount = 1 + pairCount;
                 end 
@@ -138,20 +156,28 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
                 end
             end
             if ~isempty(p)
-                ass = [ass; (min_mse_phase_all(p(:,1),cond)-min_mse_rate(p(:,1),cond)) ./ (min_mse_phase_all(p(:,1),cond)+min_mse_rate(p(:,1),cond))];
+%                 [C,ia,ic] = unique(p(:,1),'rows');
+%                 p = p(ia,:);
+                ass = [ass; (min_mse_phase_all(p(:,1),cond)-min_mse_rate(p(:,1),cond)) ];% ./ (min_mse_phase_all(p(:,1),cond)+min_mse_rate(p(:,1),cond))];
                 ass_phaseonly = [ass_phaseonly; (min_mse_phase_all(p(:,1),cond)) ];
                 ass_rate = [ass_rate; (min_mse_rate(p(:,1),cond)) ];
                 phaseonly_chance = [phaseonly_chance; min_mse_chance(p(:,1),cond)];
                 ff = f(~ismember(f,p(:,1)));
                 ls_rec = [ls_rec;  repmat(i,size(p,1),1)];
             else
-                ff = f;
+                if ~isempty(pp)
+%                 ff = f;
+                ff = pp(:,1);
+                else
+                    ff=[];
+                end
             end
-            noAss = [noAss; (min_mse_phase_all(ff,cond)-min_mse_rate(ff,cond)) ./ (min_mse_phase_all(ff,cond)+min_mse_rate(ff,cond))];        
+            noAss = [noAss; (min_mse_phase_all(ff,cond)-min_mse_rate(ff,cond)) ];%./ (min_mse_phase_all(ff,cond)+min_mse_rate(ff,cond))];        
             noAss_phaseonly = [noAss_phaseonly; (min_mse_phase_all(ff,cond)) ];  
             noAss_rate = [noAss_rate; (min_mse_rate(ff,cond)) ];  
             phaseonly_chance = [phaseonly_chance; min_mse_chance(ff,cond)];
             ls_rec = [ls_rec; repmat(i,length(ff),1)];
+            rate_not = [rate_not; squeeze(mean(mean(firingMaps.rateMaps{cond}(ff,:,:),2),3))];
             end
         end
             clear f ff p t
@@ -226,80 +252,110 @@ end
    end
 
 % 
-
-%     cd('D:\Dropbox\datasets\lsDataset')
+end
+%     cd('/home/david/Dropbox/datasets/lsDataset')
 cd('/home/david/datasets/lsDataset')
+% cd('D:\Dropbox\datasets\lsDataset\')
 end
 
-
-
-
-
-clf
-subplot(2,2,1)
-for i=1:200
-f = (intersect(find(abs(PF_loc-i)<50),find(region==1)));
-errorbar(i,(mean(stren(f,1))),(std(stren(f,1)))./sqrt(length(f)),'.k')
-hold on
+% clf
+% subplot(2,2,1)
+% for i=1:200
+% f = (intersect(find(abs(PF_loc-i)<50),find(region==1)));
+% errorbar(i,(mean(stren(f,1))),(std(stren(f,1)))./sqrt(length(f)),'.k')
+% hold on
+% end
+% hold on
+% for i=1:200
+% f = (intersect(find(abs(PF_loc-i)<50),find(region==3)));
+% errorbar(i,(mean(stren(f,1))),(std(stren(f,1)))./sqrt(length(f)),'.r')
+% hold on
+% end
+% ylabel('assembly strength')
+% xlabel('positon')
+% title('ca3(red) ca1(black) LS assemblies vs position')
+c=1
+for window = 20:5:70
+    subplot(4,4,c)
+    for i=1:200
+    f = intersect(find(abs(PF_loc-i)<window),find(region==3));
+    ca3(i) = (mean(stren(f,1)));
+    ca3_sem(i) = (std(stren(f,1)))./sqrt(length(f));
+    f = intersect(find(abs(PF_loc-i)<window),find(region==1));
+    ca1(i) = (mean(stren(f,1)));
+    ca1_sem(i) = (std(stren(f,1)))./sqrt(length(f));
+    end
+    boundedline(1:200,smooth(ca1,window),smooth(ca1_sem,window),'k')
+    boundedline(1:200,smooth(ca3,window),smooth(ca3_sem,window),'r')
+    ylabel('assembly strength')
+    xlabel('positon')
+    title('ca3(red) ca1(black) LS assemblies vs position')
+    for i=1:200
+    f = intersect(find(abs(PF_loc-i)<window),find(region==3));
+    ff = intersect(find(abs(PF_loc-i)<window),find(region==1));
+    if ~isempty(f) & ~isempty(ff)
+    [a b(i)]=kstest2(stren(f,1),stren(ff,1));
+    end
+    end
+    plot((b<.05)+4,'.')
+    title([thresh pf])
+    c=1+c;
 end
-hold on
-for i=1:200
-f = (intersect(find(abs(PF_loc-i)<50),find(region==3)));
-errorbar(i,(mean(stren(f,1))),(std(stren(f,1)))./sqrt(length(f)),'.r')
-hold on
-end
-ylabel('assembly strength')
-xlabel('positon')
-title('ca3(red) ca1(black) LS assemblies vs position')
-
-subplot(2,2,2)
-for i=1:200
-f = intersect(find(abs(PF_loc-i)<50),find(region==3));
-ca3(i) = (mean(stren(f,1)));
-ca3_sem(i) = (std(stren(f,1)))./sqrt(length(f));
-f = intersect(find(abs(PF_loc-i)<50),find(region==1));
-ca1(i) = (mean(stren(f,1)));
-ca1_sem(i) = (std(stren(f,1)))./sqrt(length(f));
-end
-boundedline(1:200,smooth(ca1,50),smooth(ca1_sem,50),'k')
-boundedline(1:200,smooth(ca3,50),smooth(ca3_sem,50),'r')
-ylabel('assembly strength')
-xlabel('positon')
-title('ca3(red) ca1(black) LS assemblies vs position')
-
-subplot(2,2,3)
-plot(sort(PF_loc(region==1)),1:sum(region==1),'.k')
-title('ca1 field COMs')
-
-subplot(2,2,4)
-plot(sort(PF_loc(region==3)),1:sum(region==3),'.r')
-title('ca3 field COMs')
+pause(.1)
+% 
+% subplot(2,2,3)
+% plot(sort(PF_loc(region==1)),1:sum(region==1),'.k')
+% title('ca1 field COMs')
+% 
+% subplot(2,2,4)
+% plot(sort(PF_loc(region==3)),1:sum(region==3),'.r')
+% title('ca3 field COMs')
 
 
 
 
 
-figure
-clear a n c ap np cp 
-for iter = 1:1000
-r = randperm(length(ass_phaseonly));
-a(iter,:) = ass_phaseonly(r(1:round(prctile(1:length(ass_phaseonly),60))));
-r = randperm(length(noAss_phaseonly));
-n(iter,:) = noAss_phaseonly(r(1:round(prctile(1:length(noAss_phaseonly),60))));
-r = randperm(length(phaseonly_chance));
-c(iter,:) = phaseonly_chance(r(1:round(prctile(1:length(phaseonly_chance),60))));
-for j = 1:100
-ap(iter,j) = prctile(a(iter,:),j);
-np(iter,j) = prctile(n(iter,:),j);
-cp(iter,j) = prctile(c(iter,:),j);
-end
-boundedline(1:100,mean(ap),3*std(ap),'g');
-boundedline(1:100,mean(np),3*std(np),'r');
-boundedline(1:100,mean(cp),3*std(cp),'k');
-% axis([0 100 0 4000])
-title(iter)
-pause(.0001);
-end
+% figure
+% clear a n c ap np cp aa nn aap nnp
+% for iter = 1:20
+%     subplot(2,2,1)
+%     r = randperm(length(ass_phaseonly));
+%     a(iter,:) = ass_phaseonly(r(1:round(prctile(1:length(ass_phaseonly),50))));
+%     r = randperm(length(noAss_phaseonly));
+%     n(iter,:) = noAss_phaseonly(r(1:round(prctile(1:length(noAss_phaseonly),50))));
+%     r = randperm(length(phaseonly_chance));
+%     c(iter,:) = phaseonly_chance(r(1:round(prctile(1:length(phaseonly_chance),50))));
+%     for j = 1:100
+%     ap(iter,j) = prctile(a(iter,:),j);
+%     np(iter,j) = prctile(n(iter,:),j);
+%     cp(iter,j) = prctile(c(iter,:),j);
+%     end
+%     boundedline(1:100,mean(ap),3*std(ap),'g');
+%     boundedline(1:100,mean(np),3*std(np),'r');
+%     boundedline(1:100,mean(cp),3*std(cp),'k');
+%     axis([0 100 3000 10000])
+%     title(iter)
+% 
+%     subplot(2,2,2)
+%     r = randperm(length(ass));
+%     aa(iter,:) = ass(r(1:round(prctile(1:length(ass),50))));
+%     r = randperm(length(noAss));
+%     nn(iter,:) = noAss(r(1:round(prctile(1:length(noAss),50))));
+% %     r = randperm(length(phaseonly_chance));
+% %     c(iter,:) = phaseonly_chance(r(1:round(prctile(1:length(phaseonly_chance),60))));
+%     for j = 1:100
+%     aap(iter,j) = prctile(aa(iter,:),j);
+%     nnp(iter,j) = prctile(nn(iter,:),j);
+% %     cp(iter,j) = prctile(c(iter,:),j);
+%     end
+%     boundedline(1:100,mean(aap),3*std(aap),'g');
+%     boundedline(1:100,mean(nnp),3*std(nnp),'r');
+% %     boundedline(1:100,mean(cp),3*std(cp),'k');
+% %     axis([0 100 1000 10000])
+%     title(iter)
+% 
+%     pause(.0001);
+% end
 
 
 

@@ -17,15 +17,28 @@ ls_rate_info =[]; hpc_rate_info = [];
 hpc_cell=[];
 ls_cell=[];
 hpc_shank = []; ls_shank = [];
-hpc_field = [];
+hpc_field = []; ls_field = [];
 hpc_reg = [];
 ls_chance_rate = []; hpc_chance_rate = [];
 ls_chance_phase = []; hpc_chance_phase = [];
-                   
+count=1;              
+tau=20;
+examples = [];
 hpc_mean_phase = zeros(101,1);
 ls_mean_phase = zeros(101,1);
 hpc_mean_rate = zeros(101,1);
 ls_mean_rate = zeros(101,1);
+hpc_pval=[];
+ls_pval = [];
+hpc_pval_c=[];
+ls_pval_c = [];
+l_rate_maps_smooth = [];
+l_phase_maps_smooth = [];
+h_phase_maps_smooth = [];
+h_rate_maps_smooth = [];
+phaseCorr_hpc =[]; phaseCorr_ls = [];
+rateCorr_ls=[]; rateCorr_hpc=[];
+
 d  = dir('*201*');
 for i=1:length(d)
     i
@@ -35,19 +48,44 @@ for i=1:length(d)
 %    animal = strsplit(animal,'/');
 %    animal = animal{end-1};
 % animal = 1;         positionDecodingMaxCorr_binned_box_median.
-    if ~isempty(dir('*positionDecodingMaxCorr_binned_box_median.cell*')) & exist([d(i).name '.placeFields.10_pctThresh.mat'])
+    if ~isempty(dir('*positionDecodingMaxCorr_binned_box_*')) & exist([d(i).name '.placeFields.10_pctThresh.mat'])
         sessionInfo = bz_getSessionInfo(pwd,'noprompts',true);
-        load([d(i).name '.firingMaps.cellinfo.mat'],'firingMaps') 
-        load([d(i).name '.placeFields.10_pctThresh.mat'],'fields') 
         spikes = bz_GetSpikes;
+        load([sessionInfo.FileName '.behavior.mat'])
+%         load([d(i).name '.firingMaps.cellinfo.mat'],'firingMaps')
+        load([d(i).name '.phaseMaps.cellinfo.mat'],'phaseMaps')
+        [firingMaps] = bz_firingMap1D(spikes,behavior,tau);
+        [binnedfiringMaps.phaseMaps] = bz_phaseMap2Bins(phaseMaps.phaseMaps,firingMaps.rateMaps,behavior);
+        load([d(i).name '.placeFields.20_pctThresh.mat'],'fields') 
 %         load([d(i).name '.olypherInfo.cellinfo.mat'],'olypherInfo') 
         b = dir('*.behavior.mat');
         load(b(1).name);
+%         for trial = 1:length(behavior.events.trials)
+%             vel{trial} = makeLength(smooth(abs(diff(behavior.events.trials{trial}.x))+abs(diff(behavior.events.trials{trial}.y)),50),201);
+%             %     vel{trial} = mean(smooth(abs(diff(behavior.events.trials{trial}.x))+abs(diff(behavior.events.trials{trial}.y)),40),200);
+%         end
         nBins = round(length(behavior.events.map{1}.x));
-        load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_median.cellinfo.mat'])
-        positionDecodingMaxCorr=positionDecodingMaxCorr_binned_box_median;
+
+        load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
+
+        positionDecodingMaxCorr=positionDecodingMaxCorr_binned_box_mean;
         if isfield(positionDecodingMaxCorr,'dateRun')
         conditions = length(unique(behavior.events.trialConditions));
+        
+        
+        try
+        load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');
+        notAssemblies = 0;
+        catch
+            try
+        load('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat','dev*','pairs','coords');%c
+        notAssemblies = 0;
+            catch
+                notAssemblies = 1;
+            end
+        end
+    
+            
         for cell =1:length(positionDecodingMaxCorr.results)
             if ~isempty(positionDecodingMaxCorr.results{cell})
         t_rate = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_rate',...
@@ -63,7 +101,7 @@ for i=1:length(d)
         t_chance_rate = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_chance_phase',...
             'GroupingVariables',{'tau','condition'});
         tab = join(join(join(join(join(t_rate,t_phase),t_chance_rate),t_chance_phase),t_phase_cos),t_phase_all);
-        
+
 %         t_phase_pval = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_phase_all_pval',...
 %             'GroupingVariables',{'tau','condition'});
 %         t_rate_pval = varfun(@mean,positionDecodingMaxCorr.results{cell},'InputVariables','mse_rate_pval',...
@@ -72,7 +110,8 @@ for i=1:length(d)
         
             for cond = 1:conditions
                 if sum(behavior.events.trialConditions==cond) >= 10 %%%%%%%%%%%%%%%%%%%%%%%%%%
-                if sum(sum(firingMaps.countMaps{cond}(cell,:,:))) > 1.5 * sum(behavior.events.trialConditions==cond) 
+                if sum(sum(firingMaps.countMaps{cond}(cell,:,:))) >= 1.5 * sum(behavior.events.trialConditions==cond) 
+%                     sum(sum(firingMaps.countMaps{cond}(cell,:,:))) > .25 * sum(behavior.events.trialConditions==cond) 
                     nTrials = sum(behavior.events.trialConditions==cond);
                     %% information theory stuff here
 %                     rows = find(olypherInfo.results{cell}.condition==cond);
@@ -81,8 +120,11 @@ for i=1:length(d)
 %                     maxphaseInfo = max(olypherInfo.results{cell}.phasePeakInfo(rows)./nTrials);
 %                     maxrateInfo = max(olypherInfo.results{cell}.ratePeakInfo(rows)./nTrials);
                     
-                    
-                    
+                row = find(positionDecodingMaxCorr.results{cell}.condition == cond);
+                col = find(positionDecodingMaxCorr.results{cell}.tau == 20);
+                row = intersect(row,col);
+                [sig pval] = kstest2(positionDecodingMaxCorr.results{cell}.mse_rate(row),positionDecodingMaxCorr.results{cell}.mse_phase(row));
+                [sig_c pval_c] = kstest2(positionDecodingMaxCorr.results{cell}.mse_chance_phase(row),positionDecodingMaxCorr.results{cell}.mse_phase(row));
                     %% carry on..
                rows = find(tab.condition==cond);
 %                if sqrt(tab.mean_mse_phase_all(rows(1)))./nBins < .3 
@@ -91,8 +133,8 @@ for i=1:length(d)
                 
 %                 rows = intersect(rows,find(tab.tau==60));
                 
-                first500ms = find(ismember(tab.tau(rows),1:25));
-                if length(first500ms) == 25
+                first500ms = find(ismember(tab.tau(rows),20));
+                if length(first500ms) == 1
 %                 min_mse_rate = (min(tab.mean_mse_rate(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
 %                 min_mse_phase_all = (min(tab.mean_mse_phase_all(rows(first500ms)))./mean(tab.mean_mse_chance(rows(first500ms))));
                 
@@ -116,13 +158,13 @@ for i=1:length(d)
 %                if min_mse_phase_all < .33 & min_mse_rate < .33
 %                if b ~= length(rows) & bb ~= length(rows) & b ~= 1 & bb ~= 1
 %                 chance = [chance, min_mse_chance];
-               if min_mse_phase_all > min_mse_chance_phase
-                  try
-                     delete(['/home/david/Dropbox/tmp/' d(i).name '_' num2str(cell) '_' num2str(cond) '.fig']) 
-                  catch
-                      warning(['couldnt delete: /home/david/Dropbox/tmp/' d(i).name '_' num2str(cell) '_' num2str(cond)])
-                  end                   
-               end
+%                if min_mse_phase_all > min_mse_chance_phase
+%                   try
+%                      delete(['/home/david/Dropbox/tmp/' d(i).name '_' num2str(cell) '_' num2str(cond) '.fig']) 
+%                   catch
+%                       warning(['couldnt delete: /home/david/Dropbox/tmp/' d(i).name '_' num2str(cell) '_' num2str(cond)])
+%                   end                   
+%                end
                if strcmp(positionDecodingMaxCorr.region{cell},'hpc') | strcmp(positionDecodingMaxCorr.region{cell},'ca3')  | strcmp(positionDecodingMaxCorr.region{cell},'ca1') 
 %                    if positionDecodingMaxCorr.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
 %                            positionDecodingMaxCorr.results{cell}.mse_rate_pval(rows(bb)) <.05
@@ -149,6 +191,8 @@ for i=1:length(d)
                    hpc_rate=[hpc_rate;min_mse_rate'];
                    hpc_tau_phase = [hpc_tau_phase;tab.tau(rows(b))./nBins];
                    hpc_tau_rate = [hpc_tau_rate;tab.tau(rows(bb))./nBins];
+                   hpc_pval = [hpc_pval;pval];
+                   hpc_pval_c = [hpc_pval_c;pval_c];
 %                    hpc_phase_pval = [hpc_phase_pval;pvals.mean_mse_phase_all_pval(rows(b),:)];
 %                    hpc_rate_pval = [hpc_rate_pval;pvals.mean_mse_rate_pval(rows(bb),:)];
                    hpc_rec = [hpc_rec; i];
@@ -156,7 +200,7 @@ for i=1:length(d)
                    if ~isempty(sessionInfo.ca3)
                        hpc_reg = [hpc_reg; 3];
                    else
-                       hpc_reg = [hpc_reg; 3];
+                       hpc_reg = [hpc_reg; 1];
                    end
                    additionalDepth = find(sessionInfo.spikeGroups.groups{spikes.shankID(cell)}==spikes.maxWaveformCh(cell))*10;
                    hpc_depth = [hpc_depth;(sessionInfo.depth)+additionalDepth];
@@ -169,6 +213,27 @@ for i=1:length(d)
                    else
                        hpc_field = [hpc_field;nan];
                    end
+                   
+                   hh = (squeeze((squeeze(binnedfiringMaps.phaseMaps{cond}(cell,:,:)))));
+                    for trial = 1:size(hh,1)
+                       hh(trial,:) = circ_smoothTS(hh(trial,:),tau,'method','mean','exclude',0); 
+                    end
+                   h_rate_maps_smooth = [h_rate_maps_smooth;(squeeze(mean(firingMaps.rateMaps_box{cond}(cell,:,:),2))')]; 
+                   h_phase_maps_smooth = [h_phase_maps_smooth;(squeeze(circ_mean(hh)))]; clear hh
+               
+                   %% velocity correlations
+%                     spkCount = 1;
+%                     for spk = 1:size(phaseMaps.phaseMaps{cond}{cell},1)
+%                         trial = phaseMaps.phaseMaps{cond}{cell}(spk,2);
+%                         bin = phaseMaps.phaseMaps{cond}{cell}(spk,1);
+%                         dat(spkCount,1) = vel{trial}(bin);
+%                         dat(spkCount,2) = (phaseMaps.phaseMaps{cond}{cell}(spk,end-1));%firingMaps.rateMaps{cond}(cell,trial,bin); %
+%                         dat(spkCount,3) = (phaseMaps.phaseMaps{cond}{cell}(spk,end));
+%                         spkCount = 1 + spkCount;
+%                     end
+%                     phaseCorr_hpc = [phaseCorr_hpc;circ_corrcl(dat(:,3),dat(:,1))];
+%                     rateCorr_hpc = [rateCorr_hpc;corr(dat(:,2),dat(:,1))];
+%                     clear dat;
 %                    histogram(hpc_phase,0:.01:1,'Normalization','pdf','FaceColor','g'); .4:.05:1;
 %                    hold on
 %                    histogram(hpc_rate,0:.01:1,'Normalization','pdf','FaceColor','r')
@@ -208,6 +273,30 @@ for i=1:length(d)
 %                    title('best fit (normed mse), any timescale')for i in $(seq 60); do rsync -auvzP --copy-links  --exclude="*lfp" --exclude="*dat" --exclude="*.kw*" --exclude="*fmask*" --exclude="*spk*" --exclude="*fet*"  --exclude="*pos" --exclude="*clu*"  --exclude="*.kv*" --exclude="*alg*" --exclude="*Session*" --exclude="*res*" --exclude="*.g*" --exclude="*nohup*" --exclude="*.k*" --exclude="*log"  --exclude="*Tak" --exclude="*csv" --exclude="*sin_cos*" --exclude="*behav.mat" --exclude="meta*" --exclude="*tak" --exclude="*nozero*" --exclude="*decoding*" --exclude="*gauss*" --exclude="*assemblies.mat" --exclude="*phaselocking.mat" --exclude="*avi" --exclude="*temp*"  --exclude="*assem*" --exclude="*ripple*"  --exclude="*behav*" --delete  lsDataset /home/david/Dropbox/datasets/; sleep 30m; done
 %                    axis([0 1 0 1])
 %                    
+
+%%%% assemblies
+
+        list = find(pairs(:,1)==cell);
+        ls_assembly(count)=0;
+        if notAssemblies == 0 & length(dev) >= cond
+        for pair = 1:length(list)
+            if list(pair)<=size(dev{cond},2)
+            [a blah] =  min(dev{cond}(:,list(pair)));
+            [aa blahblah] = min(mean(devControl{cond}(:,list(pair),:),3));
+            imp = (a-mean(dev{cond}(:,list(pair)))) ./ (aa - mean(mean(devControl{cond}(:,list(pair),:),3)));
+            imp2 = a ./ max(mean(mean(devControl{cond}(:,list(pair),:),3)));
+            zerolag = (min(dev{cond}(1:6,list(pair))) - mean(dev{cond}(:,list(pair)))) ./ (aa - mean(mean(devControl{cond}(1,list(pair),:),3)));
+            if zerolag < 1 
+            zerolag = 1;
+            end
+            if imp > 4.2 & blah > 7 & blah < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40
+                ls_assembly(count) = ls_assembly(count)+1;
+            end
+            end
+        end
+        end
+
+%%%%
 % 
 %                    subplot(2,5,7)
 %                    scatter(tab.tau(rows(b))./nBins,tab.tau(rows(bb))./nBins,'.k')
@@ -219,6 +308,16 @@ for i=1:length(d)
 %                    subplot(2,5,8)
 % ls_phase_info = [ls_phase_info; maxphaseInfo];
 % ls_rate_info = [ls_rate_info; maxrateInfo];
+%                    if mean(min_mse_phase_all) < mean(min_mse_chance_phase) & mean(min_mse_rate) > mean(min_mse_chance_rate) &  strcmp(behavior.events.conditionType{cond},'linear')
+%                        figure
+%                        load([sessionInfo.FileName '.phaseMaps.cellinfo.mat'])
+%                        scatter(phaseMaps.phaseMaps{cond}{cell}(:,1),phaseMaps.phaseMaps{cond}{cell}(:,end),'.k'); hold on
+%                        scatter(phaseMaps.phaseMaps{cond}{cell}(:,1),phaseMaps.phaseMaps{cond}{cell}(:,end)+2*pi,'.k');
+%                        title([sessionInfo.FileName ' ' cell ' ' cond])
+%                        examples = [examples; {sessionInfo.FileName, cell, cond, 'ls'}];
+%                    end
+                   ls_pval = [ls_pval;pval];
+                   ls_pval_c = [ls_pval_c;pval_c];
                    ls_phase=[ls_phase;min_mse_phase_all'];
                    ls_rate=[ls_rate;min_mse_rate'];
                    ls_tau_phase = [ls_tau_phase;tab.tau(rows(b))./nBins];
@@ -233,6 +332,33 @@ for i=1:length(d)
                    ls_shank = [ls_shank;spikes.shankID(cell)];
                    ls_chance_rate = [ls_chance_rate; min_mse_chance_rate'];
                    ls_chance_phase = [ls_chance_phase; min_mse_chance_phase'];
+                   
+                    ll = (squeeze((squeeze(binnedfiringMaps.phaseMaps{cond}(cell,:,:)))));
+                    for trial = 1:size(ll,1)
+                       ll(trial,:) = circ_smoothTS(ll(trial,:),tau,'method','mean','exclude',0); 
+                    end
+                   l_rate_maps_smooth = [l_rate_maps_smooth;squeeze(mean(firingMaps.rateMaps_box{cond}(cell,:,:),2))'];
+                   l_phase_maps_smooth = [l_phase_maps_smooth;(circ_mean(ll))];clear ll
+               
+                    if ~isempty(fields{cond}{cell}) %& length(fields{cond}{cell}) == 1
+                    ls_field = [ls_field;fields{cond}{cell}{1}.COM];
+                    else
+                    ls_field = [ls_field;nan];
+                    end
+                   
+                   %% velocity correlations
+%                     spkCount = 1;
+%                     for spk = 1:size(phaseMaps.phaseMaps{cond}{cell},1)
+%                         trial = phaseMaps.phaseMaps{cond}{cell}(spk,2);
+%                         bin = phaseMaps.phaseMaps{cond}{cell}(spk,1);
+%                         dat(spkCount,1) = vel{trial}(bin);
+%                         dat(spkCount,2) = (phaseMaps.phaseMaps{cond}{cell}(spk,end-1));%firingMaps.rateMaps{cond}(cell,trial,bin); %
+%                         dat(spkCount,3) = (phaseMaps.phaseMaps{cond}{cell}(spk,end));
+%                         spkCount = 1 + spkCount;
+%                     end
+%                     phaseCorr_ls = [phaseCorr_ls;circ_corrcl(dat(:,3),dat(:,1))];
+%                     rateCorr_ls = [rateCorr_ls;corr(dat(:,2),dat(:,1))];
+%                     clear dat;
 %                    histogram(ls_phase,0:.01:1,'Normalization','pdf','FaceColor','g')
 %                    hold on
 %                    histogram(ls_rate,0:.01:1,'Normalization','pdf','FaceColor','r')
@@ -267,6 +393,7 @@ for i=1:length(d)
 % %                     hold off
 %                     title('tau vs mse trough')
 %                      end
+count=1+count;
                end
 %                end   
 %                end
@@ -295,24 +422,45 @@ anim(i) = ls_an(f(1));
 depths(i) = ls_depth(f(1));
 end
 end
-whos
+u = unique(anim);
+for i=1:length(d)
+f = find(hpc_rec==i);
+ff = find(~isnan(hpc_field));f = intersect(f,ff);
+hp(i) = nanmean(nanmean(hpc_phase(f,end)));
+hr(i) = nanmean(nanmean(hpc_rate(f,end)));
+f = find(ls_rec==i);
+% ff = find(ls_phase(f)<1);
+if ~isempty(f)
+lmp(i) = nanmedian(nanmedian(ls_phase(f,end)));
+lmr(i) = nanmedian(nanmedian(ls_rate(f,end)));
+lr(i) = (nanmean(nanmean(ls_rate(f,end))));
+lp(i) = (nanmean(nanmean(ls_phase(f,end))));
+else
+end
+end
+
 offsets = [0 0 -3000 -800 0 0 0];
 offsets = [0 500 200 0 2500 600];
 for i=1:length(u)
-subplot(4,2,i);hold on
 f = find(anim==u(i));
+ff=find(ls_an==u(i));
 if i == 2
-    f = f(1:end-3);
+%     f = f(1:end-3);
 elseif i == 3
-    f = f(1:end-3);
+%     f = f(1:end-3);
+elseif i == 5
+    f = f(1:end-1);
 end
+figure(1)
+subplot(4,2,i);hold on
 plot((lp(f))-(lr(f)),-depths(f),'.k')
 [a  b] = corr(depths(f)',(lp(f)')-(lr(f))');
 [x y] = polyfit(depths(f),(lp(f))-(lr(f)),1);
 y1 = polyval(x,depths(f));
 plot(y1,-depths(f),'r')
 title(a)
-axis([-1500 1500 -3600 0])
+axis([-3000 3000 -3600 0])
 end
+
 
 

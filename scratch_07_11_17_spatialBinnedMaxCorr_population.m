@@ -36,7 +36,7 @@ countMap =firingMaps.countMaps;
 occuMap =firingMaps.occupancy;
 phaseMap=phaseMaps.phaseMaps;
 
-spikes = bz_GetSpikes;
+spikes = bz_GetSpikes('region','ls');
 [binnedPhaseMap] = bz_phaseMap2Bins(phaseMap,rateMap,behavior);
     
 positionDecodingMaxCorr_binned_box_mean.region = spikes.region;
@@ -48,12 +48,12 @@ end
 
 for smoothing = 1:round(nBins)
     disp(['smoothing by: ' num2str(smoothing) ' bins']);
-    for cond = 2%1:length(unique(behavior.events.trialConditions))
+    for cond = 1:length(unique(behavior.events.trialConditions))
         if size(binnedPhaseMap{cond},2) >= 5
 %         figure(cond)
         % smooth data..
         maps = bz_firingMap1D(spikes,behavior,smoothing);
-        for cell = 2%:length(spikes.times)
+        for cell = 1:length(spikes.times)
                        %smoothing
             phase_trains_smooth=[];
             cos_phase_trains_smooth=[];
@@ -74,37 +74,34 @@ for smoothing = 1:round(nBins)
 %                 rates_trains_smooth = [rates_trains_smooth; ...
 %                                        smoothts(squeeze(countMap{cond}(cell,t,:))','b',smoothing)'];
                 rates_trains_smooth = [rates_trains_smooth; ...
-                                       squeeze(maps.rateMaps_box{cond}(cell,t,:))];    
+                                       squeeze(maps.rateMaps_box{cond}(cell,t,:))];   
+              
                 pos = [pos,[1:nBins]];                   
             end 
-%             subplot(2,1,1)
-%             plot(rates_trains_smooth(1:200))
-%             subplot(2,1,2)
-%             plot(phase_trains_smooth(1:200))
-%             title(smoothing)
-%             pause
-%             pos(rates_trains_smooth==0)=nan;
-%             phase_trains_smooth(rates_trains_smooth==0)=nan;
-%             rates_trains_smooth(rates_trains_smooth==0)=nan;
+            r(cell,:) = rates_trains_smooth;
+            p(cell,:) = phase_trains_smooth;
+            p_cos(cell,:) = cos(p(cell,:));
+            p_sin(cell,:) = sin(p(cell,:));
+        end
+        
+            r=r';
+            p=p';
+            p_cos=p_cos';
+            p_sin=p_sin'; 
             
-            r = rates_trains_smooth;
-            p = phase_trains_smooth;
-            p_cos =cos(phase_trains_smooth);
-            p_sin = sin(phase_trains_smooth);
-             
             count = 1;
             for iter = 1:10
             rr = randperm(length(r));
             pct = round(prctile(1:length(r),60));
             
-            r_train = r(rr(1:pct));
-            r_test = r(rr(pct+1:end));
-            p_train = p(rr(1:pct));
-            p_test = p(rr(pct+1:end));
-            p_cos_train = p_cos(rr(1:pct));
-            p_cos_test = p_cos(rr(pct+1:end));
-            p_sin_train = p_sin(rr(1:pct));
-            p_sin_test = p_sin(rr(pct+1:end));
+            r_train = r(rr(1:pct),:);
+            r_test = r(rr(pct+1:end),:);
+            p_train = p(rr(1:pct),:);
+            p_test = p(rr(pct+1:end),:);
+            p_cos_train = p_cos(rr(1:pct),:);
+            p_cos_test = p_cos(rr(pct+1:end),:);
+            p_sin_train = p_sin(rr(1:pct),:);
+            p_sin_test = p_sin(rr(pct+1:end),:);
             
             
             pos_train = pos(rr(1:pct));
@@ -148,12 +145,12 @@ for smoothing = 1:round(nBins)
             
             cl = max_correlation_coefficient_CL;
             cl = train(cl,[r_train'],pos_train');
-            yfit = test(cl,[r_test(randperm(length(r_test)))']);
+            yfit = test(cl,[r_test(randperm(length(r_test)),:)']);
             struct.mse_chance_rate  = nanmean((pos_test'-yfit).^2);
             
             cl = max_correlation_coefficient_CL;
             cl = train(cl,[p_cos_train'; p_sin_train';p_train'],pos_train');
-            yfit = test(cl,[p_cos_test(randperm(length(p_test)))'; p_sin_test(randperm(length(p_test)))';p_test(randperm(length(p_test)))']);
+            yfit = test(cl,[p_cos_test(randperm(length(p_test)),:)'; p_sin_test(randperm(length(p_test)),:)';p_test(randperm(length(p_test)),:)']);
             struct.mse_chance_phase  = nanmean((pos_test'-yfit).^2);
             
             % store peripherals
@@ -165,7 +162,8 @@ for smoothing = 1:round(nBins)
             
             count = 1+count;
             end
-            if cell == 2 && cond == 2
+            clear r p p_cos p_sin
+           
 % %                 
 % %                 figure(cond)
                 t_rate = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_rate',...
@@ -222,11 +220,9 @@ for smoothing = 1:round(nBins)
 
                 pause(.1)
             end         
-        end
         disp(['done with condition: ' num2str(cond) ' of ' num2str(length(unique(behavior.events.trialConditions)))]);
-        end
     end
     positionDecodingMaxCorr_binned_box_mean.dateRun = date;  % this can take a very long time so lets save each loop...
-% save([xml.FileName '.positionDecodingMaxCorr_binned_box_mean_20.cellinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
+% save([xml.FileName '.positionDecodingMaxCorr_binned_box.popinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
 end
 % end

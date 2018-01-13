@@ -11,6 +11,10 @@ nLS = [];
 rec=[];
 region = [];
 PF_loc = [];
+waveforms = [];
+isi = [];
+waveforms_not = [];
+isi_not = [];
 
 for i=1:length(d)
 cd(d(i).name)
@@ -23,6 +27,7 @@ load('assembliesCrossRegion_split_w_theta.mat','dev*','pairs');%c
 end
 
 sessionInfo = bz_getSessionInfo;
+spikes = bz_GetSpikes('noprompt',true);
 load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'],'fields');
 % if exist(['assembliesCrossRegionData.mat'])
 % load(['assembliesCrossRegionData.mat'])
@@ -54,6 +59,8 @@ for c = 1:length(dev)
        nHPC=[nHPC; length(unique(pairs(:,2)))];
        nLS=[nLS; length(unique(pairs(:,1)))];
        rec = [rec; i];
+       waveforms = [waveforms;minmax_norm(spikes.rawWaveform{pairs(pair,1)})];
+       isi = [isi; minmax_norm(hist(diff(spikes.times{pairs(pair,1)}),0:.001:.25))];
        if ~isempty(sessionInfo.ca3)
            region = [region;3];
        else
@@ -79,6 +86,9 @@ for c = 1:length(dev)
        title([imp zerolag ])
        hold off
        pause(.01)
+    elseif imp < 4.2 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{c}(:,pair))>50
+       waveforms_not = [waveforms_not;minmax_norm(spikes.rawWaveform{pairs(pair,1)})];
+       isi_not = [isi_not; minmax_norm(hist(diff(spikes.times{pairs(pair,1)}),0:.001:.25))];
     end
     pairCount = 1 + pairCount;
    end    

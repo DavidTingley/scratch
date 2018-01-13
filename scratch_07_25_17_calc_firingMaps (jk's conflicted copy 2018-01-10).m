@@ -33,7 +33,7 @@ for ii=1:length(d)
          spikes = bz_GetSpikes('noprompts',true);
         if ~isempty(spikes)
         load([d(ii).name '.firingMaps.cellinfo.mat'])
-        for thresh = .15%[.01 .05 .1 .2 .4]
+        for thresh = [.01 .05 .1 .2 .4]
             for cond = 1:length(firingMaps.rateMaps)
                 fields{cond} = bz_getPlaceFields1D(firingMaps.rateMaps{cond},'minPeakRate',2,'percentThreshold',thresh);
             end
@@ -41,7 +41,6 @@ for ii=1:length(d)
         end
         end
     end
-%     cd /home/david/datasets/lsDataset
-    cd D:\Dropbox\datasets\lsDataset
+    cd /home/david/datasets/lsDataset
     clear fields firingMaps
 end

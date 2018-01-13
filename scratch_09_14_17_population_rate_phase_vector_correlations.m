@@ -1,42 +1,104 @@
-d = dir('*/*firingMaps*');
+d = dir('*201*');
 b = dir('*/*behavior*');
 l = 1; h=1;
+tau = 5;
 
 for i=1:length(d)
-    load([d(i).folder '/' d(i).name]);
-    cd(d(i).folder)
+%     load([d(i).folder '/' d(i).name]);
+    cd(d(i).name)
+    sessionInfo = bz_getSessionInfo;
+
+    if exist([sessionInfo.FileName '.firingMaps.cellinfo.mat'])
     b = dir('*behavior*');
     load([b(1).name]);
-    cd /home/david/datasets/lsDataset
-    if strcmp(behavior.description,'wheel alternation')
-    [binnedfiringMaps.phaseMaps] = bz_phaseMap2Bins(firingMaps.phaseMaps,firingMaps.rateMaps,behavior);
+    load([sessionInfo.FileName '.firingMaps.cellinfo.mat'])
+    load([sessionInfo.FileName '.phaseMaps.cellinfo.mat'])
+    load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
+    spikes = bz_GetSpikes;
+%     cd /home/david/datasets/lsDataset
+%     if strcmp(behavior.description,'wheel alternation')
+    [firingMaps] = bz_firingMap1D(spikes,behavior,tau);
+        [binnedfiringMaps.phaseMaps] = bz_phaseMap2Bins(phaseMaps.phaseMaps,firingMaps.rateMaps,behavior);
     for cell = 1:length(firingMaps.UID)
         for condition = 1:length(firingMaps.rateMaps)
+            if sum(sum(firingMaps.countMaps{condition}(cell,:,:))) > 1.5 * size(firingMaps.countMaps{condition},2)
            if strcmp(firingMaps.region{cell},'ls') & size(firingMaps.rateMaps{condition},2) > 10
-            l_maps(l,:) = makeLength(squeeze(mean(firingMaps.rateMaps{condition}(cell,:,:),2)),200);
-            l_phase_maps(l,:) = makeLength(squeeze(circ_mean(squeeze(binnedfiringMaps.phaseMaps{condition}(cell,:,:)))),200);
+%             l_maps(l,:) = (squeeze(mean(firingMaps.rateMaps{condition}(cell,:,:),2)));
+            ll = (squeeze((squeeze(binnedfiringMaps.phaseMaps{condition}(cell,:,:)))));
+            for trial = 1:size(ll,1)
+               ll(trial,:) = circ_smoothTS(ll(trial,:),tau,'method','mean','exclude',0); 
+            end
+            l_rate_maps_smooth(l,:) = (squeeze(mean(firingMaps.rateMaps_box{condition}(cell,:,:),2)));
+            l_phase_maps_smooth(l,:) = circ_mean(ll); clear ll
             l=l+1;
-           elseif size(firingMaps.rateMaps{condition},2) > 10
-            h_maps(h,:) = makeLength(squeeze(mean(firingMaps.rateMaps{condition}(cell,:,:),2)),200);
-            h_phase_maps(h,:) = makeLength(squeeze(circ_mean(squeeze(binnedfiringMaps.phaseMaps{condition}(cell,:,:)))),200);
-            h=h+1;
+           elseif size(firingMaps.rateMaps{condition},2) > 10 & ~isempty(fields{condition}{cell})
+%             h_maps(h,:) = (squeeze(mean(firingMaps.rateMaps{condition}(cell,:,:),2)));
+            for field = 1:length(fields{condition}{cell})
+                hh = (squeeze((squeeze(binnedfiringMaps.phaseMaps{condition}(cell,:,:)))));
+                for trial = 1:size(hh,1)
+                   hh(trial,:) = circ_smoothTS(hh(trial,:),tau,'method','mean','exclude',0); 
+                end
+                h_rate_maps_smooth(h,:) = (squeeze(mean(firingMaps.rateMaps_box{condition}(cell,:,:),2)));
+                h_phase_maps_smooth(h,:) = circ_mean(hh); clear hh
+                COM(h) = fields{condition}{cell}{field}.COM;
+                h=h+1;
+            end
            end
+            end
         end
-    end  
     end
+    
+%     for ii=1:201
+%     for jj=1:201
+%     cc(ii,jj) = circ_corrcc(l_phase_maps_smooth(:,ii),l_phase_maps_smooth(:,jj));
+%     hh(ii,jj) = circ_corrcc(h_phase_maps_smooth(:,ii),h_phase_maps_smooth(:,jj));
+%     end
+%     end
+    subplot(4,2,1)
+    imagesc(corr(h_rate_maps_smooth,'rows','complete'))
+    caxis([0 1])
+    subplot(4,2,2)
+    imagesc(corr(l_rate_maps_smooth,'rows','complete'))
+    caxis([0 1])
+    subplot(4,2,3)
+    imagesc(corr(h_phase_maps_smooth,'rows','complete'))
+    caxis([0 1])
+    subplot(4,2,4)
+    imagesc(corr(l_phase_maps_smooth,'rows','complete'))
+    caxis([0 1])
+    subplot(4,2,5)
+    imagesc(corr(cos(h_phase_maps_smooth),'rows','complete'))
+    caxis([0 1])
+    subplot(4,2,6)
+    imagesc(corr(cos(l_phase_maps_smooth),'rows','complete'))
+    caxis([0 1])
+    subplot(4,2,7)
+    imagesc(corr(sin(h_phase_maps_smooth),'rows','complete'))
+    caxis([0 1])
+%     imagesc(hh)
+%     caxis([0 1])
+    subplot(4,2,8)
+    imagesc(corr(sin(l_phase_maps_smooth),'rows','complete'))
+    caxis([0 1])
+%     imagesc(cc)
+%     caxis([0 1])
+    pause(.01)
+    
+    end
+%     cd D:\Dropbox\datasets\lsDataset
+cd /home/david/datasets/lsDataset
 end
 
-for i=1:length(h_phase_maps)
-h_phase_maps_smooth(i,:) = circ_smoothTS(h_phase_maps(i,:),30,'method','median','exclude',0);
-end
-for i=1:length(l_phase_maps)
-l_phase_maps_smooth(i,:) = circ_smoothTS(l_phase_maps(i,:),30,'method','median','exclude',0);
-end 
-hp = circ_mean(h_phase_maps_smooth);
-lp = circ_mean(l_phase_maps_smooth);
+
+% hp = circ_mean(h_phase_maps_smooth);
+% lp = circ_mean(l_phase_maps_smooth);
+% plot(hp)
+% figure
+% plot(lp,'g')
 
 
 
-plot(hp)
-figure
-plot(lp,'g')
+
+
+
+
