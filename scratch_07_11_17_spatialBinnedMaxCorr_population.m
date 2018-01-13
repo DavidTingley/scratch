@@ -36,7 +36,7 @@ countMap =firingMaps.countMaps;
 occuMap =firingMaps.occupancy;
 phaseMap=phaseMaps.phaseMaps;
 
-spikes = bz_GetSpikes('region','ls');
+spikes = bz_GetSpikes('region','hpc');
 [binnedPhaseMap] = bz_phaseMap2Bins(phaseMap,rateMap,behavior);
     
 positionDecodingMaxCorr_binned_box_mean.region = spikes.region;
@@ -223,6 +223,6 @@ for smoothing = 1:round(nBins)
         disp(['done with condition: ' num2str(cond) ' of ' num2str(length(unique(behavior.events.trialConditions)))]);
     end
     positionDecodingMaxCorr_binned_box_mean.dateRun = date;  % this can take a very long time so lets save each loop...
-save([xml.FileName '.positionDecodingMaxCorr_binned_box_LS.popinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
+save([xml.FileName '.positionDecodingMaxCorr_binned_box_HPC.popinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
 end
 % end
