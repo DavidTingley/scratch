@@ -33,7 +33,7 @@ countMap =firingMaps.countMaps;
 occuMap =firingMaps.occupancy;
 phaseMap=phaseMaps.phaseMaps;
 
-spikes = bz_GetSpikes('region','ls');
+spikes = bz_GetSpikes('region','hpc');
 r = randperm(length(spikes.times));
 ensemble = r(1:ensembleSize);
 spikes = bz_GetSpikes('UID',spikes.UID(r(1:ensembleSize)));
