@@ -1,4 +1,4 @@
-function [] =scratch_07_11_17_spatialBinnedMaxCorr_population(ensembleSize)
+
 % if ~exist([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
 warning off
 sessionInfo = bz_getSessionInfo;
@@ -10,7 +10,7 @@ nBins = length(behavior.events.map{1}.x);
 
 % % %    % set up phase coding data
 % [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,lfp4);
-% if ~exist([sessionInfo.FileName '.firingMaps.cellinfo.mat'])
+if ~exist([sessionInfo.FileName '.firingMaps.cellinfo.mat'])
     spikes = bz_GetSpikes;
     load([sessionInfo.FileName '.behavior.mat'])
     if ~isempty(sessionInfo.ca1)
@@ -21,21 +21,20 @@ nBins = length(behavior.events.map{1}.x);
     lfp = bz_GetLFP(sessionInfo.thetaChans(end));
     end
     if ~isempty(spikes)
-    [firingMaps] = bz_firingMap1D(spikes,behavior,5,'saveMat',false);
-    [phaseMaps] = bz_phaseMap1D(spikes,behavior,lfp,5,'saveMat',false);
+    [firingMaps] = bz_firingMap1D(spikes,behavior,5);
+    [phaseMaps] = bz_phaseMap1D(spikes,behavior,lfp,5);
     end
-% else
-%     load([sessionInfo.FileName '.firingMaps.cellinfo.mat']);
-%     load([sessionInfo.FileName '.phaseMaps.cellinfo.mat']);
-% end
+else
+    load([sessionInfo.FileName '.firingMaps.cellinfo.mat']);
+    load([sessionInfo.FileName '.phaseMaps.cellinfo.mat']);
+end
 rateMap =firingMaps.rateMaps;
 countMap =firingMaps.countMaps;
 occuMap =firingMaps.occupancy;
 phaseMap=phaseMaps.phaseMaps;
 
-spikes = bz_GetSpikes('region','ls');
+spikes = bz_GetSpikes('region','hpc');
 r = randperm(length(spikes.times));
-ensemble = r(1:ensembleSize);
 spikes = bz_GetSpikes('UID',spikes.UID(r(1:ensembleSize)));
 [binnedPhaseMap] = bz_phaseMap2Bins(phaseMap,rateMap,behavior);
     
@@ -48,7 +47,7 @@ end
 
 for smoothing = 1:round(nBins)
     disp(['smoothing by: ' num2str(smoothing) ' bins']);
-    for cond = 1:length(unique(behavior.events.trialConditions))
+    for cond = 7%1:length(unique(behavior.events.trialConditions))
         if size(binnedPhaseMap{cond},2) >= 5
 %         figure(cond)
         % smooth data..
@@ -223,7 +222,6 @@ for smoothing = 1:round(nBins)
         disp(['done with condition: ' num2str(cond) ' of ' num2str(length(unique(behavior.events.trialConditions)))]);
     end
     positionDecodingMaxCorr_binned_box_mean.dateRun = date;  % this can take a very long time so lets save each loop...
-    positionDecodingMaxCorr_binned_box_mean.ensemble = ensemble;
-    save([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box.' num2str(ensemble,'%0.3d') '.popinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
+% save([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box.popinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
 end
 % end

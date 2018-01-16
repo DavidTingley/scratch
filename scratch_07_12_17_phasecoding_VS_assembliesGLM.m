@@ -135,6 +135,23 @@ if exist('assembliesCrossRegion_split_w_theta_08-Nov-2017.mat') || exist('assemb
                     else
                         region = [region;3];
                     end
+                    %% plotting
+                    line([median(ii) median(ii)],[0 25],'color','r')
+                   line([mean(ii) mean(ii)],[0 25],'color','g')
+                   ylabel('improvement (min-mean) ./ (minc-meanc)')
+                   xlabel('time, ms')
+                   subplot(2,2,3)
+                   scatter(b,imp2,'.k')
+                   hold on
+                   title(pairs(pair,:))
+                   subplot(2,2,4)
+                   plot(dev{c}(:,pair));
+                   hold on
+                   plot(mean(devControl{c}(:,pair,:),3));
+                   title([imp zerolag ])
+                   hold off
+                   pause(.01)
+                   %% 
                     ID = [ID; i cond pairs(pair,:)];
                     behav = [behav; sum(double(behavior.events.conditionType{cond}))];
                     animal = [animal; sum(double(sessionInfo.animal))];

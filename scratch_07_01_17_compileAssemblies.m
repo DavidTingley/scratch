@@ -78,7 +78,7 @@ for c = 1:length(dev)
        subplot(2,2,3)
        scatter(b,imp2,'.k')
        hold on
-       title(pairs(pair,:))
+       title(pairs(pair,:))sto
        subplot(2,2,4)
        plot(dev{c}(:,pair));
        hold on
