@@ -110,7 +110,7 @@ for i=1:length(d)
         
             for cond = 1:conditions
                 if sum(behavior.events.trialConditions==cond) >= 10 %%%%%%%%%%%%%%%%%%%%%%%%%%
-                if sum(sum(firingMaps.countMaps{cond}(cell,:,:))) >= 1.5 * sum(behavior.events.trialConditions==cond) 
+%                 if sum(sum(firingMaps.countMaps{cond}(cell,:,:))) >= 1.5 * sum(behavior.events.trialConditions==cond) 
 %                     sum(sum(firingMaps.countMaps{cond}(cell,:,:))) > .25 * sum(behavior.events.trialConditions==cond) 
                     nTrials = sum(behavior.events.trialConditions==cond);
                     %% information theory stuff here
@@ -402,7 +402,7 @@ count=1+count;
                 elseif cond == 1 & cell == 1
                     warning('something is wrong')
                 end
-                   end
+%                    end
                 end
             end
             end
@@ -410,8 +410,8 @@ count=1+count;
         end
     end
 %     pause
-%     cd('D:\Dropbox\datasets\lsDataset\')
-cd('/home/david/datasets/lsDataset')
+    cd('D:\Dropbox\datasets\lsDataset\')
+% cd('/home/david/datasets/lsDataset')
 end
 
 for i=1:length(d)
