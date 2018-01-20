@@ -1,4 +1,4 @@
-function [] =scratch_07_11_17_spatialBinnedMaxCorr_population(ensembleSize)
+function [] =scratch_07_11_17_spatialBinnedMaxCorr_population_hpc(ensembleSize)
 % if ~exist([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
 warning off
 sessionInfo = bz_getSessionInfo;
@@ -224,6 +224,6 @@ for smoothing = 1:round(nBins)
     end
     positionDecodingMaxCorr_binned_box_mean.dateRun = date;  % this can take a very long time so lets save each loop...
     positionDecodingMaxCorr_binned_box_mean.ensemble = ensemble;
-    save([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box.' num2str(sort(ensemble),'%0.3d') '.popinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
+    save(['/ifs/data/buzsakilab/popDecoding_Results/' sessionInfo.FileName '.positionDecodingMaxCorr_binned_box.' num2str(sort(ensemble),'%0.3d') '.popinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
 end
 % end
