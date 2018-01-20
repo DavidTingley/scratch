@@ -35,7 +35,7 @@ phaseMap=phaseMaps.phaseMaps;
 
 spikes = bz_GetSpikes('region','ls');
 r = randperm(length(spikes.times));
-ensemble = r(1:ensembleSize);
+ensemble = r(1:ensembleSize); clear r
 spikes = bz_GetSpikes('UID',spikes.UID(r(1:ensembleSize)));
 [binnedPhaseMap] = bz_phaseMap2Bins(phaseMap,rateMap,behavior);
     
