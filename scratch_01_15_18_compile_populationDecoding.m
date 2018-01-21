@@ -9,12 +9,12 @@ LS_mat_rate = nan(150,200);
 HPC_mat_phase = nan(150,200);
 HPC_mat_rate = nan(150,200);
 wind = 21; % smoothing window to plot
-nCellThresh = 15; % min num cells to be counted
+nCellThresh = 1; % min num cells to be counted
 
 for i=length(d):-1:1
 %     cd(d(i).name)
     load(d((i)).name)
-for tau = 1:5:50
+for tau = 1:200
     hpc=[];ls=[];
     if strcmp(positionDecodingMaxCorr_binned_box_mean.region{1},'ls')
         ls = load(d(i).name);
