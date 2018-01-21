@@ -36,7 +36,7 @@ phaseMap=phaseMaps.phaseMaps;
 spikes = bz_GetSpikes('region','hpc');
 r = randperm(length(spikes.times));
 ensemble = r(1:ensembleSize); 
-spikes = bz_GetSpikes('UID',spikes.UID(r(1:ensembleSize)));clear r
+spikes = bz_GetSpikes('UID',spikes.UID(ensemble));clear r
 [binnedPhaseMap] = bz_phaseMap2Bins(phaseMap,rateMap,behavior);
     
 positionDecodingMaxCorr_binned_box_mean.region = spikes.region;

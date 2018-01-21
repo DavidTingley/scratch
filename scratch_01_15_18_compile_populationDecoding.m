@@ -2,19 +2,19 @@ clear
 d = dir('*201*');
 clf
 LS=[];HPC=[];
-LS_mat_phase = nan(150,200);
-HPC_mat_phase = nan(150,200);
-LS_mat_rate = nan(150,200);
-HPC_mat_rate = nan(150,200);
 % converge faster with random sampling
 % ord = randperm(length(d));
-wind = 25; % smoothing window to plot
-nCellThresh = 1; % min num cells to be counted
+LS_mat_phase = nan(150,200);
+LS_mat_rate = nan(150,200);
+HPC_mat_phase = nan(150,200);
+HPC_mat_rate = nan(150,200);
+wind = 21; % smoothing window to plot
+nCellThresh = 15; % min num cells to be counted
 
 for i=length(d):-1:1
 %     cd(d(i).name)
     load(d((i)).name)
-for tau = 1:200
+for tau = 1:5:50
     hpc=[];ls=[];
     if strcmp(positionDecodingMaxCorr_binned_box_mean.region{1},'ls')
         ls = load(d(i).name);
@@ -53,7 +53,7 @@ for tau = 1:200
                 scatter(ls_nCells,ls_mse_phase,'.b')
                 hold on
                 scatter(ls_nCells,ls_mse_rate,'.r')
-                axis([0 150 -100 8000])
+                axis([0 60 -100 11000])
                 title('ls cells')
         end
         if ~isempty(hpc) & tau == wind  
@@ -61,7 +61,7 @@ for tau = 1:200
                 scatter(hpc_nCells,hpc_mse_phase,'.b')
                 hold on
                 scatter(hpc_nCells,hpc_mse_rate,'.r')
-                axis([0 150 -100 11000])
+                axis([0 200 -100 11000])
                 title('hpc cells')
         end
         if ~isempty(ls) 
@@ -86,7 +86,7 @@ end
         hold off
         subplot(3,3,5)
         hold off
-        method = {'poly1','exp1'};
+        method = {'poly1','exp1','exp2'};
         for p = 1:2
             if ~isempty(LS)
             ind = LS(:,2)==wind & LS(:,1) > nCellThresh;
@@ -113,37 +113,82 @@ end
             axis([0 150 -100 11000])
             end
         end
-        for i=1:150 % cell num
+%         if ~isempty(LS)
+%         LS_mat_phase = griddata(LS(:,1),LS(:,2),LS(:,3),meshgrid(1:200,1:200),meshgrid(1:200,1:200));
+% %         LS_mat_phase = f(meshgrid(1:200,1:200),meshgrid(1:200,1:200));
+%         LS_mat_phase(LS_mat_phase<0)=0;
+%         LS_mat_rate = griddata(LS(:,1),LS(:,2),LS(:,4),meshgrid(1:200,1:200),meshgrid(1:200,1:200));
+% %         LS_mat_rate = f(meshgrid(1:200,1:200),meshgrid(1:200,1:200));
+%         LS_mat_rate(LS_mat_rate<0)=0;
+%         end
+%         if ~isempty(HPC)
+%         HPC_mat_phase = griddata(HPC(:,1),HPC(:,2),HPC(:,3),meshgrid(1:200,1:200),meshgrid(1:200,1:200));
+% %         HPC_mat_phase = f(meshgrid(1:200,1:200),meshgrid(1:200,1:200));
+%         HPC_mat_phase(HPC_mat_phase<0)=0;
+%         HPC_mat_rate = griddata(HPC(:,1),HPC(:,2),HPC(:,4),meshgrid(1:200,1:200),meshgrid(1:200,1:200));
+% %         HPC_mat_rate = f(meshgrid(1:200,1:200),meshgrid(1:200,1:200));
+%         HPC_mat_rate(HPC_mat_rate<0)=0;
+%         end
+
+        for ii=1:150 % cell num
             if ~isempty(LS)
-            f = find(LS(:,1)==i);
+            f = find(LS(:,1)==ii);
             end
             if ~isempty(HPC)
-                g = find(HPC(:,1)==i);
+                g = find(HPC(:,1)==ii);
             end
             for j=1:200 % tau
                 % set minimum number of models to be included?
                 if ~isempty(LS)
                 ff = find(LS(:,2)==j);
-                LS_mat_phase(i,j) = nanmean(LS(intersect(f,ff),3));
-                LS_mat_rate(i,j) = nanmean(LS(intersect(f,ff),3));
+                LS_mat_phase(ii,j) = nanmean(LS(intersect(f,ff),3));
+                LS_mat_rate(ii,j) = nanmean(LS(intersect(f,ff),4));
+                LS_mat_phase_std(ii,j) = nanstd(LS(intersect(f,ff),3));
+                LS_mat_rate_std(ii,j) = nanstd(LS(intersect(f,ff),4));
                 end
                 if ~isempty(HPC)
                 gg = find(HPC(:,2)==j);
-                HPC_mat_phase(i,j) = nanmean(HPC(intersect(g,gg),3));
-                HPC_mat_rate(i,j) = nanmean(HPC(intersect(g,gg),3));
+                HPC_mat_phase(ii,j) = nanmean(HPC(intersect(g,gg),3));
+                HPC_mat_rate(ii,j) = nanmean(HPC(intersect(g,gg),4));
                 end
             end
+%             LS_mat_phase(ii,:)=fillmissing(LS_mat_phase(ii,:),'linear');
+%             LS_mat_rate(ii,:)=fillmissing(LS_mat_rate(ii,:),'linear');
+%             if ~isempty(HPC)
+%             HPC_mat_phase(ii,:)=fillmissing(HPC_mat_phase(ii,:),'linear');
+%             HPC_mat_rate(ii,:)=fillmissing(HPC_mat_rate(ii,:),'linear');
+%             end
         end
+        if ~isempty(LS)
+%         LS_mat_phase(LS_mat_phase<0)=0;
+%         LS_mat_rate(LS_mat_rate<0)=0;
         subplot(3,3,6)
         imagesc(log(LS_mat_phase))
+%         caxis([0 log(8000)])
         ylabel('cell #')
         xlabel('smoothing window')
         subplot(3,3,7)
         imagesc(log(LS_mat_rate))
+%         caxis([0 log(8000)])
+        subplot(3,3,8)
+        hold off
+        boundedline(1:150,fillmissing(LS_mat_phase(:,wind),'nearest'),fillmissing(LS_mat_phase_std(:,wind),'nearest'),'b')
+        boundedline(1:150,fillmissing(LS_mat_rate(:,wind),'nearest'),fillmissing(LS_mat_rate_std(:,wind),'nearest'),'r')
+        
+        end
+        if ~isempty(HPC)
         subplot(3,3,8)
         imagesc(log(HPC_mat_phase))
+%         caxis([0 log(8000)])
         subplot(3,3,9)
         imagesc(log(HPC_mat_rate))
+%         caxis([0 log(8000)])
+        subplot(3,3,9)
+        hold off
+        boundedline(1:150,fillmissing(HPC_mat_phase(:,wind),'nearest'),fillmissing(HPC_mat_phase_std(:,wind),'nearest'),'b')
+        boundedline(1:150,fillmissing(HPC_mat_rate(:,wind),'nearest'),fillmissing(HPC_mat_rate_std(:,wind),'nearest'),'r')
+        
+        end
     end
 end 
  
