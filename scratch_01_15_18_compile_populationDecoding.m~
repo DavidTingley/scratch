@@ -1,20 +1,12 @@
-clear 
 d = dir('*201*');
 clf
-LS=[];HPC=[];
-LS_mat_phase = nan(150,200);
-HPC_mat_phase = nan(150,200);
-LS_mat_rate = nan(150,200);
-HPC_mat_rate = nan(150,200);
-% converge faster with random sampling
-% ord = randperm(length(d));
-wind = 25; % smoothing window to plot
-nCellThresh = 5; % min num cells to be counted
+tau = 10;
+LS=[];HPC=[];REC=[];
 
 for i=1:length(d)
 %     cd(d(i).name)
-    load(d((i)).name)
-for tau = 1:200
+    load(d(i).name)
+for tau = 1:25
     hpc=[];ls=[];
     if strcmp(positionDecodingMaxCorr_binned_box_mean.region{1},'ls')
         ls = load(d(i).name);
@@ -23,6 +15,11 @@ for tau = 1:200
         hpc = load(d(i).name);
         conditions = unique(hpc.positionDecodingMaxCorr_binned_box_mean.results{end}.condition);
     end
+%     sessionInfo = bz_getSessionInfo;
+%     load([sessionInfo.FileName '.behavior.mat']);
+%     ls = load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_LS.popinfo.mat']);
+%     hpc = load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_HPC.popinfo.mat']);
+%     rec = load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box.popinfo.mat']);
 
     for cond = conditions'
 %         if length(behavior.events.trialConditions==cond)>=10
@@ -47,107 +44,96 @@ for tau = 1:200
         hpc_mse_rate = nanmedian(hpc.positionDecodingMaxCorr_binned_box_mean.results{end}.mse_rate(ind));
         hpc_nCells = length(hpc.positionDecodingMaxCorr_binned_box_mean.region);
         end
-
-        if ~isempty(ls) & tau == wind
-                subplot(3,3,1)
-                scatter(ls_nCells,ls_mse_phase,'.b')
-                hold on
-                scatter(ls_nCells,ls_mse_rate,'.r')
-                axis([0 150 -100 8000])
-                title('ls cells')
-        end
-        if ~isempty(hpc) & tau == wind  
-                subplot(3,3,2)
-                scatter(hpc_nCells,hpc_mse_phase,'.b')
-                hold on
-                scatter(hpc_nCells,hpc_mse_rate,'.r')
-                axis([0 150 -100 11000])
-                title('hpc cells')
-        end
-        if ~isempty(ls) 
-                LS = [LS; ls_nCells, tau, ls_mse_phase, ls_mse_rate];
-        end
-        if ~isempty(hpc)
-                HPC = [HPC; hpc_nCells, tau, hpc_mse_phase, hpc_mse_rate];
-        end
+%         rows = find(rec.positionDecodingMaxCorr_binned_box_mean.results{end}.tau == tau);
+%         cols = find(rec.positionDecodingMaxCorr_binned_box_mean.results{end}.condition == cond);
+%         ind = intersect(rows,cols);
+%         rec_mse_phase(1) = nanmedian(rec.positionDecodingMaxCorr_binned_box_mean.results{end}.mse_phase(ind));
+%         rec_mse_phase(2) = nanmedian(rec.positionDecodingMaxCorr_binned_box_mean.results{end}.mse_phase_all(ind));
+%         rec_mse_phase(3) = nanmedian(rec.positionDecodingMaxCorr_binned_box_mean.results{end}.mse_phase_cos(ind));
+%         rec_mse_phase = min(rec_mse_phase);         
+%         rec_mse_rate = nanmedian(rec.positionDecodingMaxCorr_binned_box_mean.results{end}.mse_rate(ind));
+%         rec_nCells = length(rec.positionDecodingMaxCorr_binned_box_mean.region);
+    
+if ~isempty(ls) & tau == 20
+        subplot(3,3,1)
+        scatter(ls_nCells,ls_mse_phase,'.b')
+        hold on
+        scatter(ls_nCells,ls_mse_rate,'.r')
+        axis([0 150 -100 8000])
+        title('ls cells')
+        LS = [LS; ls_nCells, tau, ls_mse_phase, ls_mse_rate];
+elseif ~isempty(hpc) & tau == 20   
+        subplot(3,3,2)
+        scatter(hpc_nCells,hpc_mse_phase,'.b')
+        hold on
+        scatter(hpc_nCells,hpc_mse_rate,'.r')
+        axis([0 150 -100 8000])
+        title('hpc cells')
+        HPC = [HPC; hpc_nCells, tau, hpc_mse_phase, hpc_mse_rate];
+end
+%         subplot(3,3,3)
+%         scatter(rec_nCells,rec_mse_phase,'.b')
+%         hold on
+%         scatter(rec_nCells,rec_mse_rate,'.r')
+%         axis([0 150 -100 8000])
+%         title('all cells')
+%         REC = [REC; rec_nCells, rec_mse_phase, rec_mse_rate,  i, cond];
+        
         pause(.01)
     end
 end
     i
-    if ~mod(i,50)
-        if ~isempty(LS)
-        LS(isnan(LS(:,3)),:) = [];
-        end
-        if ~isempty(HPC)
-        HPC(isnan(HPC(:,3)),:) = [];
-        end
-        % REC(isnan(REC(:,2)),:) = [];
-        subplot(3,3,4)
-        hold off
-        subplot(3,3,5)
-        hold off
-        method = {'poly1','exp1'};
-        for p = 1:2
-            if ~isempty(LS)
-            ind = LS(:,2)==wind & LS(:,1) > nCellThresh;
-            subplot(3,3,4)
-            [f] = fit(LS(ind,1),LS(ind,3),method{p});
-%             y1 = polyval(x,1:200);
-            plot(f(1:200),'b')
-            hold on
-            [f] = fit(LS(ind,1),LS(ind,4),method{p});
-%             y1 = polyval(x,1:200);
-            plot(f(1:200),'r')
-            axis([0 150 -100 8000])
-            end
-            if ~isempty(HPC)
-            ind = HPC(:,2)==wind & HPC(:,1) > nCellThresh;
-            subplot(3,3,5)
-            [f] = fit(HPC(ind,1),HPC(ind,3),method{p});
-%             y1 = polyval(x,1:200);
-            plot(f(1:200),'b')
-            hold on
-            [f] = fit(HPC(ind,1),HPC(ind,4),method{p});
-%             y1 = polyval(x,1:200);
-            plot(f(1:200),'r')
-            axis([0 150 -100 11000])
-            end
-        end
-        for i=1:150 % cell num
-            if ~isempty(LS)
-            f = find(LS(:,1)==i);
-            end
-            if ~isempty(HPC)
-                g = find(HPC(:,1)==i);
-            end
-            for j=1:200 % tau
-                % set minimum number of models to be included?
-                if ~isempty(LS)
-                ff = find(LS(:,2)==j);
-                LS_mat_phase(i,j) = nanmean(LS(intersect(f,ff),3));
-                LS_mat_rate(i,j) = nanmean(LS(intersect(f,ff),3));
-                end
-                if ~isempty(HPC)
-                gg = find(HPC(:,2)==j);
-                HPC_mat_phase(i,j) = nanmean(HPC(intersect(g,gg),3));
-                HPC_mat_rate(i,j) = nanmean(HPC(intersect(g,gg),3));
-                end
-            end
-        end
-        subplot(3,3,6)
-        imagesc(log(LS_mat_phase))
-        ylabel('cell #')
-        xlabel('smoothing window')
-        subplot(3,3,7)
-        imagesc(log(LS_mat_rate))
-        subplot(3,3,8)
-        imagesc(log(HPC_mat_phase))
-        subplot(3,3,9)
-        imagesc(log(HPC_mat_rate))
-    end
 end 
  
+if ~isempty(LS)
+LS(isnan(LS(:,3)),:) = [];
+end
+if ~isempty(HPC)
+HPC(isnan(HPC(:,3)),:) = [];
+end
+% REC(isnan(REC(:,2)),:) = [];
 
+for p = 1:2
+    if ~isempty(LS)
+    subplot(3,3,1)
+    [x y] = polyfit(LS(:,1),LS(:,3),p);
+    y1 = polyval(x,1:200);
+    plot(1:200,y1,'b')
+    hold on
+    [x y] = polyfit(LS(:,1),LS(:,4),p);
+    y1 = polyval(x,1:200);
+    plot(1:200,y1,'r')
+    axis([0 150 -100 8000])
+    end
+    if ~isempty(HPC)
+    subplot(3,3,2)
+    [x y] = polyfit(HPC(:,1),HPC(:,3),p);
+    y1 = polyval(x,1:200);
+    plot(1:200,y1,'b')
+    hold on
+    [x y] = polyfit(HPC(:,1),HPC(:,4),p);
+    y1 = polyval(x,1:200);
+    plot(1:200,y1,'r')
+    axis([0 150 -100 8000])
+    end
+%     subplot(3,3,3)
+%     [x y] = polyfit(REC(:,1),REC(:,2),p);
+%     y1 = polyval(x,1:200);
+%     plot(1:200,y1,'b')
+%     hold on
+%     [x y] = polyfit(REC(:,1),REC(:,3),p);
+%     y1 = polyval(x,1:200);
+%     plot(1:200,y1,'r')
+%     axis([0 150 -100 8000])
+end
+
+LS_mat = zeros(200,200);
+HPC_mat = zeros(200,200);
+for i=1:200
+    for j=1:200
+        
+    end
+end
 % for i=1:length(d)
 %     f = find(LS(:,4)==i);
 %     l(i,:)=nanmedian(LS(f,1:3));

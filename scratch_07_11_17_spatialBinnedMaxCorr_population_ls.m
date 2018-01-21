@@ -166,64 +166,64 @@ for smoothing = 1:round(nBins)
            
 % %                 
 % % %                 figure(cond)
-%                 t_rate = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_rate',...
-%                 'GroupingVariables',{'tau','condition'});
-%                 t_phase_all = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_phase_all',...
-%                 'GroupingVariables',{'tau','condition'});
-%                 t_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_phase',...
-%                 'GroupingVariables',{'tau','condition'});
-%                 t_phase_cos = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_phase_cos',...
-%                 'GroupingVariables',{'tau','condition'});
-%                 t_both = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_both',...
-%                 'GroupingVariables',{'tau','condition'});
-%                 t_chance_rate = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_chance_rate',...
-%                 'GroupingVariables',{'tau','condition'});   
-%                 t_chance_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_chance_phase',...
-%                 'GroupingVariables',{'tau','condition'});  
-%                 t_std_rate = varfun(@std,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_chance_rate',...
-%                 'GroupingVariables',{'tau','condition'});  
-%                 t_std_phase = varfun(@std,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_chance_phase',...
-%                 'GroupingVariables',{'tau','condition'});  
-%                 tab = join(join(join(join(join(join(t_rate,t_phase_all),t_both),t_chance_rate),t_phase),t_phase_cos),t_chance_phase);
-%                 rows = find(tab.condition==cond);
-%                 subplot(2,2,1);
-%                 plot(tab.tau(rows),tab.mean_mse_phase(rows),'.g')
-%                 hold on
-%                 plot(tab.tau(rows),tab.mean_mse_phase_cos(rows),'g')
-%                 hold off
-% %                 imagesc(phase_trains_smooth);
-% %                 caxis([-pi pi])
-%                 subplot(2,2,2);
-%                 boundedline(tab.tau(rows),tab.mean_mse_chance_rate(rows),3*t_std_rate.std_mse_chance_rate(rows),'k')
-%                 hold on
-% %                 nans(smoothing) = sum(isnan(yfit));
-%                 plot(tab.tau(rows),tab.mean_mse_rate(rows),'r')
-%                 plot(tab.tau(rows),tab.mean_mse_both(rows),'k')
-%                 plot(tab.tau(rows),tab.mean_mse_phase_all(rows),'g')
-%                 subplot(2,2,3);
-%                 boundedline(tab.tau(rows),tab.mean_mse_chance_phase(rows),3*t_std_phase.std_mse_chance_phase(rows),'k')
-%                 hold on
-% 
-% %                 plot(positionDecodingMaxCorr_binned_box_mean.results{cell}.tau(rows),...
-% %                     mean(positionDecodingMaxCorr_binned_box_mean.results{cell}.mse_rate(rows,:)'),'r')
-% %                 hold on
-% %                 plot(positionDecodingMaxCorr_binned_box_mean.results{cell}.tau(rows),...
-% %                     mean(positionDecodingMaxCorr_binned_box_mean.results{cell}.mse_phase_all(rows,:)'),'g')
+                t_rate = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_rate',...
+                'GroupingVariables',{'tau','condition'});
+                t_phase_all = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_phase_all',...
+                'GroupingVariables',{'tau','condition'});
+                t_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_phase',...
+                'GroupingVariables',{'tau','condition'});
+                t_phase_cos = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_phase_cos',...
+                'GroupingVariables',{'tau','condition'});
+                t_both = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_both',...
+                'GroupingVariables',{'tau','condition'});
+                t_chance_rate = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_chance_rate',...
+                'GroupingVariables',{'tau','condition'});   
+                t_chance_phase = varfun(@mean,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_chance_phase',...
+                'GroupingVariables',{'tau','condition'});  
+                t_std_rate = varfun(@std,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_chance_rate',...
+                'GroupingVariables',{'tau','condition'});  
+                t_std_phase = varfun(@std,positionDecodingMaxCorr_binned_box_mean.results{cell},'InputVariables','mse_chance_phase',...
+                'GroupingVariables',{'tau','condition'});  
+                tab = join(join(join(join(join(join(t_rate,t_phase_all),t_both),t_chance_rate),t_phase),t_phase_cos),t_chance_phase);
+                rows = find(tab.condition==cond);
+                subplot(2,2,1);
+                plot(tab.tau(rows),tab.mean_mse_phase(rows),'.g')
+                hold on
+                plot(tab.tau(rows),tab.mean_mse_phase_cos(rows),'g')
+                hold off
+%                 imagesc(phase_trains_smooth);
+%                 caxis([-pi pi])
+                subplot(2,2,2);
+                boundedline(tab.tau(rows),tab.mean_mse_chance_rate(rows),3*t_std_rate.std_mse_chance_rate(rows),'k')
+                hold on
+%                 nans(smoothing) = sum(isnan(yfit));
+                plot(tab.tau(rows),tab.mean_mse_rate(rows),'r')
+                plot(tab.tau(rows),tab.mean_mse_both(rows),'k')
+                plot(tab.tau(rows),tab.mean_mse_phase_all(rows),'g')
+                subplot(2,2,3);
+                boundedline(tab.tau(rows),tab.mean_mse_chance_phase(rows),3*t_std_phase.std_mse_chance_phase(rows),'k')
+                hold on
+
 %                 plot(positionDecodingMaxCorr_binned_box_mean.results{cell}.tau(rows),...
-%                     mean(positionDecodingMaxCorr_binned_box_mean.results{cell}.mse_both(rows,:)'),'k')
-%                 hold off
-% %                 subplot(2,2,3)
-% %                 imagesc(rates_trains_smooth);
-% %                 subplot(2,2,4)
-%                 
-%                 title([cell cond smoothing]')
-% 
-%                 pause(.1)
+%                     mean(positionDecodingMaxCorr_binned_box_mean.results{cell}.mse_rate(rows,:)'),'r')
+%                 hold on
+%                 plot(positionDecodingMaxCorr_binned_box_mean.results{cell}.tau(rows),...
+%                     mean(positionDecodingMaxCorr_binned_box_mean.results{cell}.mse_phase_all(rows,:)'),'g')
+                plot(positionDecodingMaxCorr_binned_box_mean.results{cell}.tau(rows),...
+                    mean(positionDecodingMaxCorr_binned_box_mean.results{cell}.mse_both(rows,:)'),'k')
+                hold off
+%                 subplot(2,2,3)
+%                 imagesc(rates_trains_smooth);
+%                 subplot(2,2,4)
+                
+                title([cell cond smoothing]')
+
+                pause(.1)
             end         
         disp(['done with condition: ' num2str(cond) ' of ' num2str(length(unique(behavior.events.trialConditions)))]);
     end
     positionDecodingMaxCorr_binned_box_mean.dateRun = date;  % this can take a very long time so lets save each loop...
     positionDecodingMaxCorr_binned_box_mean.ensemble = ensemble;
-    save(['/ifs/data/buzsakilab/popDecoding_Results/' sessionInfo.FileName '.positionDecodingMaxCorr_binned_box.' num2str(sort(ensemble),'%0.3d') '.popinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
+    save(['/home/david/datasets/popDecoding_Results/' sessionInfo.FileName '.positionDecodingMaxCorr_binned_box.' num2str(sort(ensemble),'%0.3d') '.popinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
 end
 % end
