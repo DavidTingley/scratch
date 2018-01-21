@@ -8,13 +8,13 @@ LS_mat_rate = nan(150,200);
 HPC_mat_rate = nan(150,200);
 % converge faster with random sampling
 % ord = randperm(length(d));
-wind = 25; % smoothing window to plot
-nCellThresh = 5; % min num cells to be counted
+wind = 5; % smoothing window to plot
+nCellThresh = 1; % min num cells to be counted
 
-for i=1:length(d)
+for i=length(d):-1:1
 %     cd(d(i).name)
     load(d((i)).name)
-for tau = 1:200
+for tau = 5
     hpc=[];ls=[];
     if strcmp(positionDecodingMaxCorr_binned_box_mean.region{1},'ls')
         ls = load(d(i).name);
@@ -98,7 +98,7 @@ end
             [f] = fit(LS(ind,1),LS(ind,4),method{p});
 %             y1 = polyval(x,1:200);
             plot(f(1:200),'r')
-            axis([0 150 -100 8000])
+            axis([0 150 -100 11000])
             end
             if ~isempty(HPC)
             ind = HPC(:,2)==wind & HPC(:,1) > nCellThresh;
