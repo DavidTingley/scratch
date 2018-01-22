@@ -11,7 +11,11 @@ nBins = length(behavior.events.map{1}.x);
 % % %    % set up phase coding data
 % [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,lfp4);
 % if ~exist([sessionInfo.FileName '.firingMaps.cellinfo.mat'])
-    spikes = bz_GetSpikes;
+    spikes = bz_GetSpikes('region','ls');
+    r = randperm(length(spikes.times));
+    ensemble = r(1:ensembleSize); 
+    spikes = bz_GetSpikes('UID',spikes.UID(r(1:ensembleSize)));clear r
+    if ~exist(['/ifs/data/buzsakilab/popDecoding_Results/' sessionInfo.FileName '.positionDecodingMaxCorr_binned_box.' num2str(sort(spikes.UID),'%0.3d') '.popinfo.mat'])
     load([sessionInfo.FileName '.behavior.mat'])
     if ~isempty(sessionInfo.ca1)
     lfp = bz_GetLFP(sessionInfo.ca1);
@@ -33,10 +37,7 @@ countMap =firingMaps.countMaps;
 occuMap =firingMaps.occupancy;
 phaseMap=phaseMaps.phaseMaps;
 
-spikes = bz_GetSpikes('region','ls');
-r = randperm(length(spikes.times));
-ensemble = r(1:ensembleSize); 
-spikes = bz_GetSpikes('UID',spikes.UID(r(1:ensembleSize)));clear r
+
 [binnedPhaseMap] = bz_phaseMap2Bins(phaseMap,rateMap,behavior);
     
 positionDecodingMaxCorr_binned_box_mean.region = spikes.region;
@@ -226,4 +227,4 @@ for smoothing = 1:round(nBins)
     positionDecodingMaxCorr_binned_box_mean.ensemble = ensemble;
     save(['/ifs/data/buzsakilab/popDecoding_Results/' sessionInfo.FileName '.positionDecodingMaxCorr_binned_box.' num2str(sort(spikes.UID),'%0.3d') '.popinfo.mat'],'positionDecodingMaxCorr_binned_box_mean')
 end
-% end
+end
