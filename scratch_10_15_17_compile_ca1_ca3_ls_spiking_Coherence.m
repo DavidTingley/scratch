@@ -22,10 +22,10 @@ ca1_recording=[];ca3_recording=[];
 c1=1;
 c2=1;
 c3=1;
-[b a] = butter(3,[4/625 12/625],'bandpass');
+[b a] = butter(4,[25/625 80/625],'bandpass');
 
 [bbb aaa] = butter(3,[50/625 500/625],'bandpass');
-for ii=43:length(d)
+for ii=1:length(d)
     cd(d(ii).name)
     sessionInfo = bz_getSessionInfo;
     spikes = bz_GetSpikes('noprompts',true);
@@ -85,7 +85,7 @@ end
                     spks = spks + sum(sum(firingMaps.countMaps{cond}(cell,:,:)));
                     end
                     if spks > 1.5 * size(firingMaps.countMaps,2)
-                    [coherogram phase t f] = bz_MTCoherogram(double(spk(cell,start:stop))',((FiltFiltM(b,a,double(ca1.data(start:stop,1))))),'range',[4 12],'window',.15,'step',.05);
+                    [coherogram phase t f] = bz_MTCoherogram(double(spk(cell,start:stop))',((FiltFiltM(b,a,double(ca1.data(start:stop,1))))),'range',[25 80],'window',.15,'step',.05);
                     coh_ca1_ls_spk{c1}(cell,:) = makeLength(nanmean(coherogram),1000);
     %                 coh_ca1_ls_spk_z{c1}(cell,:) = zscore(coh_ca1_ls_spk{c1}(cell,:));
                     coh_ca1_ls_spk{c1}(cell,isnan(coh_ca1_ls_spk{c1}(cell,:)))=0;
@@ -140,7 +140,7 @@ end
             
             for cell=1:length(spikes.times)
                 if strcmp(spikes.region{cell},'ls')
-                [coherogram phase t f] = bz_MTCoherogram(double(spk(cell,start:stop))',((FiltFiltM(b,a,double(ca3.data(start:stop,1))))),'range',[4 12],'window',.15,'step',.05);
+                [coherogram phase t f] = bz_MTCoherogram(double(spk(cell,start:stop))',((FiltFiltM(b,a,double(ca3.data(start:stop,1))))),'range',[25 80],'window',.15,'step',.05);
                 coh_ca3_ls_spk{c3}(cell,:) = makeLength(nanmean(coherogram),1000);
 %                 coh_ca3_ls_spk_z{c3}(cell,:) = zscore(coh_ca3_ls_spk{c3}(cell,:));
                 coh_ca3_ls_spk{c3}(cell,isnan(coh_ca3_ls_spk{c3}(cell,:)))=0;

@@ -5,7 +5,7 @@ for rec = 1:length(d)
     if exist([d(rec).name '.firingMaps.cellinfo.mat'])
     load([d(rec).name '.phaseMaps.cellinfo.mat'])
     load([d(rec).name '.firingMaps.cellinfo.mat'])
-    load([d(rec).name '.placeFields.01_pctThresh.mat'])
+    load([d(rec).name '.placeFields.10_pctThresh.mat'])
     load([d(rec).name '.behavior.mat'])
     
 %% get velocity

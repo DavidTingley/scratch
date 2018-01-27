@@ -8,19 +8,20 @@ LS_mat_phase = nan(150,200);
 LS_mat_rate = nan(150,200);
 HPC_mat_phase = nan(150,200);
 HPC_mat_rate = nan(150,200);
-wind = 61; % smoothing window to plot
-nCellThresh = 20; % min num cells to be counted
+wind = 50; % smoothing window to plot
+nCellThresh = 5; % min num cells to be counted
+ord = randperm(length(d));
 
 for i=length(d):-1:1
 %     cd(d(i).name)
-    load(d((i)).name)
-for tau = 1:10:200
+    load(d(ord(i)).name)
+for tau = 50%1:150
     hpc=[];ls=[];
     if strcmp(positionDecodingMaxCorr_binned_box_mean.region{1},'ls')
-        ls = load(d(i).name);
+        ls = load(d(ord(i)).name);
         conditions = unique(ls.positionDecodingMaxCorr_binned_box_mean.results{end}.condition);
     elseif strcmp(positionDecodingMaxCorr_binned_box_mean.region{1},'hpc')
-        hpc = load(d(i).name);
+        hpc = load(d(ord(i)).name);
         conditions = unique(hpc.positionDecodingMaxCorr_binned_box_mean.results{end}.condition);
     end
 
@@ -53,7 +54,7 @@ for tau = 1:10:200
                 scatter(ls_nCells,ls_mse_phase,'.b')
                 hold on
                 scatter(ls_nCells,ls_mse_rate,'.r')
-                axis([0 60 -100 11000])
+                axis([0 60 -100 14000])
                 title('ls cells')
         end
         if ~isempty(hpc) & tau == wind  
@@ -61,7 +62,7 @@ for tau = 1:10:200
                 scatter(hpc_nCells,hpc_mse_phase,'.b')
                 hold on
                 scatter(hpc_nCells,hpc_mse_rate,'.r')
-                axis([0 200 -100 11000])
+                axis([0 60 -100 14000])
                 title('hpc cells')
         end
         if ~isempty(ls) 
@@ -99,7 +100,7 @@ end
             [f] = fit(LS(ind,1),LS(ind,4),method{p});
 %             y1 = polyval(x,1:200);
             plot(f(1:200),'r')
-            axis([0 150 -100 11000])
+            axis([0 150 -100 14000])
             end
             end
             if ~isempty(HPC)
@@ -113,7 +114,7 @@ end
             [f] = fit(HPC(ind,1),HPC(ind,4),method{p});
 %             y1 = polyval(x,1:200);
             plot(f(1:200),'r')
-            axis([0 150 -100 11000])
+            axis([0 150 -100 14000])
             end
             end
         end
@@ -147,15 +148,15 @@ end
                 ff = find(LS(:,2)==j);
                 LS_mat_phase(ii,j) = nanmean(LS(intersect(f,ff),3));
                 LS_mat_rate(ii,j) = nanmean(LS(intersect(f,ff),4));
-                LS_mat_phase_std(ii,j) = nanstd(LS(intersect(f,ff),3));
-                LS_mat_rate_std(ii,j) = nanstd(LS(intersect(f,ff),4));
+                LS_mat_phase_ste(ii,j) = nanstd(LS(intersect(f,ff),3))./sqrt(length(intersect(f,ff)));
+                LS_mat_rate_ste(ii,j) = nanstd(LS(intersect(f,ff),4))./sqrt(length(intersect(f,ff)));
                 end
                 if ~isempty(HPC)
                 gg = find(HPC(:,2)==j);
                 HPC_mat_phase(ii,j) = nanmean(HPC(intersect(g,gg),3));
                 HPC_mat_rate(ii,j) = nanmean(HPC(intersect(g,gg),4));
-                HPC_mat_phase_std(ii,j) = nanstd(HPC(intersect(g,gg),3));
-                HPC_mat_rate_std(ii,j) = nanstd(HPC(intersect(g,gg),4));
+                HPC_mat_phase_ste(ii,j) = nanstd(HPC(intersect(g,gg),3))./sqrt(length(intersect(g,gg)));
+                HPC_mat_rate_ste(ii,j) = nanstd(HPC(intersect(g,gg),4))./sqrt(length(intersect(g,gg)));
                 end
             end
 %             LS_mat_phase(ii,:)=fillmissing(LS_mat_phase(ii,:),'linear');
@@ -179,9 +180,11 @@ end
         subplot(3,3,8)
         hold off
         plot(1)
-        boundedline(1:150,fillmissing(LS_mat_phase(:,wind),'nearest'),fillmissing(LS_mat_phase_std(:,wind),'nearest'),'b','transparency',.1)
-        boundedline(1:150,fillmissing(LS_mat_rate(:,wind),'nearest'),fillmissing(LS_mat_rate_std(:,wind),'nearest'),'r','transparency',.1)
-        axis([0 150 0 10000])
+        boundedline(1:150,fillmissing(LS_mat_phase(:,wind),'nearest'),fillmissing(LS_mat_phase_ste(:,wind),'nearest'),'b','transparency',.1)
+        boundedline(1:150,fillmissing(LS_mat_rate(:,wind),'nearest'),fillmissing(LS_mat_rate_ste(:,wind),'nearest'),'r','transparency',.1)
+        set(gca,'xscale','log')
+%         set(gca,'yscale','log')
+        axis([0 150 0 14000])
         end
         if ~isempty(HPC)
 %         subplot(3,3,8)
@@ -190,12 +193,14 @@ end
 %         subplot(3,3,9)
 %         imagesc(log(HPC_mat_rate))
 %         caxis([0 log(8000)])
-        subplot(3,3,9)
-        hold off
+        subplot(3,3,8)
+%         hold off
         plot(1)
-        boundedline(1:150,fillmissing(HPC_mat_phase(:,wind),'nearest'),fillmissing(HPC_mat_phase_std(:,wind),'nearest'),'b','transparency',.1)
-        boundedline(1:150,fillmissing(HPC_mat_rate(:,wind),'nearest'),fillmissing(HPC_mat_rate_std(:,wind),'nearest'),'r','transparency',.1)
-        
+        boundedline(1:150,fillmissing(HPC_mat_phase(:,wind),'nearest'),fillmissing(HPC_mat_phase_ste(:,wind),'nearest'),'g','transparency',.1)
+        boundedline(1:150,fillmissing(HPC_mat_rate(:,wind),'nearest'),fillmissing(HPC_mat_rate_ste(:,wind),'nearest'),'k','transparency',.1)
+        set(gca,'xscale','log')
+%         set(gca,'yscale','log')
+        axis([0 150 0 14000])
         end
     end
 end 

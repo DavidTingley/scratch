@@ -1,6 +1,6 @@
 cd /home/david/datasets/lsDataset
 % cd('D:\Dropbox\datasets\lsDataset')
-clear
+% % clear
 d  = dir('*201*');
 count = 1;
  

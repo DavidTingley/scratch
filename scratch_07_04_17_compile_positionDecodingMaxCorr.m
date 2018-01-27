@@ -21,7 +21,7 @@ hpc_field = []; ls_field = [];
 hpc_reg = [];
 ls_chance_rate = []; hpc_chance_rate = [];
 ls_chance_phase = []; hpc_chance_phase = [];
-count=1;              
+hpc_count=1; ls_count = 1;             
 tau=20;
 examples = [];
 hpc_mean_phase = zeros(101,1);
@@ -56,7 +56,7 @@ for i=1:length(d)
         load([d(i).name '.phaseMaps.cellinfo.mat'],'phaseMaps')
         [firingMaps] = bz_firingMap1D(spikes,behavior,tau);
         [binnedfiringMaps.phaseMaps] = bz_phaseMap2Bins(phaseMaps.phaseMaps,firingMaps.rateMaps,behavior);
-        load([d(i).name '.placeFields.20_pctThresh.mat'],'fields') 
+        load([d(i).name '.placeFields.01_pctThresh.mat'],'fields') 
 %         load([d(i).name '.olypherInfo.cellinfo.mat'],'olypherInfo') 
         b = dir('*.behavior.mat');
         load(b(1).name);
@@ -110,7 +110,7 @@ for i=1:length(d)
         
             for cond = 1:conditions
                 if sum(behavior.events.trialConditions==cond) >= 10 %%%%%%%%%%%%%%%%%%%%%%%%%%
-%                 if sum(sum(firingMaps.countMaps{cond}(cell,:,:))) >= 1.5 * sum(behavior.events.trialConditions==cond) 
+                if sum(sum(firingMaps.countMaps{cond}(cell,:,:))) >= 1.5 * sum(behavior.events.trialConditions==cond) 
 %                     sum(sum(firingMaps.countMaps{cond}(cell,:,:))) > .25 * sum(behavior.events.trialConditions==cond) 
                     nTrials = sum(behavior.events.trialConditions==cond);
                     %% information theory stuff here
@@ -221,6 +221,31 @@ for i=1:length(d)
                    h_rate_maps_smooth = [h_rate_maps_smooth;(squeeze(mean(firingMaps.rateMaps_box{cond}(cell,:,:),2))')]; 
                    h_phase_maps_smooth = [h_phase_maps_smooth;(squeeze(circ_mean(hh)))]; clear hh
                
+                    %% phase offset analysis
+                    for j=1:200
+                        if ~isempty(phaseMaps.phaseMaps{cond}{cell})
+                            f = find(phaseMaps.phaseMaps{cond}{cell}(:,1)>j-5);
+                            ff = find(phaseMaps.phaseMaps{cond}{cell}(:,1)<j+5);
+                            if ~isempty(intersect(f,ff))
+                                circ_m(j) = circ_mean(phaseMaps.phaseMaps{cond}{cell}(intersect(f,ff),7));
+                                [pv(j) z] = circ_rtest(phaseMaps.phaseMaps{cond}{cell}(intersect(f,ff),7));
+                            end
+                        end
+                    end
+                    % check if is field
+                    jumps = find(diff(pv<.01));
+                    jumps = unique([1 jumps 201]);
+                    hpc_phaseOffset{hpc_count}=[];
+                    
+                    for j=1:length(jumps)-1
+                    if jumps(j+1) - jumps(j) < 150 & jumps(j+1) - jumps(j) > 6 & pv(jumps(j)+1) < .01
+                    if ~isempty(phaseMaps.phaseMaps{cond}{cell})
+                    f = find(phaseMaps.phaseMaps{cond}{cell}(:,1)>jumps(j+1)-5);
+                    ff = find(phaseMaps.phaseMaps{cond}{cell}(:,1)<jumps(j+1)+5);
+                    hpc_phaseOffset{hpc_count} =  [hpc_phaseOffset{hpc_count};circ_mean(phaseMaps.phaseMaps{cond}{cell}(intersect(f,ff),7))];
+                    end
+                    end
+                    end
                    %% velocity correlations
 %                     spkCount = 1;
 %                     for spk = 1:size(phaseMaps.phaseMaps{cond}{cell},1)
@@ -262,6 +287,7 @@ for i=1:length(d)
                    
 %                    title('tau vs mse trough')
 %                    end
+hpc_count = hpc_count + 1;
                elseif strcmp(positionDecodingMaxCorr.region{cell},'ls') 
 %                      if positionDecodingMaxCorr.results{cell}.mse_phase_all_pval(rows(b)) <.05 || ...
 %                            positionDecodingMaxCorr.results{cell}.mse_rate(rows(bb)) <.05
@@ -277,7 +303,7 @@ for i=1:length(d)
 %%%% assemblies
 
         list = find(pairs(:,1)==cell);
-        ls_assembly(count)=0;
+        ls_assembly(ls_count)=0;
         if notAssemblies == 0 & length(dev) >= cond
         for pair = 1:length(list)
             if list(pair)<=size(dev{cond},2)
@@ -290,7 +316,7 @@ for i=1:length(d)
             zerolag = 1;
             end
             if imp > 4.2 & blah > 7 & blah < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40
-                ls_assembly(count) = ls_assembly(count)+1;
+                ls_assembly(ls_count) = ls_assembly(ls_count)+1;
             end
             end
         end
@@ -345,6 +371,32 @@ for i=1:length(d)
                     else
                     ls_field = [ls_field;nan];
                     end
+                    
+                    %% phase offset analysis
+                    for j=1:200
+                        if ~isempty(phaseMaps.phaseMaps{cond}{cell})
+                            f = find(phaseMaps.phaseMaps{cond}{cell}(:,1)>j-30);
+                            ff = find(phaseMaps.phaseMaps{cond}{cell}(:,1)<j+30);
+                            if ~isempty(intersect(f,ff))
+                                circ_m(j) = circ_mean(phaseMaps.phaseMaps{cond}{cell}(intersect(f,ff),7));
+                                [pv(j) z] = circ_rtest(phaseMaps.phaseMaps{cond}{cell}(intersect(f,ff),7));
+                            end
+                        end
+                    end
+                    % check if is field
+                    jumps = find(diff(pv<.01));
+                    jumps = unique([1 jumps 201]);
+                    ls_phaseOffset{ls_count}=[];
+                    
+                    for j=1:length(jumps)-1
+                    if jumps(j+1) - jumps(j) > 30 & pv(jumps(j)+1) < .01
+                    if ~isempty(phaseMaps.phaseMaps{cond}{cell})
+                    f = find(phaseMaps.phaseMaps{cond}{cell}(:,1)>jumps(j+1)-30);
+                    ff = find(phaseMaps.phaseMaps{cond}{cell}(:,1)<jumps(j+1)+30);
+                    ls_phaseOffset{ls_count} =  [ls_phaseOffset{ls_count};circ_mean(phaseMaps.phaseMaps{cond}{cell}(intersect(f,ff),7))];
+                    end
+                    end
+                    end
                    
                    %% velocity correlations
 %                     spkCount = 1;
@@ -393,16 +445,17 @@ for i=1:length(d)
 % %                     hold off
 %                     title('tau vs mse trough')
 %                      end
-count=1+count;
+               ls_count=1+ls_count;
                end
+               
 %                end   
 %                end
 %                 end
 %             pause(.01)
                 elseif cond == 1 & cell == 1
-                    warning('something is wrong')
+cd                     warning('something is wrong')
                 end
-%                    end
+                   end
                 end
             end
             end
@@ -410,8 +463,8 @@ count=1+count;
         end
     end
 %     pause
-    cd('D:\Dropbox\datasets\lsDataset\')
-% cd('/home/david/datasets/lsDataset')
+%     cd('D:\Dropbox\datasets\lsDataset\')
+cd('/home/david/datasets/lsDataset')
 end
 
 for i=1:length(d)
