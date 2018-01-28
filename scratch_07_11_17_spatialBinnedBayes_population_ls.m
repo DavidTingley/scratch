@@ -224,6 +224,6 @@ for smoothing = 1:round(nBins./2)
     posDecodeBayes.dateRun = date;  % this can take a very long time so lets save each loop...
     posDecodeBayes.ensemble = ensemble;
     cd('/ifs/data/buzsakilab/popDecodeBayes')
-    save(['sessionInfo.FileName '.' num2str(sort(spikes.UID),'%0.3d') '.popinfo.mat'],'posDecodeBayes')
+    save([sessionInfo.FileName '.' num2str(sort(spikes.UID),'%0.3d') '.popinfo.mat'],'posDecodeBayes')
 end
 end
