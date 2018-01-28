@@ -77,10 +77,10 @@ for smoothing = 1:round(nBins./2)
               
                 pos = [pos,[1:nBins]];                   
             end 
-            r(cell,:) = discretize(rates_trains_smooth,min(rates_trains_smooth):(max(rates_trains_smooth)-min(rates_trains_smooth))./20:max(rates_trains_smooth));
-            p(cell,:) =discretize(phase_trains_smooth,min(phase_trains_smooth):(max(phase_trains_smooth)-min(phase_trains_smooth))./20:max(phase_trains_smooth)); 
-            p_cos(cell,:) = discretize(cos(p(cell,:)),min(cos(p(cell,:))):(max(cos(p(cell,:)))-min(cos(p(cell,:))))./20:max(cos(p(cell,:))));
-            p_sin(cell,:) = discretize(sin(p(cell,:)),min(sin(p(cell,:))):(max(sin(p(cell,:)))-min(sin(p(cell,:))))./20:max(sin(p(cell,:))));
+            r(cell,:) = discretize(rates_trains_smooth,min(rates_trains_smooth):(max(rates_trains_smooth)-min(rates_trains_smooth)+.0001)./20:max(rates_trains_smooth)+.0001);
+            p(cell,:) =discretize(phase_trains_smooth,min(phase_trains_smooth):(max(phase_trains_smooth)-min(phase_trains_smooth)+.0001)./20:max(phase_trains_smooth)+.0001); 
+            p_cos(cell,:) = discretize(cos(p(cell,:)),min(cos(p(cell,:))):(max(cos(p(cell,:)))-min(cos(p(cell,:)))+.0001)./20:max(cos(p(cell,:)))+.0001);
+            p_sin(cell,:) = discretize(sin(p(cell,:)),min(sin(p(cell,:))):(max(sin(p(cell,:)))-min(sin(p(cell,:)))+.0001)./20:max(sin(p(cell,:)))+.0001);
         end
         
             r=r';
