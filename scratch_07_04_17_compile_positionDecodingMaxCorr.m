@@ -56,7 +56,7 @@ for i=1:length(d)
         load([d(i).name '.phaseMaps.cellinfo.mat'],'phaseMaps')
         [firingMaps] = bz_firingMap1D(spikes,behavior,tau);
         [binnedfiringMaps.phaseMaps] = bz_phaseMap2Bins(phaseMaps.phaseMaps,firingMaps.rateMaps,behavior);
-        load([d(i).name '.placeFields.01_pctThresh.mat'],'fields') 
+        load([d(i).name '.placeFields.20_pctThresh.mat'],'fields') 
 %         load([d(i).name '.olypherInfo.cellinfo.mat'],'olypherInfo') 
         b = dir('*.behavior.mat');
         load(b(1).name);
