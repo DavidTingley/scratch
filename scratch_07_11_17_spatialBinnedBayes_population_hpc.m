@@ -77,10 +77,10 @@ for smoothing = 1:round(nBins./2)
               
                 pos = [pos,[1:nBins]];                   
             end 
-            r(cell,:) = rates_trains_smooth;
-            p(cell,:) = phase_trains_smooth;
-            p_cos(cell,:) = cos(p(cell,:));
-            p_sin(cell,:) = sin(p(cell,:));
+            r(cell,:) = discretize(rates_trains_smooth,min(rates_trains_smooth:(max(rates_trains_smooth)-min(rates_trains_smooth))./20:max(rates_trains_smooth));
+            p(cell,:) =discretize(phase_trains_smooth,min(phase_trains_smooth:(max(phase_trains_smooth)-min(phase_trains_smooth))./20:max(phase_trains_smooth)); 
+            p_cos(cell,:) = discretize(cos(p(cell,:)),min(cos(p(cell,:)):(max(cos(p(cell,:)))-min(cos(p(cell,:))))./20:max(cos(p(cell,:))));
+            p_sin(cell,:) = discretize(sin(p(cell,:)),min(sin(p(cell,:)):(max(sin(p(cell,:)))-min(sin(p(cell,:))))./20:max(sin(p(cell,:))));
         end
         
             r=r';
@@ -93,15 +93,14 @@ for smoothing = 1:round(nBins./2)
             rr = randperm(length(r));
             pct = round(prctile(1:length(r),60));   
             
-            r_train = discretize(r(rr(1:pct),:),min(r(rr(1:pct),:)):(max(r(rr(1:pct),:))-min(r(rr(1:pct),:)))./20:max(r(rr(1:pct),:)));
-            r_test = discretize(r(rr(pct+1:end),:),min(r(rr(pct+1:end),:)):(max(r(rr(pct+1:end),:))-min(r(rr(pct+1:end),:)))./20:max(r(rr(pct+1:end),:)));
-            p_train = discretize(p(rr(1:pct),:),min(p(rr(1:pct),:)):(max(p(rr(1:pct),:))-min(p(rr(1:pct),:)))./20:max(p(rr(1:pct),:)));
-            p_test = discretize(p(rr(pct+1:end),:),min(p(rr(pct+1:end),:)):(max(p(rr(pct+1:end),:))-min(p(rr(pct+1:end),:)))./20:max(p(rr(pct+1:end),:)));
-            p_cos_train = discretize(p_cos(rr(1:pct),:),min(p_cos(rr(1:pct),:)):(max(p_cos(rr(1:pct),:))-min(p_cos(rr(1:pct),:)))./20:max(p_cos(rr(1:pct),:)));
-            p_cos_test = discretize(p_cos(rr(pct+1:end),:),min(p_cos(rr(pct+1:end),:)):(max(p_cos(rr(pct+1:end),:))-min(p_cos(rr(pct+1:end),:)))./20:max(p_cos(rr(pct+1:end),:)));
-            p_sin_train = discretize(p_sin(rr(1:pct),:),min(p_sin(rr(1:pct),:)):(max(p_sin(rr(1:pct),:))-min(p_sin(rr(1:pct),:)))./20:max(p_sin(rr(1:pct),:)));
-            p_sin_test = discretize(p_sin(rr(pct+1:end),:),min(p_sin(rr(pct+1:end),:)):(max(p_sin(rr(pct+1:end),:))-min(p_sin(rr(pct+1:end),:)))./20:max(p_sin(rr(pct+1:end),:)));
-            
+            r_train = r(rr(1:pct),:);
+            r_test = r(rr(pct+1:end),:);
+            p_train = p(rr(1:pct),:);
+            p_test = p(rr(pct+1:end),:);
+            p_cos_train = p_cos(rr(1:pct),:);
+            p_cos_test = p_cos(rr(pct+1:end),:);
+            p_sin_train = p_sin(rr(1:pct),:);
+            p_sin_test = p_sin(rr(pct+1:end),:);
             
             pos_train = pos(rr(1:pct));
             pos_test = pos(rr(pct+1:end));
