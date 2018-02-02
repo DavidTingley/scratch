@@ -1,23 +1,25 @@
 clear
 d  = dir('*201*');
-count = 1;
+hpc_count = 1;
+ls_count = 1;
+ls_phase = []; ls_rate = [];
+hpc_phase = []; hpc_rate = [];
 vals = [];
 corrs = [];
 smoothingRange = 1:300:4000;
-%% compile data
-
-for ii=2:length(d)
+%% compile data  
+for ii=length(d):-1:1
    cd(d(ii).name)
    if exist([d(ii).name '.referenceFrames.mat'])
    load([d(ii).name '.referenceFrames.mat'])
    load([d(ii).name '.spikes.cellinfo.mat'])
    for cell = 1:length(mse_all_rate)
-       alloScore = squeeze(nanmean(nanmean(mse_all_rate{cell}(:,1:2,:),3),2));
-       alloScore_chance = squeeze((nanmean(mse_all_chance_rate{cell},2)));
-       [a b] = min(alloScore./alloScore_chance);
+%        alloScore = squeeze(nanmean(nanmean(mse_all_rate{cell}(:,1:2,:),3),2));
+%        alloScore_chance = squeeze((nanmean(mse_all_chance_rate{cell},2)));
+%        [a b] = min(alloScore./alloScore_chance);
        
        
-       mse_rate = mse_all_rate{cell}
+       mse_rate = mse_all_rate{cell};
     mse_phase_cos = mse_all_phase_cos{cell};
     mse_phase_sin = mse_all_phase_sin{cell};
     mse_chance_rate = mse_all_chance_rate{cell};
@@ -93,10 +95,28 @@ rr = (squeeze(nanmean(mse_norm_rate,3)));
         [a b]= corr(pp(:),rr(:),'rows','complete');
         title([cell a])
         corrs = [corrs; a sum(double(spikes.region{cell}))];
-        clear mse_norm_phase mse_norm_rate
         pause(.0001)
        vals = [vals,a];
+%        if size(pp,2) == 31
+           if strcmp(spikes.region{cell},'ls')
+               ls_phase(ls_count,:,:) = pp(:,[1:10 end-13:end]);
+               ls_rate(ls_count,:,:) = rr(:,[1:10 end-13:end]);
+               
+               ls_count = 1+ls_count;
+           elseif strcmp(spikes.region{cell},'hpc')
+               hpc_phase(hpc_count,:,:) = pp(:,[1:10 end-13:end]);
+               hpc_rate(hpc_count,:,:) = rr(:,[1:10 end-13:end]);
+               
+               hpc_count = 1+hpc_count;
+           end
+%        else
+%            disp(['not using rec cause wrong size.. ' spikes.sessionName])
+%            scratch_07_20_17_decoding_ego_allo_route_centric
+%        end
+       clear mse_norm_phase mse_norm_rate
    end
+   else
+%        scratch_07_20_17_decoding_ego_allo_route_centric
    end 
-   cd('D:\Dropbox\lsDataset\')
+   cd('/home/david/datasets/lsDataset')
 end

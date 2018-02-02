@@ -60,10 +60,10 @@ for i=1:length(d)
 %         load([d(i).name '.olypherInfo.cellinfo.mat'],'olypherInfo') 
         b = dir('*.behavior.mat');
         load(b(1).name);
-%         for trial = 1:length(behavior.events.trials)
-%             vel{trial} = makeLength(smooth(abs(diff(behavior.events.trials{trial}.x))+abs(diff(behavior.events.trials{trial}.y)),50),201);
-%             %     vel{trial} = mean(smooth(abs(diff(behavior.events.trials{trial}.x))+abs(diff(behavior.events.trials{trial}.y)),40),200);
-%         end
+        for trial = 1:length(behavior.events.trials)
+            vel{trial} = makeLength(smooth(abs(diff(behavior.events.trials{trial}.x))+abs(diff(behavior.events.trials{trial}.y)),50),201);
+            %     vel{trial} = mean(smooth(abs(diff(behavior.events.trials{trial}.x))+abs(diff(behavior.events.trials{trial}.y)),40),200);
+        end
         nBins = round(length(behavior.events.map{1}.x));
 
         load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
@@ -399,18 +399,23 @@ hpc_count = hpc_count + 1;
                     end
                    
                    %% velocity correlations
-%                     spkCount = 1;
-%                     for spk = 1:size(phaseMaps.phaseMaps{cond}{cell},1)
-%                         trial = phaseMaps.phaseMaps{cond}{cell}(spk,2);
-%                         bin = phaseMaps.phaseMaps{cond}{cell}(spk,1);
-%                         dat(spkCount,1) = vel{trial}(bin);
-%                         dat(spkCount,2) = (phaseMaps.phaseMaps{cond}{cell}(spk,end-1));%firingMaps.rateMaps{cond}(cell,trial,bin); %
-%                         dat(spkCount,3) = (phaseMaps.phaseMaps{cond}{cell}(spk,end));
-%                         spkCount = 1 + spkCount;
-%                     end
-%                     phaseCorr_ls = [phaseCorr_ls;circ_corrcl(dat(:,3),dat(:,1))];
-%                     rateCorr_ls = [rateCorr_ls;corr(dat(:,2),dat(:,1))];
-%                     clear dat;
+                    spkCount = 1;
+                    for spk = 1:size(phaseMaps.phaseMaps{cond}{cell},1)
+                        trial = phaseMaps.phaseMaps{cond}{cell}(spk,2);
+                        bin = phaseMaps.phaseMaps{cond}{cell}(spk,1);
+                        dat(spkCount,1) = vel{trial}(bin);
+                        dat(spkCount,2) = (phaseMaps.phaseMaps{cond}{cell}(spk,end-1));%firingMaps.rateMaps{cond}(cell,trial,bin); %
+                        dat(spkCount,3) = (phaseMaps.phaseMaps{cond}{cell}(spk,end));
+                        spkCount = 1 + spkCount;
+                    end
+                    phaseCorr_ls = [phaseCorr_ls;circ_corrcl(dat(:,3),dat(:,1))];
+                    rateCorr_ls = [rateCorr_ls;corr(dat(:,2),dat(:,1))];
+                    for iter = 1:100
+                       r = randperm(size(dat,1));
+                       phaseCorr_shuffle(ls_count,iter) = circ_corrcl(dat(r,3),dat(:,1));
+                       rateCorr_shuffle(ls_count,iter) = corr(dat(r,2),dat(:,1));
+                    end
+                    clear dat;
 %                    histogram(ls_phase,0:.01:1,'Normalization','pdf','FaceColor','g')
 %                    hold on
 %                    histogram(ls_rate,0:.01:1,'Normalization','pdf','FaceColor','r')

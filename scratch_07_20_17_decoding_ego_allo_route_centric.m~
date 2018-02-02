@@ -1,14 +1,14 @@
-% d  = dir('*length(spk_trains{cond}{t})*');
-% % ii=38;
-% 
-% for ii=1:68
-%     cd(d(ii).name)
+d  = dir('*201*');
+% ii=38;
+
+for ii=1:68
+    cd(d(ii).name)
 xml = LoadParameters;
 load([xml.FileName '.behavior.mat'])
 load([xml.FileName '.sessionInfo.mat'])
 spikes = bz_GetSpikes;
 
-%     if ~exist([spikes.sessionName '.referenceFrames.mat'])
+    if ~exist([spikes.sessionName '.referenceFramesMaxCorr.mat'])
 if isfield(behavior.events.trials{1},'direction')
 % lfp = bz_GetLFP(sessionInfo.thetaChans(2));
 %     
@@ -28,7 +28,7 @@ conditionCentric = [];
 goalCentric = [];
 alloCentric = [];
 egoCentric = [];
-for cond = 1:length(conditions)
+for cond = conditions
     trials = find(behavior.events.trialConditions==cond);
     intervals = behavior.events.trialIntervals(trials,:);
     for t = 1:length(trials)
@@ -57,7 +57,7 @@ for cond = 1:length(conditions)
         nPos = length(behavior.events.trials{trial}.x);
         
         % goal centric is the distance to the reward for all trials.
-        goalCentric = [goalCentric;makeLength(behavior.events.trials{trial}.mapping,length(spk_trains{cond}{t}))'];
+        goalCentric = [goalCentric;makeLength(behavior.events.trials{trial}.mapping,201)'];
                 % the -1 gaurantees the length to be longer than the above spk/phase trains
 
         % route centric, given rotations...
@@ -74,13 +74,13 @@ for cond = 1:length(conditions)
                 routeLoc = 4;
             end
         end
-        route = zeros(length(spk_trains{cond}{t}),4);
-        route(:,routeLoc) = makeLength(behavior.events.trials{trial}.mapping,length(spk_trains{cond}{t}));
+        route = zeros(201,4);
+        route(:,routeLoc) = makeLength(behavior.events.trials{trial}.mapping,201);
         routeCentric = [routeCentric; route];
         
         %
-        c = zeros(length(spk_trains{cond}{t}),length(conditions));
-        c(:,cond) = makeLength(behavior.events.trials{trial}.mapping,length(spk_trains{cond}{t}));
+        c = zeros(201,length(conditions));
+        c(:,cond) = makeLength(behavior.events.trials{trial}.mapping,201);
         conditionCentric = [conditionCentric; c];
         % and allocentric locations in space
         try
@@ -95,19 +95,19 @@ for cond = 1:length(conditions)
             zeros(length(behavior.events.trials{trial}.orientation.yaw),1)];
         end
         try
-        allo = [makeLength(behavior.events.trials{trial}.x,length(spk_trains{cond}{t}))...
-            ;makeLength(behavior.events.trials{trial}.y,length(spk_trains{cond}{t}))...
-            ;makeLength(behavior.events.trials{trial}.z,length(spk_trains{cond}{t}))...
-            ;acos(makeLength(cos(angles(:,1)),length(spk_trains{cond}{t})))...
-            ;acos(makeLength(cos(angles(:,2)),length(spk_trains{cond}{t})))...
-            ;acos(makeLength(cos(angles(:,3)),length(spk_trains{cond}{t})))]';
+        allo = [makeLength(behavior.events.trials{trial}.x,201)...
+            ;makeLength(behavior.events.trials{trial}.y,201)...
+            ;makeLength(behavior.events.trials{trial}.z,201)...
+            ;acos(makeLength(cos(angles(:,1)),201))...
+            ;acos(makeLength(cos(angles(:,2)),201))...
+            ;acos(makeLength(cos(angles(:,3)),201))]';
         catch
-        allo = [makeLength(behavior.events.trials{trial}.x,length(spk_trains{cond}{t}))...
-            ;makeLength(behavior.events.trials{trial}.y,length(spk_trains{cond}{t}))...
-            ;makeLength(zeros(length(behavior.events.trials{trial}.y),1),length(spk_trains{cond}{t}))...
-            ;acos(makeLength(cos(angles(:,1)),length(spk_trains{cond}{t})))...
-            ;acos(makeLength(cos(angles(:,2)),length(spk_trains{cond}{t})))...
-            ;acos(makeLength(cos(angles(:,3)),length(spk_trains{cond}{t})))]';    
+        allo = [makeLength(behavior.events.trials{trial}.x,201)...
+            ;makeLength(behavior.events.trials{trial}.y,201)...
+            ;makeLength(zeros(length(behavior.events.trials{trial}.y),1),201)...
+            ;acos(makeLength(cos(angles(:,1)),201))...
+            ;acos(makeLength(cos(angles(:,2)),201))...
+            ;acos(makeLength(cos(angles(:,3)),201))]';    
         end
         vels = [zeros(1,6); diff(allo)];
         acc =  [zeros(1,6); diff(diff(allo)); zeros(1,6)];
@@ -129,31 +129,31 @@ for wind = smoothingRange
     [binnedPhaseMap] = bz_phaseMap2Bins(phaseMaps.phaseMaps,firingMaps.rateMaps,behavior);
 %     for cell = 1:nCells 
     %smoothing
-        phase_trains_smooth=[];
-        rates_trains_smooth = [];
-        for cond =  1:length(conditions)
-            for t = 1:length(phase_trains{cond})
-            phase_trains_smooth=[phase_trains_smooth;...
-            circ_smoothTS(phase_trains{cond}{t}(cell,:),wind,'method','mean','exclude',0)];
-            rates_trains_smooth = [rates_trains_smooth; ...
-            smoothts(spk_trains{cond}{t}(cell,:),'b',wind)'];
-            end
-        end
-%             phase_trains_smooth=[];
-%             rates_trains_smooth = [];
-%             for cond = conditions
-%             for t = 1:size(binnedPhaseMap{cond},2)
-%                 binnedPhaseMap{cond}(cell,t,isnan(binnedPhaseMap{cond}(cell,t,:)))=0;
-%                 phase_trains_smooth=[phase_trains_smooth;...
-%                     circ_smoothTS(squeeze(binnedPhaseMap{cond}(cell,t,:)),wind,'method','mean','exclude',0)];
-%                 rates_trains_smooth = [rates_trains_smooth; ...
-%                                        squeeze(maps.rateMaps_box{cond}(cell,t,:))];                   
-%             end 
+%         phase_trains_smooth=[];
+%         rates_trains_smooth = [];
+%         for cond = conditions
+%             for t = 1:length(phase_trains{cond})
+%             phase_trains_smooth=[phase_trains_smooth;...
+%             circ_smoothTS(phase_trains{cond}{t}(cell,:),wind,'method','mean','exclude',0)];
+%             rates_trains_smooth = [rates_trains_smooth; ...
+%             smoothts(spk_trains{cond}{t}(cell,:),'b',wind)'];
 %             end
+%         end
+            phase_trains_smooth=[];
+            rates_trains_smooth = [];
+            for cond = conditions
+            for t = 1:size(binnedPhaseMap{cond},2)
+                binnedPhaseMap{cond}(cell,t,isnan(binnedPhaseMap{cond}(cell,t,:)))=0;
+                phase_trains_smooth=[phase_trains_smooth;...
+                    circ_smoothTS(squeeze(binnedPhaseMap{cond}(cell,t,:)),wind,'method','mean','exclude',0)];
+                rates_trains_smooth = [rates_trains_smooth; ...
+                                       squeeze(maps.rateMaps_box{cond}(cell,t,:))];                   
+            end 
+            end
         
         % split data into train/test
         predictors = [alloCentric, routeCentric, conditionCentric, goalCentric, egoCentric];
-                     % 6 4 2X 1 12               
+                     % 6 4 2 1 12               
         for iter = 1:5
             r = randperm(length(rates_trains_smooth));
             pct = round(prctile(1:length(r),60));
@@ -166,7 +166,7 @@ for wind = smoothingRange
             predictors_test = predictors(r(pct+1:end),:);
             if sum(rates_train)>1
             %% begin modelling rate
-            mse_chance_rate(c,iter) = mean((rates_test(randperm(length(rates_test)))-rates_test).^2);
+%             mse_chance_rate(c,iter) = mean((rates_test(randperm(length(rates_test)))-rates_test).^2);
             for p=1:size(predictors,2)
                 [b dev_p stats] = glmfit(predictors_train(:,p),rates_train,'normal');
                 yfit = glmval(b,predictors_test(:,p),'identity');
@@ -179,8 +179,8 @@ for wind = smoothingRange
             end
             %% begin modelling phase
 %             mse_chance_phase(c,iter) = mean((phase_test(randperm(length(phase_test)))-phase_test).^2);
-            mse_chance_phase_cos(c,iter) = mean((cos(phase_test(randperm(length(phase_test))))-cos(phase_test)).^2);
-            mse_chance_phase_sin(c,iter) = mean((sin(phase_test(randperm(length(phase_test))))-sin(phase_test)).^2);
+%             mse_chance_phase_cos(c,iter) = mean((cos(phase_test(randperm(length(phase_test))))-cos(phase_test)).^2);
+%             mse_chance_phase_sin(c,iter) = mean((sin(phase_test(randperm(length(phase_test))))-sin(phase_test)).^2);
             for p=1:size(predictors,2)
                 [b dev_p stats] = glmfit(predictors_train(:,p),phase_train,'normal');
                 yfit = glmval(b,predictors_test(:,p),'identity');
@@ -209,15 +209,7 @@ for wind = smoothingRange
 %                  [b dev_p stats] = glmfit([phase_train cos(phase_train) sin(phase_train)],predictors_train(:,p),'normal');
 %                 yfit = glmval(b,[phase_test cos(phase_test) sin(phase_test)],'identity');
 %                 mse_phase(c,p,iter) = mean((yfit-rates_test).^2); 
-            end
-            else
-                mse_rate(c,p,iter) = nan;
-                mse_phase(c,p,iter) = nan;
-                mse_phase_cos(c,p,iter) = nan;
-                mse_phase_sin(c,p,iter) = nan;
-                mse_chance_rate(c,iter) = nan;
-                mse_chance_phase_cos(c,iter) = nan;
-                mse_chance_phase_sin(c,iter) = nan;
+            end            
             end
         end
         
@@ -289,14 +281,14 @@ end
     mse_all_rate{cell} = mse_rate;
     mse_all_chance_phase_cos{cell} = mse_chance_phase_cos;
     mse_all_chance_phase_sin{cell} = mse_chance_phase_sin;
-    mse_all_chance_rate{cell} = mse_chance_rate;
+%     mse_all_chance_rate{cell} = mse_chance_rate;
     clear mse mse_allo mse_cond mse_route mse_goal mse_chance_rate mse_chance_phase_cos mse_chance_phase_sin mse_rate mse_phase*
-    save([spikes.sessionName '.referenceFrames.mat'],'mse*')
+    save([spikes.sessionName '.referenceFramesMaxCorr.mat'],'mse*')
 end
 end
-%     end
-% cd /home/david/datasets/lsDataset
-% end
+    end
+cd /home/david/datasets/lsDataset
+end
 
 
 

@@ -15,7 +15,7 @@ nBins = length(behavior.events.map{1}.x);
     r = randperm(length(spikes.times));
     ensemble = r(1:ensembleSize); 
     spikes = bz_GetSpikes('UID',spikes.UID(ensemble));clear r
-    if ~exist(['/ifs/data/buzsakilab/popDecodeBayes/' sessionInfo.FileName '.posDecodeBayes.' num2str(sort(spikes.UID),'%0.3d') '.popinfo.mat'])
+    if ~exist(['/home/david/datasets/popDecodeBayes/' sessionInfo.FileName '.all_hpc' '.popinfo.mat'])
     load([sessionInfo.FileName '.behavior.mat'])
     if ~isempty(sessionInfo.ca1)
     lfp = bz_GetLFP(sessionInfo.ca1);
@@ -222,7 +222,7 @@ for smoothing = 1:round(nBins./2)
     end
     posDecodeBayes.dateRun = date;  % this can take a very long time so lets save each loop...
     posDecodeBayes.ensemble = ensemble;
-    cd('/ifs/data/buzsakilab/popDecodeBayes')
-    save([sessionInfo.FileName '.' num2str(sort(spikes.UID),'%0.3d') '.popinfo.mat'],'posDecodeBayes')
+    cd('/home/david/datasets/popDecodeBayes')
+    save([sessionInfo.FileName '.all_hpc' '.popinfo.mat'],'posDecodeBayes')
 end
 end

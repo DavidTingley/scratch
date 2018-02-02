@@ -25,29 +25,26 @@ load([sessionInfo.FileName '.behavior.mat'])
 %            tt = input(['types [w/s]' ': '],'s');
        for t = 1:length(unique(behavior.events.trialConditions))
            f = find(behavior.events.trialConditions == t);
-           cc = (behavior.events.trialConditions(f(1)));
            
            for j=1:length(f)
                
-               if strcmp(d(cc),'l')
+               if strcmp(d(t),'l')
                    behavior.events.trials{f(j)}.direction = 'counter-clockwise';
-               elseif strcmp(d(cc),'r')
+               elseif strcmp(d(t),'r')
                    behavior.events.trials{f(j)}.direction = 'clockwise';
                end
                
                
                if strcmp(behavior.description,'central alternation')
-                   behavior.events.trials{f(j)}.type = 'central alternation';
+                   behavior.events.trials{t}.type = 'central alternation';
                elseif strcmp(behavior.description,'wheel alternation')
-                   behavior.events.trials{f(j)}.type = 'wheel alternation';
+                   behavior.events.trials{t}.type = 'wheel alternation';
                else
-                   if j==1
-                   ddd = input([num2str(f(j)) ': directions [w/c]' ': '],'s');
-                   end
+                   ddd = input([num2str(t) ': directions [w/c]' ': '],'s');
                    if strcmp(ddd,'c')
-                       behavior.events.trials{f(j)}.type = 'central alternation';
+                       behavior.events.trials{t}.type = 'central alternation';
                    elseif strcmp(ddd,'w')
-                       behavior.events.trials{f(j)}.type = 'wheel alternation';
+                       behavior.events.trials{t}.type = 'wheel alternation';
                    end
                end
            end
