@@ -19,7 +19,7 @@ for ii=1:length(d)
        mse_rate = nanmean(mse_all_rate{cell},3);
        mse_phase = nanmean(mse_all_phase{cell},3);
        mse_phase_cos = nanmean(mse_all_phase_cos{cell},3);
-%        mse_phase_cos_chance = nanmean(mse_all_phase_cos_chance{cell},3);
+       mse_phase_cos_chance = nanmean(mse_all_phase_cos_chance{cell},3);
        mse_phase_sin = nanmean(mse_all_phase_sin{cell},3);
        mse_phase_chance = nanmean(mse_all_phase_chance{cell},3);
 %     mse_chance_rate = mse_all_chance_rate{cell};
@@ -40,7 +40,7 @@ for ii=1:length(d)
 %         subplot(2,2,4)
 %         for j=1:size(mse_phase_cos,1)
                 mse_norm_phase = (mse_phase_cos); %zscore
-                mse_norm_phase_chance = (mse_phase_chance_cos); %zscore
+                mse_norm_phase_chance = (mse_phase_cos_chance); %zscore
 %         end
 %         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm_phase,3))))
 %         line([6.5 6.5],[0 4000],'color','k')
@@ -135,7 +135,7 @@ bar(squeeze(nanmean(nanmean(ls_phase(:,windRange,:),1),2)))
 xticks([1:6 8.5 11 14.5 20.5])
 set(gca,'xticklabel',legend)
 title([num2str(size(ls_phase,1)) ' LS cells included'])
-axis([0 24 3 4])
+axis([0 24 1 1.5])
 subplot(3,1,2)
 bar(1,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,1:3))))),'r')
 hold on
@@ -150,5 +150,5 @@ bar(3,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,11))))))
 bar(4,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,12:end))))))
 xticks([1:4])
 set(gca,'xticklabel',legendShort)
-axis([0 5 3 4])
+axis([0 5 1 1.5])
 
