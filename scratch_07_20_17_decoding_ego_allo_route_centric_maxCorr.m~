@@ -179,7 +179,7 @@ for wind = smoothingRange
             %% begin modelling phase
 
                 cl = max_correlation_coefficient_CL;
-                r = randi([1, length(phase_train)],1);
+                r = randi([1, length(phase_train),1]);
                 cl = train(cl,predictors_train(:,p)',[circshift(phase_train,r)]');
                 yfit = test(cl,[predictors_test(:,p)']);
                 mse_phase_chance(p,wind,iter) = mean((yfit-phase_test').^2);

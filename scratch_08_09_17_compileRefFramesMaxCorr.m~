@@ -26,7 +26,7 @@ for ii=1:length(d)
 %     mse_chance_phase_cos = mse_all_chance_phase_cos{cell};
 
 %         for j=1:size(mse_rate,1)
-                mse_norm_rate = (mse_rate);-nanmean(nanmean((mse_rate))); %zscore
+                mse_norm_rate = (mse_rate)-nanmean(nanmean((mse_rate))); %zscore
 %         end
         
 %         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm_rate,3))))
@@ -38,8 +38,7 @@ for ii=1:length(d)
         
 %         subplot(2,2,4)
 %         for j=1:size(mse_phase_cos,1)
-                mse_norm_phase = (mse_phase);-nanmean(nanmean((mse_phase))); %zscore
-                mse_norm_phase_chance = (mse_phase);-nanmean(nanmean((mse_phase_chance))); %zscore
+                mse_norm_phase = (mse_phase)-nanmean(nanmean((mse_phase))); %zscore
 %         end
 %         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm_phase,3))))
 %         line([6.5 6.5],[0 4000],'color','k')
@@ -99,7 +98,7 @@ for ii=1:length(d)
            if strcmp(spikes.region{cell},'ls')
                ls_phase(ls_count,:,:) = mse_norm_phase([1:10 end-12:end],:)';
                ls_rate(ls_count,:,:) = mse_norm_rate([1:10 end-12:end],:)';
-               ls_phase_chance(ls_count,:,:) = mse_norm_phase_chance([1:10 end-12:end],:)';
+               
                ls_count = 1+ls_count;
            elseif strcmp(spikes.region{cell},'hpc')
                hpc_phase(hpc_count,:,:) = mse_norm_phase([1:10 end-12:end],:)';
@@ -124,12 +123,11 @@ end
 
 % 1:6 allo 7:10 route 11 goal 12:23 ego
 legend = {'x','y','z','pitch','yaw','roll','routes','goal','ego(accel)','ego(vel)'};
-legendShort = {'allo','route','goal','ego'};
 % figure
 windRange = 21;
 clf
 subplot(3,1,1)
-bar(squeeze(nanmean(nanmean(ls_phase(:,windRange,:),1),2)),'r')
+bar(squeeze(nanmean(ls_phase(:,windRange,:))),'r')
 xticks([1:6 8.5 11 14.5 20.5])
 set(gca,'xticklabel',legend)
 title([num2str(size(ls_phase,1)) ' LS cells included'])
@@ -137,13 +135,5 @@ subplot(3,1,2)
 bar(1,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,1:3))))))
 hold on
 bar(2,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,7:10))))))
-bar(3,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,11))))))
-bar(4,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,12:end))))))
-xticks([1:4])
-set(gca,'xticklabel',legendShort)
-subplot(3,1,3)
-bar(1,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,1:3))))))
-hold on
-bar(2,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,7:10))))))
-bar(3,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,11))))))
-bar(4,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,12:end))))))
+bar(3,mean(squeeze(nanmean(nanmean(ls_phase(:,:,11))))))
+bar(4,mean(squeeze(nanmean(nanmean(ls_phase(:,:,12:end))))))
