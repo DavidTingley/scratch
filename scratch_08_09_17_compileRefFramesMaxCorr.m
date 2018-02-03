@@ -39,8 +39,8 @@ for ii=1:length(d)
         
 %         subplot(2,2,4)
 %         for j=1:size(mse_phase_cos,1)
-                mse_norm_phase = (mse_phase); %zscore
-                mse_norm_phase_chance = (mse_phase_chance); %zscore
+                mse_norm_phase = (mse_phase_cos); %zscore
+                mse_norm_phase_chance = (mse_phase_chance_cos); %zscore
 %         end
 %         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm_phase,3))))
 %         line([6.5 6.5],[0 4000],'color','k')

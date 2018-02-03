@@ -210,6 +210,7 @@ for wind = smoothingRange
                 mse_phase(p,wind,iter) = nan;
                 mse_phase_cos_chance(p,wind,iter) = nan;
                 mse_phase_sin(p,wind,iter) = nan;
+                mse_phase_cos(p,wind,iter) = nan;
                 mse_phase_chance(p,wind,iter) = nan;
                 end
             end
