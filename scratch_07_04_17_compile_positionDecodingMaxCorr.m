@@ -54,7 +54,11 @@ for i=1:length(d)
         load([sessionInfo.FileName '.behavior.mat'])
 %         load([d(i).name '.firingMaps.cellinfo.mat'],'firingMaps')
         load([d(i).name '.phaseMaps.cellinfo.mat'],'phaseMaps')
-        load([d(i).name '.referenceFrames.mat'])
+        try
+            load([d(i).name '.referenceFramesMaxCorr.mat'])
+        catch
+            mse_all_rate = [];
+        end
         [firingMaps] = bz_firingMap1D(spikes,behavior,tau);
         [binnedfiringMaps.phaseMaps] = bz_phaseMap2Bins(phaseMaps.phaseMaps,firingMaps.rateMaps,behavior);
         load([d(i).name '.placeFields.20_pctThresh.mat'],'fields') 
@@ -189,15 +193,15 @@ for i=1:length(d)
 % hpc_phase_info = [hpc_phase_info; maxphaseInfo];
 % hpc_rate_info = [hpc_rate_info; maxrateInfo];
                     if length(mse_all_rate) >= cell
-                   hpc_referenceFrame_rate_rate(hpc_count,:,:) = nanmean(mse_all_rate{cell}(1:30,:,:),3);
-                   hpc_referenceFrame_rate_phase(hpc_count,:,:) = nanmean(mse_all_phase{cell}(1:30,:,:),3);
-                   hpc_referenceFrame_rate_phase_cos(hpc_count,:,:) = nanmean(mse_all_phase_cos{cell}(1:30,:,:),3);
-                   hpc_referenceFrame_rate_phase_sin(hpc_count,:,:) = nanmean(mse_all_phase_sin{cell}(1:30,:,:),3);
+                   hpc_referenceFrame_rate_rate(hpc_count,:,:) = nanmean(mse_all_rate{cell}([1:10 end-12:end],:,:),3);
+                   hpc_referenceFrame_rate_phase(hpc_count,:,:) = nanmean(mse_all_phase{cell}([1:10 end-12:end],:,:),3);
+                   hpc_referenceFrame_rate_phase_cos(hpc_count,:,:) = nanmean(mse_all_phase_cos{cell}([1:10 end-12:end],:,:),3);
+                   hpc_referenceFrame_rate_phase_sin(hpc_count,:,:) = nanmean(mse_all_phase_sin{cell}([1:10 end-12:end],:,:),3);
                     else
-                   hpc_referenceFrame_rate_rate(hpc_count,:,:) = nan(30,31);
-                   hpc_referenceFrame_rate_phase(hpc_count,:,:) = nan(30,31);
-                   hpc_referenceFrame_rate_phase_cos(hpc_count,:,:) = nan(30,31);
-                   hpc_referenceFrame_rate_phase_sin(hpc_count,:,:) = nan(30,31);
+                   hpc_referenceFrame_rate_rate(hpc_count,:,:) = nan(23,41);
+                   hpc_referenceFrame_rate_phase(hpc_count,:,:) = nan(23,41);
+                   hpc_referenceFrame_rate_phase_cos(hpc_count,:,:) = nan(23,41);
+                   hpc_referenceFrame_rate_phase_sin(hpc_count,:,:) = nan(23,41);
                     end
 
                    hpc_phase=[hpc_phase;min_mse_phase_all'];
@@ -356,16 +360,17 @@ hpc_count = hpc_count + 1;
 %                        examples = [examples; {sessionInfo.FileName, cell, cond, 'ls'}];
 %                    end
                    if length(mse_all_rate) >= cell
-                   ls_referenceFrame_rate_rate(ls_count,:,:,:) = mse_all_rate{cell}(1:30,:,:);
-                   ls_referenceFrame_rate_phase(ls_count,:,:,:) = mse_all_phase{cell}(1:30,:,:);
-                   ls_referenceFrame_rate_phase_cos(ls_count,:,:,:) = mse_all_phase_cos{cell}(1:30,:,:);
-                   ls_referenceFrame_rate_phase_sin(ls_count,:,:,:) = mse_all_phase_sin{cell}(1:30,:,:);
+                   ls_referenceFrame_rate_rate(ls_count,:,:,:) = nanmean(mse_all_rate{cell}([1:10 end-12:end],:,:),3);
+                   ls_referenceFrame_rate_phase(ls_count,:,:,:) = nanmean(mse_all_phase{cell}([1:10 end-12:end],:,:),3);
+                   ls_referenceFrame_rate_phase_cos(ls_count,:,:,:) = nanmean(mse_all_phase_cos{cell}([1:10 end-12:end],:,:),3);
+                   ls_referenceFrame_rate_phase_sin(ls_count,:,:,:) = nanmean(mse_all_phase_sin{cell}([1:10 end-12:end],:,:),3);
                    else
-                   ls_referenceFrame_rate_rate(hpc_count,:,:) = nan(30,31);
-                   ls_referenceFrame_rate_phase(hpc_count,:,:) = nan(30,31);
-                   ls_referenceFrame_rate_phase_cos(hpc_count,:,:) = nan(30,31);
-                   ls_referenceFrame_rate_phase_sin(hpc_count,:,:) = nan(30,31);
-                    end
+                   ls_referenceFrame_rate_rate(ls_count,:,:) = nan(23,41);
+                   ls_referenceFrame_rate_phase(ls_count,:,:) = nan(23,41);
+                   ls_referenceFrame_rate_phase_cos(ls_count,:,:) = nan(23,41);
+                   ls_referenceFrame_rate_phase_sin(ls_count,:,:) = nan(23,41);
+                   end
+                    
                    ls_pval = [ls_pval;pval];
                    ls_pval_c = [ls_pval_c;pval_c];
                    ls_phase=[ls_phase;min_mse_phase_all'];

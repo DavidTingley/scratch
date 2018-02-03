@@ -195,6 +195,11 @@ for wind = smoothingRange
                 mse_phase_cos(p,wind,iter) = mean((yfit-cos(phase_test)').^2);
                 
                 cl = max_correlation_coefficient_CL;
+                cl = train(cl,predictors_train(:,p)',[cos(circshift(phase_train,r))]');
+                yfit = test(cl,[predictors_test(:,p)']);
+                mse_phase_cos_chance(p,wind,iter) = mean((yfit-cos(phase_test)').^2);
+                
+                cl = max_correlation_coefficient_CL;
                 cl = train(cl,predictors_train(:,p)',[sin(phase_train)]');
                 yfit = test(cl,[predictors_test(:,p)']);
                 mse_phase_sin(p,wind,iter) = mean((yfit-sin(phase_test)').^2);
@@ -203,7 +208,7 @@ for wind = smoothingRange
             else
                 mse_rate(p,wind,iter) = nan;
                 mse_phase(p,wind,iter) = nan;
-                mse_phase_cos(p,wind,iter) = nan;
+                mse_phase_cos_chance(p,wind,iter) = nan;
                 mse_phase_sin(p,wind,iter) = nan;
                 mse_phase_chance(p,wind,iter) = nan;
                 end
@@ -272,6 +277,7 @@ for wind = smoothingRange
 end
 %     mse_all_phase{cell} = mse_phase;
     mse_all_phase_cos{cell} = mse_phase_cos;
+    mse_all_phase_cos_chance{cell} = mse_phase_cos_chance;
     mse_all_phase_sin{cell} = mse_phase_sin;
     mse_all_phase{cell} = mse_phase;
     mse_all_phase_chance{cell} = mse_phase_chance;
