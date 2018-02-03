@@ -10,7 +10,7 @@ spikes = bz_GetSpikes;
 
 %     if ~exist([spikes.sessionName '.referenceFrames.mat'])
 if isfield(behavior.events.trials{1},'direction')
-% lfp = bz_GetLFP(sessionInfo.thetaChans(2));
+% lfp = bz_GetLFP(sessionInfo.thetaChans(2));o
 %     
 conditions = unique(behavior.events.trialConditions);
 nCells = length(spikes.times);

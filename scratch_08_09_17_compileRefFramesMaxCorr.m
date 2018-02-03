@@ -6,9 +6,9 @@ ls_phase = []; ls_rate = [];
 hpc_phase = []; hpc_rate = [];
 vals = [];
 corrs = [];
-smoothingRange = 1:300:4000;
+smoothingRange = 1:50;
 %% compile data  
-for ii=length(d):-1:1
+for ii=1:length(d)
    cd(d(ii).name)
    if exist([d(ii).name '.referenceFramesMaxCorr.mat'])
    load([d(ii).name '.referenceFramesMaxCorr.mat'])
@@ -17,20 +17,22 @@ for ii=length(d):-1:1
 %        alloScore = squeeze(nanmean(nanmean(mse_all_rate{cell}(:,1:2,:),3),2));
 %        alloScore_chance = squeeze((nanmean(mse_all_chance_rate{cell},2)));
 %        [a b] = min(alloScore./alloScore_chance);
-       
-       
-       mse_rate = mse_all_rate{cell};
-    mse_phase_cos = mse_all_phase_cos{cell};
-    mse_phase_sin = mse_all_phase_sin{cell};
+       p=33;c=5;
+       if size(mse_all_rate{cell},1)>c
+           
+       mse_rate = mse_all_rate{cell}(1:c,:,:);
+       mse_phase = mse_all_phase{cell}(1:c,:,:);
+       mse_phase_cos = mse_all_phase_cos{cell}(1:c,:,:);
+       mse_phase_sin = mse_all_phase_sin{cell}(1:c,:,:);
 %     mse_chance_rate = mse_all_chance_rate{cell};
 %     mse_chance_phase_sin = mse_all_chance_phase_sin{cell};
 %     mse_chance_phase_cos = mse_all_chance_phase_cos{cell};
                subplot(2,2,2)
                mse_rate(isnan(mse_rate))=nanmean(mse_rate(:));
         for j=1:size(mse_rate,1)
-                mse_norm_rate(j,:,:) = zscore(mse_rate(j,:,:));
+                mse_norm_rate(j,:,:) = (mse_rate(j,:,:))-mean(mean((mse_rate(j,:,:)))); %zscore
         end
-        p=33;c=14;
+        
         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm_rate,3))))
         title('rate')
                 line([6.5 6.5],[0 4000],'color','k')
@@ -40,7 +42,7 @@ for ii=length(d):-1:1
         
         subplot(2,2,4)
         for j=1:size(mse_phase_cos,1)
-                mse_norm_phase(j,:,:) = zscore(mse_phase_cos(j,:,:));
+                mse_norm_phase(j,:,:) = (mse_phase_cos(j,:,:))-mean(mean((mse_phase_cos(j,:,:)))); %zscore
         end
         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse_norm_phase,3))))
         line([6.5 6.5],[0 4000],'color','k')
@@ -53,40 +55,40 @@ for ii=length(d):-1:1
         
         subplot(2,2,1)
         % allo
-        plot(smoothingRange(1:c),((squeeze(nanmean(nanmean(mse_rate(:,1:6,:),2),3)))),'.k')
+        plot(smoothingRange(1:c),((squeeze(nanmean(nanmean(mse_rate(1:c,1:6,:),2),3)))),'.k')
         hold on
         %route
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,7:10,:),2),3)))),'.r')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(1:c,7:10,:),2),3)))),'.r')
         %cond
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,11:20,:),2),3)))),'.b')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(1:c,11:20,:),2),3)))),'.b')
         %goal
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,21,:),2),3)))),'.g')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(1:c,21,:),2),3)))),'.g')
         %ego
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(:,22:end,:),2),3)))),'.m')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_rate(1:c,22:end,:),2),3)))),'.m')
         hold off
         title(spikes.region{cell})
         subplot(2,2,3)
         % allo
 %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,1:6,:),2),3))))./mean(mse_chance_phase,2),'.k')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,1:6,:),2),3)))),'.k')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(1:c,1:6,:),2),3)))),'.k')
         hold on
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,1:6,:),2),3)))),'.k')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(1:c,1:6,:),2),3)))),'.k')
         %route
 %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,7:10,:),2),3))))./mean(mse_chance_phase,2),'.r')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,7:10,:),2),3)))),'.r')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,7:10,:),2),3)))),'.r')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(1:c,7:10,:),2),3)))),'.r')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(1:c,7:10,:),2),3)))),'.r')
         %cond
 %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,11:20,:),2),3))))./mean(mse_chance_phase,2),'.b')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,11:20,:),2),3)))),'.b')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,11:20,:),2),3)))),'.b')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(1:c,11:20,:),2),3)))),'.b')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(1:c,11:20,:),2),3)))),'.b')
         %goal
 %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,21,:),2),3))))./mean(mse_chance_phase,2),'.g')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,21,:),2),3)))),'.g')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,21,:),2),3)))),'.g')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(1:c,21,:),2),3)))),'.g')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(1:c,21,:),2),3)))),'.g')
         %ego
 %         plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase(:,22:end,:),2),3))))./mean(mse_chance_phase,2),'.m')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(:,22:end,:),2),3)))),'.m')
-        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(:,22:end,:),2),3)))),'.m')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_cos(1:c,22:end,:),2),3)))),'.m')
+        plot(smoothingRange(1:c),((squeeze(mean(mean(mse_phase_sin(1:c,22:end,:),2),3)))),'.m')
         hold off
         
 %         imagesc(1:p,smoothingRange(1:c),(squeeze(mean(mse,3))))
@@ -99,13 +101,13 @@ rr = (squeeze(nanmean(mse_norm_rate,3)));
        vals = [vals,a];
 %        if size(pp,2) == 31
            if strcmp(spikes.region{cell},'ls')
-               ls_phase(ls_count,:,:) = pp(:,[1:10 end-13:end]);
-               ls_rate(ls_count,:,:) = rr(:,[1:10 end-13:end]);
+               ls_phase(ls_count,:,:) = pp(:,[1:10 end-12:end]);
+               ls_rate(ls_count,:,:) = rr(:,[1:10 end-12:end]);
                
                ls_count = 1+ls_count;
            elseif strcmp(spikes.region{cell},'hpc')
-               hpc_phase(hpc_count,:,:) = pp(:,[1:10 end-13:end]);
-               hpc_rate(hpc_count,:,:) = rr(:,[1:10 end-13:end]);
+               hpc_phase(hpc_count,:,:) = pp(:,[1:10 end-12:end]);
+               hpc_rate(hpc_count,:,:) = rr(:,[1:10 end-12:end]);
                
                hpc_count = 1+hpc_count;
            end
@@ -114,9 +116,28 @@ rr = (squeeze(nanmean(mse_norm_rate,3)));
 %            scratch_07_20_17_decoding_ego_allo_route_centric
 %        end
        clear mse_norm_phase mse_norm_rate
+       end
    end
    else
+       disp(['not using ' d(ii).name])
 %        scratch_07_20_17_decoding_ego_allo_route_centric
    end 
    cd('/home/david/datasets/lsDataset')
+%     cd('D:\Dropbox\datasets\lsDataset')
 end
+
+% 1:6 allo 7:10 route 11 goal 12:23 ego
+legend = {'x','y','z','pitch','yaw','roll','routes','goal','ego(accel)','ego(vel)'};
+% figure
+clf
+subplot(3,1,1)
+bar(squeeze(nanmean(nanmean(ls_phase(:,:,:)))),'r')
+xticks([1:6 8.5 11 14.5 20.5])
+set(gca,'xticklabel',legend)
+title([num2str(size(ls_phase,1)) ' LS cells included'])
+subplot(3,1,2)
+bar(1,mean(squeeze(nanmean(nanmean(ls_phase(:,:,1:3))))))
+hold on
+bar(2,mean(squeeze(nanmean(nanmean(ls_phase(:,:,7:10))))))
+bar(3,mean(squeeze(nanmean(nanmean(ls_phase(:,:,11))))))
+bar(4,mean(squeeze(nanmean(nanmean(ls_phase(:,:,12:end))))))

@@ -6,6 +6,7 @@ clf
  ord = randperm(length(d));
 
 for rec= 1:length(d)
+    rec
     cd(d((rec)).name)
     sessionInfo = bz_getSessionInfo;
 
@@ -25,15 +26,16 @@ for rec= 1:length(d)
     [blah stop] = min(abs(hpc.timestamps-max(behavior.events.trialIntervals(trial,2))));
     freqs2=25:2:200;
     freqs1=5:0.5:10;
-
+    if stop-start>1000
     [cmats_sig_hpc_ls{rec}(trial,:,:,:,:),strength,pref_phase,mean_phase] = thetamod2(double(hpc.data(start:stop)),double(ls.data(start:stop)),freqs2,[2 3 5 6],1250,[25 200]);
-    [tort_hpc_ls{rec},freq,MI] = CFCtort(double(hpc.data(start:stop)),double(ls.data(start:stop)),freqs1,freqs2,1250,[30 200]);
+    [tort_hpc_ls{rec}(trial,:,:),freq,MI] = CFCtort(double(hpc.data(start:stop)),double(ls.data(start:stop)),freqs1,freqs2,1250,[30 200]);
     
     [cmats_sig_hpc_hpc{rec}(trial,:,:,:,:),strength,pref_phase,mean_phase] = thetamod2(double(hpc.data(start:stop)),double(hpc.data(start:stop)),freqs2,[2 3 5 6],1250,[25 200]);
-    [tort_hpc_hpc{rec},freq,MI] = CFCtort(double(hpc.data(start:stop)),double(hpc.data(start:stop)),freqs1,freqs2,1250,[30 200]);
+    [tort_hpc_hpc{rec}(trial,:,:),freq,MI] = CFCtort(double(hpc.data(start:stop)),double(hpc.data(start:stop)),freqs1,freqs2,1250,[30 200]);
     
     [cmats_sig_ls_ls{rec}(trial,:,:,:,:),strength,pref_phase,mean_phase] = thetamod2(double(ls.data(start:stop)),double(ls.data(start:stop)),freqs2,[2 3 5 6],1250,[25 200]);
-    [tort_ls_ls{rec},freq,MI] = CFCtort(double(ls.data(start:stop)),double(ls.data(start:stop)),freqs1,freqs2,1250,[30 200]);
+    [tort_ls_ls{rec}(trial,:,:),freq,MI] = CFCtort(double(ls.data(start:stop)),double(ls.data(start:stop)),freqs1,freqs2,1250,[30 200]);
+    end
     end
 %     
 %     %% HPC/LS coupling

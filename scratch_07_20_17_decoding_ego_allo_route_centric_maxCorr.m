@@ -15,7 +15,7 @@ if isfield(behavior.events.trials{1},'direction')
 conditions = unique(behavior.events.trialConditions);
 nCells = length(spikes.times);
 routeCentricSamplingRate = behavior.samplingRate;
-smoothingRange = 1:50;
+smoothingRange = 1:10:50;
 
 % % find a better way to get spike phase relationship...
 % [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
@@ -126,8 +126,7 @@ warning off
 
 
 for cell = 1:nCells
-    c=1;
-%     figure
+
 for wind = smoothingRange
     maps = bz_firingMap1D(spikes,behavior,wind);
     [binnedPhaseMap] = bz_phaseMap2Bins(phaseMaps.phaseMaps,firingMaps.rateMaps,behavior);
@@ -171,54 +170,42 @@ for wind = smoothingRange
             for p=1:size(predictors,2)
                 if sum(rates_train)>100
             %% begin modelling rate
-%             mse_chance_rate(c,iter) = mean((rates_test(randperm(length(rates_test)))-rates_test).^2);
-            
-%                 [b dev_p stats] = glmfit(predictors_train(:,p),rates_train,'normal');
-%                 yfit = glmval(b,predictors_test(:,p),'identity');
-%                 mse_rate(c,p,iter) = mean((yfit-rates_test).^2);     
-                
+
             cl = max_correlation_coefficient_CL;
             cl = train(cl,predictors_train(:,p)',rates_train');
             yfit = test(cl,[predictors_test(:,p)']);
-            mse_rate(c,p,iter) = mean((yfit-rates_test').^2);
+            mse_rate(p,wind,iter) = mean((yfit-rates_test').^2);
      
             %% begin modelling phase
-%             mse_chance_phase(c,iter) = mean((phase_test(randperm(length(phase_test)))-phase_test).^2);
-%             mse_chance_phase_cos(c,iter) = mean((cos(phase_test(randperm(length(phase_test))))-cos(phase_test)).^2);
-%             mse_chance_phase_sin(c,iter) = mean((sin(phase_test(randperm(length(phase_test))))-sin(phase_test)).^2);
-%                 [b dev_p stats] = glmfit(predictors_train(:,p),phase_train,'normal');
-%                 yfit = glmval(b,predictors_test(:,p),'identity');
-%                 mse_phase(c,p,iter) = mean((yfit-phase_test).^2);   
-%                 [b dev_p stats] = glmfit(predictors_train(:,p),cos(phase_train),'normal');
-%                 yfit = glmval(b,predictors_test(:,p),'identity');
-%                 mse_phase_cos(c,p,iter) = mean((yfit-cos(phase_test)).^2);   
-%                 [b dev_p stats] = glmfit(predictors_train(:,p),sin(phase_train),'normal');
-%                 yfit = glmval(b,predictors_test(:,p),'identity');
-%                 mse_phase_sin(c,p,iter) = mean((yfit-sin(phase_test)).^2);   
+
+                cl = max_correlation_coefficient_CL;
+                r = randperm(length(phase_train));
+                cl = train(cl,predictors_train(:,p)',[(phase_train(r))]');
+                yfit = test(cl,[predictors_test(:,p)']);
+                mse_phase_chance(p,wind,iter) = mean((yfit-phase_test').^2);
                 
                 cl = max_correlation_coefficient_CL;
                 cl = train(cl,predictors_train(:,p)',[(phase_train)]');
                 yfit = test(cl,[predictors_test(:,p)']);
-                mse_phase(c,p,iter) = mean((yfit-phase_test').^2);
+                mse_phase(p,wind,iter) = mean((yfit-phase_test').^2);
                 
                 cl = max_correlation_coefficient_CL;
                 cl = train(cl,predictors_train(:,p)',[cos(phase_train)]');
                 yfit = test(cl,[predictors_test(:,p)']);
-                mse_phase_cos(c,p,iter) = mean((yfit-cos(phase_test)').^2);
+                mse_phase_cos(p,wind,iter) = mean((yfit-cos(phase_test)').^2);
                 
                 cl = max_correlation_coefficient_CL;
                 cl = train(cl,predictors_train(:,p)',[sin(phase_train)]');
                 yfit = test(cl,[predictors_test(:,p)']);
-                mse_phase_sin(c,p,iter) = mean((yfit-sin(phase_test)').^2);
-%                  [b dev_p stats] = glmfit([phase_train cos(phase_train) sin(phase_train)],predictors_train(:,p),'normal');
-%                 yfit = glmval(b,[phase_test cos(phase_test) sin(phase_test)],'identity');
-%                 mse_phase(c,p,iter) = mean((yfit-rates_test).^2); 
+                mse_phase_sin(p,wind,iter) = mean((yfit-sin(phase_test)').^2);
+
                     
             else
-                mse_rate(c,p,iter) = nan;
-                mse_phase(c,p,iter) = nan;
-                mse_phase_cos(c,p,iter) = nan;
-                mse_phase_sin(c,p,iter) = nan;
+                mse_rate(p,wind,iter) = nan;
+                mse_phase(p,wind,iter) = nan;
+                mse_phase_cos(p,wind,iter) = nan;
+                mse_phase_sin(p,wind,iter) = nan;
+                mse_phase_chance(p,wind,iter) = nan;
                 end
             end
         end
@@ -282,13 +269,14 @@ for wind = smoothingRange
 %         title(cell)
 %         
 %         pause(.05)
-        c=c+1;
 end
 %     mse_all_phase{cell} = mse_phase;
     mse_all_phase_cos{cell} = mse_phase_cos;
     mse_all_phase_sin{cell} = mse_phase_sin;
     mse_all_phase{cell} = mse_phase;
+    mse_all_phase_chance{cell} = mse_phase_chance;
     mse_all_rate{cell} = mse_rate;
+    disp(['done with cell: ' num2str(cell)])
 %     mse_all_chance_phase_cos{cell} = mse_chance_phase_cos;
 %     mse_all_chance_phase_sin{cell} = mse_chance_phase_sin;
 %     mse_all_chance_rate{cell} = mse_chance_rate;
