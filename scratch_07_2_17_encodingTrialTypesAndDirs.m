@@ -3,12 +3,12 @@
 
 
 
-dd  = dir('*201*');
-
- hpc_corrs =[];
- ls_corrs=[];
-  hpc_corrs_shuffle =[];
- ls_corrs_shuffle=[];
+% dd  = dir('*201*');
+% 
+%  hpc_corrs =[];
+%  ls_corrs=[];
+%   hpc_corrs_shuffle =[];
+%  ls_corrs_shuffle=[];
  
 %% compile data
 
@@ -19,6 +19,7 @@ dd  = dir('*201*');
 
 sessionInfo = bz_getSessionInfo;
 load([sessionInfo.FileName '.behavior.mat'])
+clf
    bz_plotTrials(behavior);
    if ~strcmp(behavior.description,'linear')
            d = input(['directions [l/r]' ': '],'s');
@@ -84,5 +85,5 @@ load([sessionInfo.FileName '.behavior.mat'])
        save([sessionInfo.FileName '.behavior.mat'],'behavior')
    end
    clear behavior tt d
-   cd /home/david/datasets/lsDataset/
+%    cd /home/david/datasets/lsDataset/
 % end

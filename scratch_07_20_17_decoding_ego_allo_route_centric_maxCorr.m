@@ -8,7 +8,7 @@ load([xml.FileName '.behavior.mat'])
 load([xml.FileName '.sessionInfo.mat'])
 spikes = bz_GetSpikes;
 
-    if ~exist([spikes.sessionName '.referenceFramesMaxCorr.mat'])
+%     if ~exist([spikes.sessionName '.referenceFramesMaxCorr.mat'])
 if isfield(behavior.events.trials{1},'direction')
 % lfp = bz_GetLFP(sessionInfo.thetaChans(2));
 %     
@@ -296,7 +296,7 @@ end
     save([spikes.sessionName '.referenceFramesMaxCorr.mat'],'mse*')
 end
 end
-    end
+%     end
 % cd /home/david/datasets/lsDataset
 % end
 
