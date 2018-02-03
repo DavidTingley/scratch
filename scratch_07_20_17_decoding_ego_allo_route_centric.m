@@ -1,8 +1,8 @@
-d  = dir('*201*');
-% % ii=38;
-% 
-for ii=1:length(d)
-    cd(d(ii).name)
+% d  = dir('*201*');
+% % % ii=38;
+% % 
+% for ii=1:length(d)
+%     cd(d(ii).name)
 xml = LoadParameters;
 load([xml.FileName '.behavior.mat'])
 load([xml.FileName '.sessionInfo.mat'])
@@ -295,8 +295,8 @@ end
 end
 end
 %     end
-cd ..%/home/david/datasets/lsDataset
-end
+% cd ..%/home/david/datasets/lsDataset
+% end
 
 
 

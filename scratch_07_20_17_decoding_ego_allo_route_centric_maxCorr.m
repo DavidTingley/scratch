@@ -15,7 +15,7 @@ if isfield(behavior.events.trials{1},'direction')
 conditions = unique(behavior.events.trialConditions);
 nCells = length(spikes.times);
 routeCentricSamplingRate = behavior.samplingRate;
-smoothingRange = 20;
+smoothingRange = 1:50;
 
 % % find a better way to get spike phase relationship...
 % [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
