@@ -129,25 +129,25 @@ legendShort = {'allo','route','goal','ego'};
 windRange = 21;
 clf
 subplot(3,1,1)
-bar(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,:),1),2)),'r')
+errorbar(1:23,squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,:),1),2)),squeeze(nanmean(nanstd(ls_phase_chance(:,windRange,:),1),2))./sqrt(size(ls_phase,1)),'.r')
 hold on
-bar(squeeze(nanmean(nanmean(ls_phase(:,windRange,:),1),2)))
+errorbar(1.5:1:23.5,squeeze(nanmean(nanmean(ls_phase(:,windRange,:),1),2)),squeeze(nanmean(nanstd(ls_phase(:,windRange,:),1),2))./sqrt(size(ls_phase,1)),'.k')
 xticks([1:6 8.5 11 14.5 20.5])
 set(gca,'xticklabel',legend)
 title([num2str(size(ls_phase,1)) ' LS cells included'])
 axis([0 24 1 1.5])
 subplot(3,1,2)
-bar(1,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,1:3))))),'r')
+errorbar(1.1,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,1:3))))),(squeeze(nanstd(nanmean(ls_phase_chance(:,windRange,1:3),3))))./sqrt(size(ls_phase_chance,1)),'r')
 hold on
-bar(2,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,7:10))))),'r')
-bar(3,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,11))))),'r')
-bar(4,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,12:end))))),'r')
+errorbar(2.1,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,7:10))))),(squeeze(nanstd(nanmean(ls_phase_chance(:,windRange,7:10),3))))./sqrt(size(ls_phase_chance,1)),'r')
+errorbar(3.1,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,11))))),(squeeze(nanstd(nanmean(ls_phase_chance(:,windRange,11),3))))./sqrt(size(ls_phase_chance,1)),'r')
+errorbar(4.1,mean(squeeze(nanmean(nanmean(ls_phase_chance(:,windRange,12:end))))),(squeeze(nanstd(nanmean(ls_phase_chance(:,windRange,12:end),3))))./sqrt(size(ls_phase_chance,1)),'r')
 % controls
-bar(1,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,1:3))))))
+errorbar(1,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,1:3))))),(squeeze(nanstd(nanmean(ls_phase(:,windRange,1:3),3))))./sqrt(size(ls_phase,1)))
 hold on
-bar(2,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,7:10))))))
-bar(3,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,11))))))
-bar(4,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,12:end))))))
+errorbar(2,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,7:10))))),(squeeze(nanstd(nanmean(ls_phase(:,windRange,7:10),3))))./sqrt(size(ls_phase,1)))
+errorbar(3,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,11))))),(squeeze(nanstd(nanmean(ls_phase(:,windRange,11),3))))./sqrt(size(ls_phase,1)))
+errorbar(4,mean(squeeze(nanmean(nanmean(ls_phase(:,windRange,12:end))))),(squeeze(nanstd(nanmean(ls_phase(:,windRange,12:end),3))))./sqrt(size(ls_phase,1)))
 xticks([1:4])
 set(gca,'xticklabel',legendShort)
 axis([0 5 1 1.5])

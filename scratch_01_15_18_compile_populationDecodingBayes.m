@@ -54,7 +54,7 @@ for tau = 20
                 scatter(ls_nCells,ls_mse_phase,'.b')
                 hold on
                 scatter(ls_nCells,ls_mse_rate,'.r')
-                axis([0 60 -100 14000])
+                axis([0 100 -100 14000])
                 title('ls cells')
         end
         if ~isempty(hpc) & tau == wind  
@@ -62,7 +62,7 @@ for tau = 20
                 scatter(hpc_nCells,hpc_mse_phase,'.b')
                 hold on
                 scatter(hpc_nCells,hpc_mse_rate,'.r')
-                axis([0 60 -100 14000])
+                axis([0 100 -100 14000])
                 title('hpc cells')
         end
         if ~isempty(ls) 

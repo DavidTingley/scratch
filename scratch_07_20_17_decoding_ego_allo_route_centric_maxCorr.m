@@ -15,7 +15,7 @@ if isfield(behavior.events.trials{1},'direction')
 conditions = unique(behavior.events.trialConditions);
 nCells = length(spikes.times);
 routeCentricSamplingRate = behavior.samplingRate;
-smoothingRange = 1:10:50;
+smoothingRange = 21;%1:10:50;
 
 % % find a better way to get spike phase relationship...
 % [firingMaps] = bz_firingMap1D(spikes,behavior,lfp,4);
@@ -288,7 +288,7 @@ end
 %     mse_all_chance_phase_sin{cell} = mse_chance_phase_sin;
 %     mse_all_chance_rate{cell} = mse_chance_rate;
     clear mse mse_allo mse_cond mse_route mse_goal mse_chance_rate mse_chance_phase_cos mse_chance_phase_sin mse_rate mse_phase*
-    save([spikes.sessionName '.referenceFramesMaxCorr.mat'],'mse*')
+    save([spikes.sessionName '.referenceFramesMaxCorr_fast.mat'],'mse*')
 end
 end
 %     end
