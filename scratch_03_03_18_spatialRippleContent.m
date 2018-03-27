@@ -79,20 +79,20 @@ count=0;
 %             scatter(mean(rewardContent_part),hpc_rec(:,1),'.r')
 %             pause(.1)
         end
-    content.region{rec} = spikes.region{end};
+    content.region = spikes.region{end};
     content.nCells(rec) = size(spatialContent,1);
-    content.spatialContent{rec} = spatialContent;
-    content.rewardContent{rec} = rewardContent;
-    content.spatialContent_binary{rec} = spatialContent_part;
-    content.rewardContent_binary{rec} = rewardContent_part;
-    content.nSpikes{rec} = nSpikes;
-    content.meanPeakRate{rec} = meanPeakRate;
-    content.rewardGain{rec} = rewardModulation.rewardGain;
-    content.hpc_power{rec} = hpc_rec(:,2);
-    content.ls_power{rec} = hpc_rec(:,1);
-    content.ls_power_z{rec} = ls_rec(:,1);
-    [aa bb] = corr(content.ls_power{rec},nanmean(content.spatialContent{rec})')
-    [aa bb] = corr(content.ls_power{rec},nanmean(content.rewardContent{rec})')
+    content.spatialContent = spatialContent;
+    content.rewardContent = rewardContent;
+    content.spatialContent_binary = spatialContent_part;
+    content.rewardContent_binary = rewardContent_part;
+    content.nSpikes = nSpikes;
+    content.meanPeakRate = meanPeakRate;
+    content.rewardGain = rewardModulation.rewardGain;
+    content.hpc_power = hpc_rec(:,2);
+    content.ls_power = hpc_rec(:,1);
+    content.ls_power_z = ls_rec(:,1);
+    [aa bb] = corr(content.ls_power,nanmean(content.spatialContent)')
+    [aa bb] = corr(content.ls_power,nanmean(content.rewardContent)')
     rec
     clear meanPeakRate rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content*
     end

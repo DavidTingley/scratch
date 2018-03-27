@@ -41,7 +41,7 @@ for i=1:length(recordingList)
        end
        subplot(3,2,find(ind));
        
-       plot(max(avgRippleBand_z{i}(300:325)),-depth(i),'.k')
+       plot(max(avgRippleBand{i}(300:325)),-depth(i),'.k')
        hold on
        pause(.001)
        
