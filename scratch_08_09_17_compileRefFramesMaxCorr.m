@@ -10,8 +10,8 @@ smoothingRange = 1:50;
 %% compile data  
 for ii=1:length(d)
    cd(d(ii).name)
-   if exist([d(ii).name '.referenceFramesMaxCorr.mat'])
-   load([d(ii).name '.referenceFramesMaxCorr.mat'])
+   if exist([d(ii).name '.referenceFramesMaxCorr_fast.mat'])
+   load([d(ii).name '.referenceFramesMaxCorr_fast.mat'])
    load([d(ii).name '.spikes.cellinfo.mat'])
    for cell = 1:length(mse_all_rate)
        if size(mse_all_rate{cell},1) > 3

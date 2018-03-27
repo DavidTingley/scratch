@@ -44,8 +44,8 @@ for c = 1:length(dev)
     if zerolag < 1 
         zerolag = 1;
     end
-
-    if imp > 4.2 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{c}(:,pair))>50
+%imp > thresh & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{cond}(:,pair))>40
+    if imp > 4 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{c}(:,pair))>40
        subplot(2,2,1)
        scatter(b,imp,'.k')
        hold on
@@ -78,7 +78,7 @@ for c = 1:length(dev)
        subplot(2,2,3)
        scatter(b,imp2,'.k')
        hold on
-       title(pairs(pair,:))sto
+       title(pairs(pair,:))
        subplot(2,2,4)
        plot(dev{c}(:,pair));
        hold on
@@ -86,7 +86,7 @@ for c = 1:length(dev)
        title([imp zerolag ])
        hold off
        pause(.01)
-    elseif imp < 4.2 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{c}(:,pair))>50
+    elseif imp <= 4 & b > 7 & b < 150 &  zerolag < 1.1 & mean(dev{c}(:,pair))>40
        waveforms_not = [waveforms_not;minmax_norm(spikes.rawWaveform{pairs(pair,1)})];
        isi_not = [isi_not; minmax_norm(hist(diff(spikes.times{pairs(pair,1)}),0:.001:.25))];
     end

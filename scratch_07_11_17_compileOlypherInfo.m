@@ -23,7 +23,7 @@ for ii=1:length(d)
            if sum(behavior.events.trialConditions==cond) >= 10
            nTrials = size(firingMaps.rateMaps{cond},2);
 %            if ~isempty(fields{cond}{cell})
-            if strcmp(olypherInfo.region{cell},'hpc') | strcmp(olypherInfo.region{cell},'ca1') | strcmp(olypherInfo.region{cell},'ca3')
+            if strcmp(olypherInfo.region{cell},'ls')% | strcmp(olypherInfo.region{cell},'ca1') | strcmp(olypherInfo.region{cell},'ca3')
                 %  strcmp(olypherInfo.region{cell},'ls')%
             disc = unique(olypherInfo.results{cell}.discBins);
             if length(disc) >= 1
@@ -86,6 +86,7 @@ for ii=1:length(d)
    end
    cd /home/david/datasets/lsDataset
    clear olypherInfo
+   ii
 % cd('D:\Dropbox\datasets\lsDataset')
 end
 
