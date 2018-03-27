@@ -80,7 +80,7 @@ count=0;
 %             pause(.1)
         end
     content.region = spikes.region{end};
-    content.nCells(rec) = size(spatialContent,1);
+    content.nCells = size(spatialContent,1);
     content.spatialContent = spatialContent;
     content.rewardContent = rewardContent;
     content.spatialContent_binary = spatialContent_part;
