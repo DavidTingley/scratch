@@ -1,30 +1,37 @@
 d = dir('*201*');
 count=0;
-[b a] = butter(4,[110/625 200/625],'bandpass');
-% [b a] = butter(4,[120/625 180/625],'bandpass');
+% [b a] = butter(4,[110/625 200/625],'bandpass');
+[b a] = butter(4,[120/625 180/625],'bandpass');
     
 %     
 % for rec = 1:length(d)
 %     cd(d(rec).name)
     sessionInfo = bz_getSessionInfo;
     if  exist([sessionInfo.FileName '.CA1Ripples.events.mat']) & exist([sessionInfo.FileName '.olypherInfo_w_disc.cellinfo.mat']) & exist([sessionInfo.FileName '.olypherInfo_w_disc.cellinfo.mat'])
-        
+        load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
         load([sessionInfo.FileName '.olypherInfo_w_disc.cellinfo.mat'],'olypherInfo')
         load([sessionInfo.FileName '.rewardModulation.cellinfo.mat'],'rewardModulation')
         ca1 = load([sessionInfo.FileName '.CA1Ripples.events.mat']);
         spikes = bz_GetSpikes;
         
+        % 
+        hasField = zeros(length(fields{1}),1);
+        for i=1:length(fields)
+            for j=1:length(fields{i})
+                hasField(j) = hasField(j) + ~isempty(fields{i}{j});    
+            end
+        end
         %% get LFP power for all events..        
         ls.lfp = bz_GetLFP(sessionInfo.ls);
         ca1.lfp = bz_GetLFP(sessionInfo.ca1);
-        ls_power = (fastrms(FiltFiltM(b,a,double(ls.lfp.data)),15));
+        ls_power = (fastrms(FiltFiltM(b,a,double(ls.lfp.data)),12));
         ls_power_z = zscore(ls_power);
-        hpc_power = (fastrms(FiltFiltM(b,a,double(ca1.lfp.data)),15));
+        hpc_power = (fastrms(FiltFiltM(b,a,double(ca1.lfp.data)),12));
         ls_rec =[];
         hpc_rec= [];
         for event = 1:size(ca1.ripples.timestamps,1)
-            start = round((ca1.ripples.timestamps(event,1)-.015) * 1250); % used to be 20 ms
-            stop = round((ca1.ripples.timestamps(event,1)+.015) * 1250);
+            start = round((ca1.ripples.timestamps(event,1)-.02) * 1250); % used to be 20 ms
+            stop = round((ca1.ripples.timestamps(event,1)+.02) * 1250);
 
             [ls_max blah] = max(abs(ls_power(start:stop)));
             [ls_max_z blah_z] = max(abs(ls_power_z(start:stop)));
@@ -50,9 +57,10 @@ count=0;
 
             meanPeakRate(spk) = nanmean(olypherInfo.results{spk}.ratePeakInfo(cols));
             for ind = 1:length(ca1.ripples.peaks)
-                ripSpks = Restrict(spikes.times{spk},[ca1.ripples.timestamps(ind,1)-.01 ca1.ripples.timestamps(ind,2)+.01]);
+                ripSpks = Restrict(spikes.times{spk},[ca1.ripples.timestamps(ind,1)-.02 ca1.ripples.timestamps(ind,2)+.02]);
                 spatialContent(spk,ind) = meanPeakRate(spk).*length(ripSpks);
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk).*length(ripSpks);
+                PF(spk,ind) = (hasField(spk)>0) .* length(ripSpks);
                 nSpikes(spk,ind) = length(ripSpks);
                 if length(ripSpks) > 0
                 spatialContent_part(spk,ind) = meanPeakRate(spk);%.*length(ripSpks);
@@ -86,6 +94,7 @@ count=0;
     content.spatialContent_binary = spatialContent_part;
     content.rewardContent_binary = rewardContent_part;
     content.nSpikes = nSpikes;
+    content.PF = PF;
     content.meanPeakRate = meanPeakRate;
     content.rewardGain = rewardModulation.rewardGain;
     content.hpc_power = hpc_rec(:,2);
@@ -94,7 +103,7 @@ count=0;
     [aa bb] = corr(content.ls_power,nanmean(content.spatialContent)')
     [aa bb] = corr(content.ls_power,nanmean(content.rewardContent)')
     rec
-    clear meanPeakRate rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content*
+    clear meanPeakRate rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content* PF
     end
     save([sessionInfo.FileName '.rippleContent.mat'])
 %    cd /home/david/datasets/ripples_LS 
