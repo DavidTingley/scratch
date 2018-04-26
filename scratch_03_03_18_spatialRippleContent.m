@@ -4,8 +4,8 @@ count=0;
 [b a] = butter(4,[120/625 180/625],'bandpass');
     
 %     
-% for rec = 1:length(d)
-%     cd(d(rec).name)
+for rec = 1:length(d)
+    cd(d(rec).name)
     sessionInfo = bz_getSessionInfo;
     if  exist([sessionInfo.FileName '.CA1Ripples.events.mat']) & exist([sessionInfo.FileName '.olypherInfo_w_disc.cellinfo.mat']) & exist([sessionInfo.FileName '.olypherInfo_w_disc.cellinfo.mat'])
         load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
@@ -48,6 +48,9 @@ count=0;
         nSpikes = zeros(length(spikes.times),length(ca1.ripples.peaks));
         spatialContent_part = zeros(length(spikes.times),length(ca1.ripples.peaks));
         rewardContent_part = zeros(length(spikes.times),length(ca1.ripples.peaks));
+        PF = zeros(length(spikes.times),length(ca1.ripples.peaks));
+        cellLoc = nan(length(spikes.times),length(ca1.ripples.peaks));
+        cellLoc_part = nan(length(spikes.times),length(ca1.ripples.peaks));
         
         for spk = 1:length(spikes.times)
             if strcmp(spikes.region{spk},'hpc') | strcmp(spikes.region{spk},'ca3') | strcmp(spikes.region{spk},'ca1') 
@@ -62,9 +65,11 @@ count=0;
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk).*length(ripSpks);
                 PF(spk,ind) = (hasField(spk)>0) .* length(ripSpks);
                 nSpikes(spk,ind) = length(ripSpks);
+                cellLoc(spk,ind) = spikes.chanDepthRelative_CA1PYR(spk).*lencongth(ripSpks);
                 if length(ripSpks) > 0
                 spatialContent_part(spk,ind) = meanPeakRate(spk);%.*length(ripSpks);
                 rewardContent_part(spk,ind) = rewardModulation.rewardGain(spk);%.*length(ripSpks);
+                cellLoc_part(spk,ind) = spikes.chanDepthRelative_CA1PYR(spk);
                 end
             end
             count = 1+count;      
@@ -87,25 +92,27 @@ count=0;
 %             scatter(mean(rewardContent_part),hpc_rec(:,1),'.r')
 %             pause(.1)
         end
-    content.region = spikes.region{end};
-    content.nCells = size(spatialContent,1);
-    content.spatialContent = spatialContent;
-    content.rewardContent = rewardContent;
-    content.spatialContent_binary = spatialContent_part;
-    content.rewardContent_binary = rewardContent_part;
-    content.nSpikes = nSpikes;
-    content.PF = PF;
-    content.meanPeakRate = meanPeakRate;
-    content.rewardGain = rewardModulation.rewardGain;
-    content.hpc_power = hpc_rec(:,2);
-    content.ls_power = hpc_rec(:,1);
-    content.ls_power_z = ls_rec(:,1);
-    [aa bb] = corr(content.ls_power,nanmean(content.spatialContent)')
-    [aa bb] = corr(content.ls_power,nanmean(content.rewardContent)')
+    content.region{rec} = spikes.region{end};
+    content.nCells{rec} = size(spatialContent,1);
+    content.spatialContent{rec} = spatialContent;
+    content.rewardContent{rec} = rewardContent;
+    content.spatialContent_binary{rec} = spatialContent_part;
+    content.rewardContent_binary{rec} = rewardContent_part;
+    content.nSpikes{rec} = nSpikes;
+    content.PF{rec} = PF;
+    content.cellLoc{rec} = cellLoc;
+    content.cellLoc_part{rec} = cellLoc_part;
+    content.meanPeakRate{rec} = meanPeakRate;
+    content.rewardGain{rec} = rewardModulation.rewardGain;
+    content.hpc_power{rec} = hpc_rec(:,2);
+    content.ls_power{rec} = hpc_rec(:,1);
+    content.ls_power_z{rec} = ls_rec(:,1);
+    [aa bb] = corr(content.ls_power{rec},nanmean(content.spatialContent{rec})')
+    [aa bb] = corr(content.ls_power{rec},nanmean(content.rewardContent{rec})')
     rec
-    clear meanPeakRate rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content* PF
+    clear meanPeakRate rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content* PF cellLoc*
     end
-    save([sessionInfo.FileName '.rippleContent.mat'])
-%    cd /home/david/datasets/ripples_LS 
-%    save('/home/david/Dropbox/hpc_ripple_content_180324.mat','-v7.3')
-% end
+%     save([sessionInfo.FileName '.rippleContent.mat'])
+   cd /home/david/datasets/ripples_LS 
+   save('/home/david/Dropbox/hpc_ripple_content_180324.mat','-v7.3')
+end
