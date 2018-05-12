@@ -1,5 +1,5 @@
-% clear all
-% cd /home/david/datasets/ripples_LS
+clear all
+cd /home/david/datasets/ripples_LS
 recordingList  = dir('*201*');
 animals = {'DT1','DT2','DT5','DT7','DT8','DT9'};
 [b a] = butter(4,[10/625 40/625],'bandpass');
@@ -8,8 +8,8 @@ winds = [10 25 40 60 80 100];
 
 for window = 3%1:6
     
-% for i=1:length(recordingList)%hist:-1:45
-%    cd(recordingList(i).name) 
+for i=1:length(recordingList)%hist:-1:45
+   cd(recordingList(i).name) 
    sessionInfo = bz_getSessionInfo;
    ripples = bz_LoadEvents(pwd,'CA1Ripples');
    if ~isempty(ripples) & length(ripples.peaks) > 100
@@ -89,14 +89,14 @@ for window = 3%1:6
        
    end
    sessionInfo.FileName
-%    cd /home/david/datasets/ripples_LS
+   cd /home/david/datasets/ripples_LS
 end
 
 
 
-% d = dir('*201*');
-% for i=1:length(d)
-% cd(d(i).name)
+d = dir('*201*');
+for i=1:length(d)
+cd(d(i).name)
 sessionInfo = bz_getSessionInfo(pwd,'noprompts',true);
 spikes = bz_GetSpikes('noprompt',true);
 if ~isempty(spikes)
@@ -110,17 +110,16 @@ if ~isempty(spikes)
         end
         save([sessionInfo.FileName '.spikes.cellinfo.mat'],'spikes')
     end
-end; 
-% cd /home/david/datasets/ripples_LS
-% end
+end; cd /home/david/datasets/ripples_LS
+end
 
 
                 
 depths =[];
 depths_noWav =[];
 
-% for i=1:length(d)
-% cd(d(i).name)
+for i=1:length(d)
+cd(d(i).name)
 spikes = bz_GetSpikes('noprompts',true); % requires buzcode
 sessionInfo = bz_getSessionInfo;
 if ~isempty(spikes) & isfield(spikes, 'chanDepthRelative_CA1PYR')
@@ -193,33 +192,30 @@ if ~isempty(spikes) & isfield(spikes, 'chanDepthRelative_CA1PYR')
             depths_noWav = [depths;spikes.chanDepthRelative_CA1PYR(spk)];
             
             %% add back into spikes cellinfo file
-            scatter(spikes.chanDepthRelative_CA1PYR(spk),spikes.chanDepthRelative_CA1PYR(spk)+spkOffset,'.k')
-            hold on
-            pause(.1)
-            spikes.chanDepthRelative_CA1PYR(spk)=spikes.chanDepthRelative_CA1PYR(spk)+spkOffset;
+            spikes.
         end
     end
     end
     clear waves clus
     %% resave spikes cellinfo file
-    save([sessionInfo.FileName '.spikes.cellinfo.mat'],'spikes')
+    
 end
-% cd /home/david/datasets/ripples_LS
-% end
-% 
-% figure(1)
-% subplot(3,3,window)
-% histogram(depths,-200:2:200)
-% title(winds(window))
-% figure(2)
-% subplot(3,3,window)
-% histogram(depths_noWav,-200:2:200)
-% title(winds(window))
-% pause(.1)
-% all_depths{window} = depths;
-% all_depths_noWav{window} = depths_noWav;
-% save('/home/david/Dropbox/depths_data.mat')
-% end
+cd /home/david/datasets/ripples_LS
+end
+
+figure(1)
+subplot(3,3,window)
+histogram(depths,-200:2:200)
+title(winds(window))
+figure(2)
+subplot(3,3,window)
+histogram(depths_noWav,-200:2:200)
+title(winds(window))
+pause(.1)
+all_depths{window} = depths;
+all_depths_noWav{window} = depths_noWav;
+save('/home/david/Dropbox/depths_data.mat')
+end
 % 
 
 
