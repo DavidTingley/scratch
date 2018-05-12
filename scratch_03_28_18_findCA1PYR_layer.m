@@ -193,10 +193,10 @@ if ~isempty(spikes) & isfield(spikes, 'chanDepthRelative_CA1PYR')
             depths_noWav = [depths;spikes.chanDepthRelative_CA1PYR(spk)];
             
             %% add back into spikes cellinfo file
-            scatter(spikes.chanDepthRelative_CA1PYR(spk),spikes.chanDepthRelative_CA1PYR(spk)+spkOffset,'.k')
-            hold on
-            pause(.1)
-            spikes.chanDepthRelative_CA1PYR(spk)=spikes.chanDepthRelative_CA1PYR(spk)+spkOffset;
+%             scatter(spikes.chanDepthRelative_CA1PYR(spk),spikes.chanDepthRelative_CA1PYR(spk)+spkOffset,'.k')
+%             hold on
+%             pause(.1)
+            spikes.chanDepthRelative_CA1PYR_wav(spk)=spikes.chanDepthRelative_CA1PYR(spk)+spkOffset;
         end
     end
     end
