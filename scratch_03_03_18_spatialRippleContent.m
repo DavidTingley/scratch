@@ -31,7 +31,10 @@ for rec = 1:length(d)
         hpc_rec= [];
         for event = 1:size(ca1.ripples.timestamps,1)
             start = round((ca1.ripples.timestamps(event,1)-.02) * 1250); % used to be 20 ms
-            stop = round((ca1.ripples.timestamps(event,1)+.02) * 1250);
+            if start<1
+                start = 1;
+            end
+            stop = round((ca1.ripples.timestamps(event,2)+.02) * 1250);
 
             [ls_max blah] = max(abs(ls_power(start:stop)));
             [ls_max_z blah_z] = max(abs(ls_power_z(start:stop)));
@@ -58,14 +61,19 @@ for rec = 1:length(d)
             cols = find(olypherInfo.results{spk}.smoothing==20);
             cols = intersect(rows,cols);
 
-            meanPeakRate(spk) = nanmean(olypherInfo.results{spk}.ratePeakInfo(cols));
+            meanPeakRate(spk) = nanmax(olypherInfo.results{spk}.ratePeakInfo(cols)); % used to be nanmean
             for ind = 1:length(ca1.ripples.peaks)
-                ripSpks = Restrict(spikes.times{spk},[ca1.ripples.timestamps(ind,1)-.02 ca1.ripples.timestamps(ind,2)+.02]);
+                start = ((ca1.ripples.timestamps(ind,1)-.02)); % used to be 20 ms
+                if start<1
+                    start = 1;
+                end
+                stop = ((ca1.ripples.timestamps(ind,2)+.02));
+                ripSpks = Restrict(spikes.times{spk},[start stop]);
                 spatialContent(spk,ind) = meanPeakRate(spk).*length(ripSpks);
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk).*length(ripSpks);
                 PF(spk,ind) = (hasField(spk)>0) .* length(ripSpks);
                 nSpikes(spk,ind) = length(ripSpks);
-                cellLoc(spk,ind) = spikes.chanDepthRelative_CA1PYR(spk).*lencongth(ripSpks);
+                cellLoc(spk,ind) = spikes.chanDepthRelative_CA1PYR(spk).*length(ripSpks);
                 if length(ripSpks) > 0
                 spatialContent_part(spk,ind) = meanPeakRate(spk);%.*length(ripSpks);
                 rewardContent_part(spk,ind) = rewardModulation.rewardGain(spk);%.*length(ripSpks);
@@ -114,5 +122,5 @@ for rec = 1:length(d)
     end
 %     save([sessionInfo.FileName '.rippleContent.mat'])
    cd /home/david/datasets/ripples_LS 
-   save('/home/david/Dropbox/hpc_ripple_content_180324.mat','-v7.3')
+   save('/home/david/Dropbox/hpc_ripple_content_ts.mat','-v7.3')
 end

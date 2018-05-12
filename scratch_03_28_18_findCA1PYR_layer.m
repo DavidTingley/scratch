@@ -6,7 +6,7 @@ animals = {'DT1','DT2','DT5','DT7','DT8','DT9'};
 
 winds = [10 25 40 60 80 100];
 
-for window = 1:6
+for window = 2%1:6
     
 for i=1:length(recordingList)%hist:-1:45
    cd(recordingList(i).name) 
