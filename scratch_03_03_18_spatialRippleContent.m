@@ -74,6 +74,7 @@ for rec = 1:length(d)
                 PF(spk,ind) = (hasField(spk)>0) .* length(ripSpks);
                 nSpikes(spk,ind) = length(ripSpks);
                 cellLoc(spk,ind) = spikes.chanDepthRelative_CA1PYR(spk).*length(ripSpks);
+                cellLoc_wav(spk,ind) = spikes.chanDepthRelative_CA1PYR_wav(spk).*length(ripSpks);
                 if length(ripSpks) > 0
                 spatialContent_part(spk,ind) = meanPeakRate(spk);%.*length(ripSpks);
                 rewardContent_part(spk,ind) = rewardModulation.rewardGain(spk);%.*length(ripSpks);
@@ -109,6 +110,7 @@ for rec = 1:length(d)
     content.nSpikes{rec} = nSpikes;
     content.PF{rec} = PF;
     content.cellLoc{rec} = cellLoc;
+    content.cellLoc_wav{rec} = cellLoc_wav;
     content.cellLoc_part{rec} = cellLoc_part;
     content.meanPeakRate{rec} = meanPeakRate;
     content.rewardGain{rec} = rewardModulation.rewardGain;
