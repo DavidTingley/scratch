@@ -103,6 +103,7 @@ spikes = bz_GetSpikes('noprompt',true);
 if ~isempty(spikes)
     if isfield(sessionInfo, 'chanDepthRelative_CA1PYR')
         spikes.chanDepthRelative_CA1PYR = nan(length(spikes.times),1);
+        spikes.chanDepthRelative_CA1PYR_wav = nan(length(spikes.times),1);
         for spk = 1:length(spikes.times)
             if strcmp(spikes.region{spk},'ca1') | strcmp(spikes.region{spk},'hpc')
             chan = find(sessionInfo.channels ==spikes.maxWaveformCh(spk));
