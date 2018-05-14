@@ -62,7 +62,7 @@ for window = 3%1:6
 
 
 %         peakChanLoc = find(ca1.lfp.channels==sessionInfo.spikeGroups.groups{shank}(peakChan));
-        if peakChan >= 1.5 & peakChan <= length(peakPower) - 1.5 & blah > 800
+        if peakChan > 1.7 & peakChan < length(peakPower) - 1.7 & blah > 800
            for chan=1:length(sessionInfo.spikeGroups.groups{shank})
                 ind = find(sessionInfo.channels==sessionInfo.spikeGroups.groups{shank}(chan));
 %                 if mod(chan,2)
