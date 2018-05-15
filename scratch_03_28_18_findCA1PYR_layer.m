@@ -28,7 +28,6 @@ for window = 3%1:6
        end
        
        sessionInfo.chanDepthRelative_CA1PYR = nan(length(sessionInfo.channels),1);
-       sessionInfo.chanDepthRelative_CA1PYR_wav = nan(length(sessionInfo.channels),1);
    %%%
     for shank=1:length(sessionInfo.spikeGroups.groups)
 %         subplot(4,3,shank)
@@ -62,7 +61,7 @@ for window = 3%1:6
 
 
 %         peakChanLoc = find(ca1.lfp.channels==sessionInfo.spikeGroups.groups{shank}(peakChan));
-        if peakChan > 1.7 & peakChan < length(peakPower) - 1.7 & blah > 800
+        if peakChan > 1.6 & peakChan < length(peakPower) - 1.6 & blah > 800
            for chan=1:length(sessionInfo.spikeGroups.groups{shank})
                 ind = find(sessionInfo.channels==sessionInfo.spikeGroups.groups{shank}(chan));
 %                 if mod(chan,2)
