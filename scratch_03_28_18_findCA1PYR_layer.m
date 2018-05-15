@@ -61,7 +61,7 @@ for window = 3%1:6
 
 
 %         peakChanLoc = find(ca1.lfp.channels==sessionInfo.spikeGroups.groups{shank}(peakChan));
-        if peakChan > 1.6 & peakChan < length(peakPower) - 1.6 & blah > 800
+        if peakChan > 1.6 & peakChan < length(peakPower) - 1.6 & blah > 600
            for chan=1:length(sessionInfo.spikeGroups.groups{shank})
                 ind = find(sessionInfo.channels==sessionInfo.spikeGroups.groups{shank}(chan));
 %                 if mod(chan,2)
@@ -147,6 +147,7 @@ if ~isempty(spikes) & isfield(spikes, 'chanDepthRelative_CA1PYR')
     end
     for spk = 1:length(spikes.times)
         if strcmp(spikes.region{spk},'hpc') | strcmp(spikes.region{spk},'ca1')
+            spikes.chanDepthRelative_CA1PYR_wav(spk)=spikes.chanDepthRelative_CA1PYR(spk);
             if ~isempty(waves{spikes.shankID(spk)})
             wav = waves{spikes.shankID(spk)};
             clu = clus{spikes.shankID(spk)}(2:end); 
