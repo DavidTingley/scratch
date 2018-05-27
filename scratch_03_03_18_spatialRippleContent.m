@@ -54,7 +54,6 @@ for rec = 1:length(d)
         PF = zeros(length(spikes.times),length(ca1.ripples.peaks));
         cellLoc = nan(length(spikes.times),length(ca1.ripples.peaks));
         cellLoc_wav = nan(length(spikes.times),length(ca1.ripples.peaks));
-        cellLoc_part = nan(length(spikes.times),length(ca1.ripples.peaks));
         
         for spk = 1:length(spikes.times)
             if strcmp(spikes.region{spk},'hpc') | strcmp(spikes.region{spk},'ca3') | strcmp(spikes.region{spk},'ca1') 
@@ -74,12 +73,12 @@ for rec = 1:length(d)
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk).*length(ripSpks);
                 PF(spk,ind) = (hasField(spk)>0) .* length(ripSpks);
                 nSpikes(spk,ind) = length(ripSpks);
-                cellLoc(spk,ind) = spikes.chanDepthRelative_CA1PYR(spk).*length(ripSpks);
-                cellLoc_wav(spk,ind) = spikes.chanDepthRelative_CA1PYR_wav(spk).*length(ripSpks);
+                cellLoc(spk,ind) = spikes.chanDepthRelative_CA1PYR(spk);
+                cellLoc_wav(spk,ind) = spikes.chanDepthRelative_CA1PYR_wav(spk);
+                
                 if length(ripSpks) > 0
                 spatialContent_part(spk,ind) = meanPeakRate(spk);%.*length(ripSpks);
                 rewardContent_part(spk,ind) = rewardModulation.rewardGain(spk);%.*length(ripSpks);
-                cellLoc_part(spk,ind) = spikes.chanDepthRelative_CA1PYR(spk);
                 end
             end
             count = 1+count;      
@@ -112,7 +111,6 @@ for rec = 1:length(d)
     content.PF{rec} = PF;
     content.cellLoc{rec} = cellLoc;
     content.cellLoc_wav{rec} = cellLoc_wav;
-    content.cellLoc_part{rec} = cellLoc_part;
     content.meanPeakRate{rec} = meanPeakRate;
     content.rewardGain{rec} = rewardModulation.rewardGain;
     content.hpc_power{rec} = hpc_rec(:,2);
