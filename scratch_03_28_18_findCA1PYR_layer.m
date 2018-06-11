@@ -6,7 +6,7 @@ animals = {'DT1','DT2','DT5','DT7','DT8','DT9'};
 
 winds = [10 25 40 60 80 100];
 
-for window = 3%1:6
+for window = 4%1:6
     
 % for i=1:length(recordingList)%hist:-1:45
 %    cd(recordingList(i).name) 
@@ -47,7 +47,7 @@ for window = 3%1:6
 %         hold on; plot(peakPower)
         % attempting ~1 um resolution...
 %         try
-        [blah peakChan] = max(smooth(interp1(peakPower,1:1/20:length(peakPower)),winds(window)));
+        [blah peakChan] = max(smooth(interp1(peakPower,1:1/40:length(peakPower)),winds(window)));
 %         plot(smooth(interp1(peakPower,1:1/20:length(peakPower)),55))
 %         pause(.1)
 %         [blah peakChan2] = max(smooth(interp1(peakPower(2:2:length(peakPower)),1:1/20:length(peakPower)/2),7));
@@ -56,7 +56,7 @@ for window = 3%1:6
 %         [blah peakChan2] = max(smooth(interp(peakPower(2:2:length(peakPower))',5,1),5));  
 %         end
         
-        peakChan = peakChan / 20;
+        peakChan = peakChan / 40;
 %         peakChan2 = peakChan2  * 2 / 20;
 
 
@@ -122,7 +122,7 @@ depths_noWav =[];
 
 % for i=1:length(d)
 % cd(d(i).name)
-spikes = bz_GetSpikes('noprompts',true); % requires buzcode
+% spikes = bz_GetSpikes('noprompts',true); % requires buzcode
 sessionInfo = bz_getSessionInfo;
 if ~isempty(spikes) & isfield(spikes, 'chanDepthRelative_CA1PYR')
     for shank = 1:sessionInfo.spikeGroups.nGroups
