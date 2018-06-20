@@ -172,7 +172,7 @@ if ~isempty(spikes) & isfield(spikes, 'chanDepthRelative_CA1PYR')
                 [ampAbove blah] = min(aboveWaveform - median(meanWaveforms(:)));
                 [ampBelow blah] = min(belowWaveform - median(meanWaveforms(:)));
                 
-                spkOffset = (ampAbove./amp - ampBelow./amp) * 20;
+                spkOffset = (ampAbove./amp - ampBelow./amp) * 10;
                 
                 if aboveChan ~= 1 & belowChan ~= size(meanWaveforms) % check one more for staggered probes
                     aboveChan = aboveChan - 1;
@@ -182,7 +182,7 @@ if ~isempty(spikes) & isfield(spikes, 'chanDepthRelative_CA1PYR')
                     [ampAbove blah] = min(aboveWaveform - median(meanWaveforms(:)));
                     [ampBelow blah] = min(belowWaveform - median(meanWaveforms(:)));
                 
-                    spkOffset2 = (ampAbove./amp - ampBelow./amp) * 40;
+                    spkOffset2 = (ampAbove./amp - ampBelow./amp) * 20;
                 else
                     spkOffset2 = 0;
                 end

@@ -30,11 +30,11 @@ for rec = 1:length(d)
         ls_rec =[];
         hpc_rec= [];
         for event = 1:size(ca1.ripples.timestamps,1)
-            start = round((ca1.ripples.timestamps(event,1)-.02) * 1250); % used to be 20 ms
+            start = round((ca1.ripples.peaks(event,1)-.02) * 1250); % used to be 20 ms
             if start<1
                 start = 1;
             end
-            stop = round((ca1.ripples.timestamps(event,2)+.02) * 1250);
+            stop = round((ca1.ripples.peaks(event,1)+.02) * 1250);
 
             [ls_max blah] = max(abs(ls_power(start:stop)));
             [ls_max_z blah_z] = max(abs(ls_power_z(start:stop)));
@@ -63,11 +63,11 @@ for rec = 1:length(d)
 
             meanPeakRate(spk) = nanmax(olypherInfo.results{spk}.ratePeakInfo(cols)); % used to be nanmean
             for ind = 1:length(ca1.ripples.peaks)
-                start = ((ca1.ripples.timestamps(ind,1)-.02)); % used to be 20 ms
+                start = ((ca1.ripples.peaks(ind,1)-.02)); % used to be 20 ms
                 if start<1
                     start = 1;
                 end
-                stop = ((ca1.ripples.timestamps(ind,2)+.02));
+                stop = ((ca1.ripples.peaks(ind,1)+.02));
                 ripSpks = Restrict(spikes.times{spk},[start stop]);
                 spatialContent(spk,ind) = meanPeakRate(spk);%.*length(ripSpks);
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk);%.*length(ripSpks);
@@ -116,6 +116,7 @@ for rec = 1:length(d)
     content.hpc_power{rec} = hpc_rec(:,2);
     content.ls_power{rec} = hpc_rec(:,1);
     content.ls_power_z{rec} = ls_rec(:,1);
+    content.animal(rec) = sum(double(sessionInfo.animal));
     [aa bb] = corr(content.ls_power{rec},nanmean(content.spatialContent{rec})')
     [aa bb] = corr(content.ls_power{rec},nanmean(content.rewardContent{rec})')
     rec
@@ -123,5 +124,5 @@ for rec = 1:length(d)
     end
 %     save([sessionInfo.FileName '.rippleContent.mat'])
    cd /home/david/datasets/ripples_LS 
-   save('/home/david/Dropbox/hpc_ripple_content_ts.mat','-v7.3')
+   save('/home/david/Dropbox/hpc_ripple_content_40.mat','-v7.3')
 end
