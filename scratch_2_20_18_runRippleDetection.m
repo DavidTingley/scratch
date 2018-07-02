@@ -14,7 +14,7 @@ for rec = 1:length(d)
         for i=1:size(lfp.data,2)
             lfp.filt(:,i) = FiltFiltM(b,a,double(lfp.data(:,i)));
         end
-%     if sum(diff(SleepState.ints.NREMstate')) > 60*3
+    if sum(diff(SleepState.ints.NREMstate')) > 60*3
         if ~isempty(refChan)
             [ripples] = bz_FindRipples(lfp.data(:,1),lfp.timestamps,...
             'noise',lfp.data(:,2),...

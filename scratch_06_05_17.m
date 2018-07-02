@@ -1,9 +1,9 @@
 
-d = dir('*ripplesALL*');
+% d = dir('*ripplesALL*');
 
-if ~isempty(dir(['*.ripplesALL.event.mat'])) & ~isempty(dir('*pos')) & ~isempty(dir('*clu*'))
+if ~isempty(dir(['*.CA1Ripples.events.mat'])) & ~isempty(dir('*pos')) & ~isempty(dir('*clu*'))
 
-load([d.name])
+ripples = bz_LoadEvents(pwd,'CA1Ripples');
 lfp = bz_GetLFP([ripples.rippleChan 15]);
 spikes = bz_GetSpikes('savemat',true,'forcereload',true,'getwaveforms',true);
 beh = dir('*pos');
@@ -54,7 +54,7 @@ pow(:,2) = zscore(FiltFiltM(b,a,double(lfp.data(:,2))));
 
 
 
-for i=1:length(ripples.times)
+for i=1:length(ripples.peaks)
 p(i) = max(pow(round(ripples.peaks(i)*1250)-40:round(ripples.peaks(i)*1250)+40,1));
 pp(i) = max(pow(round(ripples.peaks(i)*1250)-40:round(ripples.peaks(i)*1250)+40,2));
 end
@@ -69,14 +69,14 @@ ff = find(pp<=mean(pp)+std(pp)*2);
 % end
 
 
-for i=1:length(ripples.times)
+for i=1:length(ripples.peaks)
 for j=1:length(spikes.times)
 sp = find(spikes.times{j}>ripples.peaks(i)-.04);
 sp2 = find(spikes.times{j}<ripples.peaks(i)+.04);
 rate(i,j,ceil((spikes.times{j}(intersect(sp,sp2))-ripples.peaks(i))*1250)+50)=1;
 end
 end
-for i=1:length(ripples.times)
+for i=1:length(ripples.peaks)
     for j=1:length(spikes.times)
         rr(i,j,:)= fastrms(squeeze(rate(i,j,:)),12);
     end
