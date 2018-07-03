@@ -35,11 +35,11 @@
         dat_smooth = cell2mat(spk_smooth);
         
         idx = find(reg==1); % LS
-        [W_ls, H_ls, cost_ls,loadings_ls,power_ls] = seqNMF(dat_smooth(idx,:),'L',100,'K',40,'lambda',.1,'showplot',0);
+        [W_ls, H_ls, cost_ls,loadings_ls,power_ls] = seqNMF(dat_smooth(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
 %         clear ind spk spk_smooth dat dat_smooth
         
         idx = find(reg==2); % HPC
-        [W_hpc, H_hpc, cost_hpc,loadings_hpc,power_hpc] = seqNMF(dat_smooth(idx,:),'L',100,'K',40,'lambda',.1,'showplot',0);
+        [W_hpc, H_hpc, cost_hpc,loadings_hpc,power_hpc] = seqNMF(dat_smooth(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
 %         clear ind spk spk_smooth dat dat_smooth
     end
     
