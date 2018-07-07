@@ -24,7 +24,7 @@
                 f = Restrict(spikes.times{ii},[ripples.peaks(i)-.049999 ripples.peaks(i)+.049999]);
                 spk{i}(ii,ceil(51+(f-ripples.peaks(i))*1000))=1;
 
-                spk_smooth{i}(ii,:) = Smooth(spk{i}(ii,:),12);
+                spk_smooth{i}(ii,:) = [zeros(25,1); Smooth(spk{i}(ii,:),5); zeros(25,1)];
 %             if strcmp(spikes.region{ii},'ls')% | strcmp(spikes.region{ii},'ca1') | strcmp(spikes.region{ii},'ca3')
 %                 ind(ii) = 1;
 %             end
