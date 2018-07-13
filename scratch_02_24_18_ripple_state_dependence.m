@@ -14,6 +14,7 @@ wakeCA1RippleRate = nan(length(d),1);
 NREMCA1RippleRate = nan(length(d),1);
 REMCA1RippleRate = nan(length(d),1);
 
+count = 1;
 
 for rec = 1:length(d)
     cd(d(rec).name)
@@ -22,7 +23,9 @@ for rec = 1:length(d)
     ls_ripples = bz_LoadEvents(pwd,'LSRipples');
     ca1_ripples = bz_LoadEvents(pwd,'CA1Ripples');
     sleep = bz_LoadStates(pwd,'SleepState');
-    
+    spikes = bz_GetSpikes('noprompt',true);
+    if exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
+    load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
     if ~isempty(ls_ripples) & ~isempty(ca1_ripples)
     % get coupling scores
     for i=1:length(ca1_ripples.timestamps) % ca1 as ref for now...
@@ -33,6 +36,32 @@ for rec = 1:length(d)
        end
     end
     
+    for spk = 1:length(spikes.times)
+        for cond = 1:length(fields)
+           if ~isempty(fields{cond}{spk})
+               f(spk) = 1;
+           else
+               f(spk) = 0;
+           end
+        end
+        [times groups] = spikes2sorted({spikes.times{spk},ca1_ripples.peaks(coupling==0)});
+        [ccg t] = CCG(times,groups,'binSize',.001,'duration',.5);
+        ccg = ccg ./ sum(coupling==0);
+        [times groups] = spikes2sorted({spikes.times{spk},ca1_ripples.peaks(coupling==1)});
+        [ccg_coupled t] = CCG(times,groups,'binSize',.001,'duration',.5);
+        ccg_coupled = ccg_coupled ./ sum(coupling==1);
+        if f(spk) == 1 & ~strcmp(spikes.region{spk},'ls') & sum(coupling) > 15
+            plot(ccg(:,1,2),'k')
+            hold on
+            plot(ccg_coupled(:,1,2),'r')
+            pause(.001)
+            hold off
+            not_coup(count,:) = ccg(:,1,2);
+            coupl(count,:) = ccg_coupled(:,1,2);
+            count = 1+count;
+        end
+        clear f
+    end
     
     % get wake rate
     wakeTime = double(sum(diff(sleep.ints.WAKEstate')));
@@ -80,6 +109,7 @@ for rec = 1:length(d)
         REMCA1RippleRate(rec) = nan;
     end
     
+    end
     end
    cd /home/david/datasets/ripples_LS 
    clear coupling

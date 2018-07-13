@@ -16,8 +16,8 @@ for rec = length(d):-1:1
 %         [freqs,time,hpc_power] = bz_WaveSpec(ca1.lfp.data,[120 200],1,3,1/1250,'lin');
 %         ls_power = zscore(abs(ls_power));
 %         hpc_power = zscore(abs(hpc_power));
-ls_power = zscore(fastrms(bz_Filter(double(ls.lfp.data),'filter','butter','passband',[120 180],'order', 3),20));
-hpc_power = zscore(fastrms(bz_Filter(double(ca1.lfp.data),'filter','butter','passband',[120 180],'order', 3),20));
+ls_power = (fastrms(bz_Filter(double(ls.lfp.data),'filter','butter','passband',[120 180],'order', 3),20));
+hpc_power = (fastrms(bz_Filter(double(ca1.lfp.data),'filter','butter','passband',[120 180],'order', 3),20));
         
 %         figure(rec)
         subplot(2,2,1);
@@ -41,10 +41,10 @@ hpc_power = zscore(fastrms(bz_Filter(double(ca1.lfp.data),'filter','butter','pas
             hpc_rec=[hpc_rec;ls_max,hpc_max];
             hold on
         end
-        axis([0 40 0 40])
+%         axis([0 40 0 40])
         
         subplot(2,2,2);
-        pts = linspace(0, 40, 101);
+        pts = linspace(0, max([hpc_rec(:)]), 101);
         N = histcounts2(hpc_rec(:,1), hpc_rec(:,2), pts, pts);
         imagesc(pts,pts,log(N))
         title('hpc detection')
