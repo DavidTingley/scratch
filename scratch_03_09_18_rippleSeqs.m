@@ -1,8 +1,8 @@
-
+function []=scratch_03_09_18_rippleSeqs(nCells)
 % d = dir('*201*');
 % for rec=1:length(d)
 %     cd(d(rec).name)
-    nCells = 10;
+%     nCells = 10;
     sessionInfo = bz_getSessionInfo;
     ripples = bz_LoadEvents(pwd,'CA1Ripples');
     if ~isempty(ripples)
@@ -63,7 +63,7 @@
 
 %% run shuffled data..
         for iter = 1:20
-         parfor i=1:length(ripples.timestamps)
+         for i=1:length(ripples.timestamps)
             spk_shuffle{i} = zeros(numCells,101);
             r = randperm(length(ripples.peaks)); % random
             for ii=1:numCells
@@ -78,9 +78,11 @@
         idx = find(reg==1); % LS
         [W_ls_shuffle, H_ls_shuffle, cost_ls_shuffle,loadings_ls_shuffle(iter,:),power_ls_shuffle(iter)] = seqNMF(dat_smooth_shuffle(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
         end
-    end
+%     end
     
     save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '.hpc.' sprintf('%02d',idx_hpc) '.mat'],'*hpc*','-v7.3')
     save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '.ls.' sprintf('%02d',idx_ls) '.mat'],'*ls*','-v7.3')
     
-% end
+    end
+
+end
