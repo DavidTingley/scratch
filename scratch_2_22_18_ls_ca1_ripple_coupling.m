@@ -5,19 +5,23 @@ count=0;
 for rec = length(d):-1:1
 
     cd(d(rec).name)
-    sessionInfo = bz_getSessionInfo;
+    sessionInfo = bz_getSessionInfo(pwd,'noprompts', true);
     if exist([sessionInfo.FileName '.LSRipples.events.mat']) & exist([sessionInfo.FileName '.CA1Ripples.events.mat'])
         ls = load([sessionInfo.FileName '.LSRipples.events.mat']);
         ca1 = load([sessionInfo.FileName '.CA1Ripples.events.mat']);
         count = 1+count;
-        ls.lfp = bz_GetLFP(sessionInfo.ls);
-        ca1.lfp = bz_GetLFP(sessionInfo.ca1);
+        if ~isfield(sessionInfo,'ls')
+           sessionInfo.ls = ls.ripples.rippleChan;
+           save([sessionInfo.FileName '.sessionInfo.mat'],'sessionInfo')
+        end
+        ls.lfp = bz_GetLFP(sessionInfo.ls,'noprompts', true);
+        ca1.lfp = bz_GetLFP(sessionInfo.ca1,'noprompts', true);
 %         [freqs,time,ls_power] = bz_WaveSpec(ls.lfp.data,[120 200],1,3,1/1250,'lin');
 %         [freqs,time,hpc_power] = bz_WaveSpec(ca1.lfp.data,[120 200],1,3,1/1250,'lin');
 %         ls_power = zscore(abs(ls_power));
 %         hpc_power = zscore(abs(hpc_power));
-ls_power = (fastrms(bz_Filter(double(ls.lfp.data),'filter','butter','passband',[120 180],'order', 3),20));
-hpc_power = (fastrms(bz_Filter(double(ca1.lfp.data),'filter','butter','passband',[120 180],'order', 3),20));
+ls_power = (fastrms(bz_Filter(double(ls.lfp.data),'filter','butter','passband',[140 180],'order', 3),20));
+hpc_power = (fastrms(bz_Filter(double(ca1.lfp.data),'filter','butter','passband',[140 180],'order', 3),20));
         
 %         figure(rec)
         subplot(2,2,1);
@@ -27,7 +31,7 @@ hpc_power = (fastrms(bz_Filter(double(ca1.lfp.data),'filter','butter','passband'
 
             [ls_max a] = max(abs(ls_power(start:stop)));
             [hpc_max a] = max(abs(hpc_power(start:stop)));
-            scatter(ls_max,hpc_max,'.r')
+            scatter(ls_max,hpc_max,2,'.r')
             ls_rec=[ls_rec;ls_max,hpc_max];
             hold on
         end
@@ -37,7 +41,7 @@ hpc_power = (fastrms(bz_Filter(double(ca1.lfp.data),'filter','butter','passband'
 
             [ls_max a] = max(abs(ls_power(start:stop)));
             [hpc_max a] = max(abs(hpc_power(start:stop)));
-            scatter(ls_max,hpc_max,'.k')
+            scatter(ls_max,hpc_max,2,'.k')
             hpc_rec=[hpc_rec;ls_max,hpc_max];
             hold on
         end
@@ -71,5 +75,6 @@ hpc_power = (fastrms(bz_Filter(double(ca1.lfp.data),'filter','butter','passband'
 %         [times groups] = spikes2sorted({ls.ripples.peaks,ca1.ripples.peaks});
 %         [ccg t] = CCG(times,groups,'binSize',.001);
     end
-   cd /home/david/datasets/ripples_LS 
+%    cd /home/david/datasets/ripples_LS 
+cd E:\datasets\ripples_LS
 end

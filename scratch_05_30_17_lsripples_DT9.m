@@ -19,14 +19,14 @@ if d(i).isdir
 
     disp(['finding ripples with ch #: ' num2str(rippleChan) ', and noise ch #: ' num2str(refChan)])
     [ripples] = bz_FindRipples(lfp.data(:,1),lfp.timestamps,'noise',...
-        lfp.data(:,2),'durations',[12 100],'thresholds',[3 6],'saveMat',false,'frequency',lfp.samplingRate);
+        lfp.data(:,2),'durations',[12 100],'saveMat',false,'frequency',lfp.samplingRate);
     if length(ripples.times) > 2
     [ripples.maps,ripples.data,ripples.stats] = bz_RippleStats(lfp.filt(:,1),lfp.timestamps,ripples,'frequency',lfp.samplingRate);
 
     ripples.rippleChan = rippleChan;
     ripples.refChan = refChan;
 
-    save([xml.FileName '.ls_ripples.event.mat'],'ripples','-v7.3')
+    save([xml.FileName '.LSripples.event.mat'],'ripples','-v7.3')
     end
     
     cd ..
