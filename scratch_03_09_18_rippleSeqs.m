@@ -2,6 +2,7 @@
 % d = dir('*201*');
 % for rec=1:length(d)
 %     cd(d(rec).name)
+    nCells = 10;
     sessionInfo = bz_getSessionInfo;
     ripples = bz_LoadEvents(pwd,'CA1Ripples');
     if ~isempty(ripples)
@@ -34,8 +35,8 @@
         idx = find(reg==1); % LS
 %         downsample idx to specific #
         r = randperm(length(idx));
-        if length(r)>5
-            idx_ls = idx(r(1:5));
+        if length(r)>nCells
+            idx_ls = idx(r(1:nCells));
         [W_ls, H_ls, cost_ls,loadings_ls,power_ls] = seqNMF(dat_smooth(idx_ls,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
 %         clear ind spk spk_smooth dat dat_smooth
         else
@@ -48,8 +49,8 @@
         
         idx = find(reg==2); % HPC
         r = randperm(length(idx));
-        if length(r)>5
-            idx_hpc = idx(r(1:5));
+        if length(r)>nCells
+            idx_hpc = idx(r(1:nCells));
         [W_hpc, H_hpc, cost_hpc,loadings_hpc,power_hpc] = seqNMF(dat_smooth(idx_hpc,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
 %         clear ind spk spk_smooth dat dat_smooth
         else
@@ -79,6 +80,7 @@
         end
     end
     
-    save([sessionInfo.FileName '.' num2str(seq) '.seqNMF.mat'],'-v7.3')
+    save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '.hpc.' sprintf('%02d',idx_hpc) '.mat'],'*hpc*','-v7.3')
+    save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '.ls.' sprintf('%02d',idx_ls) '.mat'],'*ls*','-v7.3')
     
 % end
