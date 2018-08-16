@@ -4,9 +4,10 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
 %     cd(d(rec).name)
 %     nCells = 10;
     sessionInfo = bz_getSessionInfo;
+    disp(['running ' sessionInfo.FileName ', with ' num2str(nCells) ' cells'])
     ripples = bz_LoadEvents(pwd,'CA1Ripples');
     if ~isempty(ripples)
-        spikes = bz_GetSpikes;
+        spikes = bz_GetSpikes('noprompts',true);
         for i=1:length(spikes.times)
             if strcmp(spikes.region{i},'ls')
                 reg(i) = 1;
