@@ -74,10 +74,14 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
             end
          end
         dat_smooth_shuffle = cell2mat(spk_smooth_shuffled);
-        idx = find(reg==2); % HPC
-        [W_hpc_shuffle, H_hpc_shuffle, cost_hpc_shuffle,loadings_hpc_shuffle(iter,:),power_hpc_shuffle(iter)] = seqNMF(dat_smooth_shuffle(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
-        idx = find(reg==1); % LS
-        [W_ls_shuffle, H_ls_shuffle, cost_ls_shuffle,loadings_ls_shuffle(iter,:),power_ls_shuffle(iter)] = seqNMF(dat_smooth_shuffle(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
+        if ~isempty(W_hpc)
+%         idx = find(reg==2); % HPC
+        [W_hpc_shuffle, H_hpc_shuffle, cost_hpc_shuffle,loadings_hpc_shuffle(iter,:),power_hpc_shuffle(iter)] = seqNMF(dat_smooth_shuffle(idx_hpc,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
+        end
+        if ~isempty(W_ls)
+%         idx = find(reg==1); % LS
+        [W_ls_shuffle, H_ls_shuffle, cost_ls_shuffle,loadings_ls_shuffle(iter,:),power_ls_shuffle(iter)] = seqNMF(dat_smooth_shuffle(idx_ls,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
+        end
         end
 %     end
     
