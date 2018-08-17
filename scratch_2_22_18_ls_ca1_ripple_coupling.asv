@@ -16,6 +16,7 @@ for rec = length(d):-1:1
         [times groups] = spikes2sorted({ls.ripples.peaks,ca1.ripples.peaks});
         [ccg t] = CCG(times,groups,'binSize',.001);
         crossCorrs(rec,:) = ccg(:,1,2);
+        count = 1+count;
         if ~isfield(sessionInfo,'ls')
            sessionInfo.ls = ls.ripples.rippleChan;
            save([sessionInfo.FileName '.sessionInfo.mat'],'sessionInfo')
@@ -29,7 +30,7 @@ for rec = length(d):-1:1
 ls_power = (fastrms(bz_Filter(double(ls.lfp.data),'filter','butter','passband',[140 180],'order', 3),12));
 hpc_power = (fastrms(bz_Filter(double(ca1.lfp.data),'filter','butter','passband',[140 180],'order', 3),12));
         
-figure(1)
+
 idx = find(strcmp(animals,sessionInfo.animal));
         subplot(6,3,idx);
         for event = 1:size(ls.ripples.timestamps,1)
@@ -65,40 +66,39 @@ idx = find(strcmp(animals,sessionInfo.animal));
         
         pause(1)
 %% get population firing rate
-figure(2)
-    spikes = bz_GetSpikes('noprompts',true);
-    if ~isempty(spikes)
-    for sp = 1:length(spikes.times)
-        if strcmp(spikes.region{sp},'ls') %|strcmp(spikes.region{sp},'ca3') |strcmp(spikes.region{sp},'ca1')
-            popRate(count,:) = zeros(501,1);
-            for ind = 1:size(ripples.timestamps,1)
-                ts = Restrict(spikes.times{sp},[ca1.ripples.peaks(ind)-.2 ca1.ripples.peaks(ind)+.2]); 
-                idxNorm = ceil((ts-ca1.ripples.peaks(ind)+.2)*1250+.0000001);% - round(offsets(ind)./20000.*1250);
-                if ~isempty(ts) & idxNorm > 0 & idxNorm <= 501
-                    popRate(count,idxNorm) = popRate(count,idxNorm)+1;
-                end
-            end
-            popRate(count,:) = popRate(count,:);
-            popRate_z(count,:) = zscore(popRate(count,:));
-            popRate_avg(count,:) = popRate(count,:)./size(ripples.timestamps,1);
-            count = 1+count;
-        end
-    end
-    end
-    subplot(3,2,1)
-    imagesc(popRate)
-    subplot(3,2,2)
-    plot(squeeze(median(median(dat,2)))*.195)
-    subplot(3,2,3)
-    plot((mean(popRate)))
-    subplot(3,2,4)
-    imagesc(popRate_avg)
-    subplot(3,2,5)
-    plot(mean(popRate_z))
-    subplot(3,2,6)
-    imagesc(popRate_z)
-    caxis([0 4])
-    pause(.1)
+%     spikes = bz_GetSpikes('noprompts',true);
+%     if ~isempty(spikes)
+%     for sp = 1:length(spikes.times)
+%         if strcmp(spikes.region{sp},'hpc') |strcmp(spikes.region{sp},'ca3') |strcmp(spikes.region{sp},'ca1')
+%             popRate(count,:) = zeros(501,1);
+%             for ind = 1:size(ripples.timestamps,1)
+%                 ts = Restrict(spikes.times{sp},[ca1.ripples.peaks(ind)-.2 ca1.ripples.peaks(ind)+.2]); 
+%                 idxNorm = ceil((ts-ripples.peaks(ind)+.2)*1250+.0000001);% - round(offsets(ind)./20000.*1250);
+%                 if ~isempty(ts) & idxNorm > 0 & idxNorm <= 501
+%                     popRate(count,idxNorm) = popRate(count,idxNorm)+1;
+%                 end
+%             end
+%             popRate(count,:) = popRate(count,:);
+%             popRate_z(count,:) = zscore(popRate(count,:));
+%             popRate_avg(count,:) = popRate(count,:)./size(ripples.timestamps,1);
+%             count = 1+count;
+%         end
+%     end
+%     end
+%     subplot(3,2,1)
+%     imagesc(popRate)
+%     subplot(3,2,2)
+%     plot(squeeze(median(median(dat,2)))*.195)
+%     subplot(3,2,3)
+%     plot((mean(popRate)))
+%     subplot(3,2,4)
+%     imagesc(popRate_avg)
+%     subplot(3,2,5)
+%     plot(mean(popRate_z))
+%     subplot(3,2,6)
+%     imagesc(popRate_z)
+%     caxis([0 4])
+%     pause(.1)
 
     end
 %    cd /home/david/datasets/ripples_LS 

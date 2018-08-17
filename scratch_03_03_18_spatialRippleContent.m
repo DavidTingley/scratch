@@ -69,15 +69,15 @@ for rec = 1:length(d)
                 end
                 stop = ((ca1.ripples.timestamps(ind,2)+.02));
                 ripSpks = Restrict(spikes.times{spk},[start stop]);
-                spatialContent(spk,ind) = meanPeakRate(spk);%.*length(ripSpks);
-                rewardContent(spk,ind) = rewardModulation.rewardGain(spk);%.*length(ripSpks);
-                PF(spk,ind) = (hasField(spk)>0);% .* length(ripSpks);
+                spatialContent(spk,ind) = meanPeakRate(spk).*length(ripSpks);
+                rewardContent(spk,ind) = rewardModulation.rewardGain(spk).*length(ripSpks);
+                PF(spk,ind) = (hasField(spk)>0) .* length(ripSpks);
                 nSpikes(spk,ind) = length(ripSpks);
                 cellLoc(spk,ind) = spikes.chanDepthRelative_CA1PYR(spk);
                 cellLoc_wav(spk,ind) = spikes.chanDepthRelative_CA1PYR_wav(spk);
                 
                 if length(ripSpks) > 0
-                spatialContenimt_part(spk,ind) = meanPeakRate(spk);%.*length(ripSpks);
+                spatialContent_part(spk,ind) = meanPeakRate(spk);%.*length(ripSpks);
                 rewardContent_part(spk,ind) = rewardModulation.rewardGain(spk);%.*length(ripSpks);
                 end
             end
@@ -87,19 +87,19 @@ for rec = 1:length(d)
                 meanPeakRate = [];
             end
 %             spk
-%             subplot(3,2,1)
-%             scatter(mean(spatialContent),mean(rewardContent),'.r')
-%             subplot(3,2,2)
-%             scatter(mean(spatialContent_part),mean(rewardContent_part),'.r')
-%             subplot(3,2,3)
-%             scatter(mean(spatialContent),hpc_rec(:,1),'.r')
-%             subplot(3,2,4)
-%             scatter(mean(rewardContent),hpc_rec(:,1),'.r')
-%             subplot(3,2,5)
-%             scatter(mean(spatialContent_part),hpc_rec(:,1),'.r')
-%             subplot(3,2,6)
-%             scatter(mean(rewardContent_part),hpc_rec(:,1),'.r')
-%             pause(.1)
+            subplot(3,2,1)
+            scatter(mean(spatialContent),mean(rewardContent),'.r')
+            subplot(3,2,2)
+            scatter(mean(spatialContent_part),mean(rewardContent_part),'.r')
+            subplot(3,2,3)
+            scatter(mean(spatialContent),hpc_rec(:,1),'.r')
+            subplot(3,2,4)
+            scatter(mean(rewardContent),hpc_rec(:,1),'.r')
+            subplot(3,2,5)
+            scatter(mean(spatialContent_part),hpc_rec(:,1),'.r')
+            subplot(3,2,6)
+            scatter(mean(rewardContent_part),hpc_rec(:,1),'.r')
+            pause(.1)
         end
     content.region{rec} = spikes.region{end};
     content.nCells{rec} = size(spatialContent,1);
@@ -123,6 +123,7 @@ for rec = 1:length(d)
     clear meanPeakRate rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content* PF cellLoc*
     end
 %     save([sessionInfo.FileName '.rippleContent.mat'])
-   cd /home/david/datasets/ripples_LS 
-   save('/home/david/Dropbox/hpc_ripple_content_ts.mat','-v7.3')
+%    cd /home/david/datasets/ripples_LS 
+   cd E:\datasets\ripples_LS
+%    save('/home/david/Dropbox/hpc_ripple_content_ts.mat','-v7.3')
 end
