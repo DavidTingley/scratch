@@ -3,9 +3,6 @@ function []=scratch_03_09_18_rippleSeqs_ls(nCells)
 % for rec=1:length(d)
 %     cd(d(rec).name)
 %     nCells = 10;
-nCells
-nCells = str2num(nCells);
-nCells
 
     sessionInfo = bz_getSessionInfo;
     disp(['running ' sessionInfo.FileName ', with ' num2str(nCells) ' cells'])
