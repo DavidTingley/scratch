@@ -1,4 +1,4 @@
-function [] = scratch_07_22_18_bayesianTemplate(RECORDING)
+function [] = scratch_07_22_18_bayesianTemplate()
 % cd D:\Dropbox\datasets\lsDataset
 d = dir('*201*');
 binSize = [.02];
@@ -9,8 +9,8 @@ overlap = 5;
 
 
 
-for ii=RECORDING
-    cd(d(ii).name)
+for ii=1
+%     cd(d(ii).name)
     sessionInfo = bz_getSessionInfo;
     ls_spikes = bz_GetSpikes('region','ls','noprompts',true);
     hpc_spikes = bz_GetSpikes('region','hpc','noprompts',true);
@@ -280,7 +280,7 @@ for ii=RECORDING
     end
     
     save([sessionInfo.FileName '.bayesianResults.mat'],'-v7.3')
-cd ~/datasets/ripples_LS/
+% cd ~/datasets/ripples_LS/
 % cd E:\datasets\ripples_LS
 % savefig('/home/david/Dropbox/bayesianDecoder.fig')
 % save('/home/david/Dropbox/bayesianDecoder_noExclusion.mat','-v7.3')
