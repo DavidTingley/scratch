@@ -34,7 +34,7 @@ for rec = 1:length(d)
 %         if length(ca1_ripples.peaks) > 10
 %     % get coupling scores
     for i=1:length(ls_ripples.timestamps) % ca1 as ref for now...
-       if min(abs(ca1_ripples.peaks-ls_ripples.peaks(i))) < .025
+       if min(abs(ca1_ripples.peaks(i)-ls_ripples.peaks)) < binSize
             coupling(i) = 1;
        else
             coupling(i) = 0;

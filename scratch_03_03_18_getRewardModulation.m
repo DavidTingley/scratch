@@ -1,6 +1,6 @@
 d = dir('*201*');
    
-for rec = 1:length(d)
+for rec = length(d):-1:1
 
    cd(d(rec).name)
    sessionInfo = bz_getSessionInfo;
@@ -9,11 +9,17 @@ for rec = 1:length(d)
        
        load([sessionInfo.FileName '.behavior.mat']);
        
-       [times groups]=spikes2sorted(spikes.times);
-       recDuration = (times(end));
+%        [times groups]=spikes2sorted(spikes.times);
+%        recDuration = (times(end));
        for spk = 1:length(spikes.times)
            for trial =1:length(behavior.events.trials)
-              r(trial,spk) = length(Restrict(spikes.times{spk},[behavior.events.trials{trial}.timestamps(end) behavior.events.trials{trial}.timestamps(end)+1]));
+               if trial ~= length(behavior.events.trials)
+                  r(trial,spk) = length(Restrict(spikes.times{spk},[behavior.events.trials{trial}.timestamps(end) behavior.events.trials{trial+1}.timestamps(1)]));
+                  r(trial,spk) = r(trial,spk) ./ (behavior.events.trials{trial+1}.timestamps(1) - behavior.events.trials{trial}.timestamps(end)); 
+               else
+                  r(trial,spk) = length(Restrict(spikes.times{spk},[behavior.events.trials{trial}.timestamps(end) behavior.events.trials{trial}.timestamps(end)+2]));
+                  r(trial,spk) = r(trial,spk) ./ 2; 
+               end
               r_in(trial,spk) = length(Restrict(spikes.times{spk},[behavior.events.trials{trial}.timestamps(1) behavior.events.trials{trial}.timestamps(end)]));
               r_in(trial,spk) = r_in(trial,spk) ./ (behavior.events.trials{trial}.timestamps(end) - behavior.events.trials{trial}.timestamps(1));
            end

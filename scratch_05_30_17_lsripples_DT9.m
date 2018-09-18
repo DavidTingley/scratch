@@ -30,7 +30,7 @@ if length(ripples.times) > 2
     ripples.rippleChan = rippleChan;
     ripples.refChan = refChan;
 
-    save([xml.FileName '.LSripples.event.mat'],'ripples','-v7.3')
+    save([xml.FileName '.LSRipples.events.mat'],'ripples','-v7.3')
     end
     
     cd ..
