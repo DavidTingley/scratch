@@ -2,16 +2,16 @@ function [] = scratch_07_22_18_bayesianTemplate()
 % cd D:\Dropbox\datasets\lsDataset
 d = dir('*201*');
 binSize = [.02];
-tcFactors = [2:2:20];
 count_ls = 1;
 count_hpc = 1;
 overlap = 5;
 
 
 
-for ii=1
+% for ii=61:length(d)
 %     cd(d(ii).name)
     sessionInfo = bz_getSessionInfo;
+    disp(['working on ' sessionInfo.FileName])
     ls_spikes = bz_GetSpikes('region','ls','noprompts',true);
     hpc_spikes = bz_GetSpikes('region','hpc','noprompts',true);
     spikes = bz_GetSpikes('noprompts',true);
@@ -65,14 +65,29 @@ for ii=1
     
     for t = 1:length(firingMaps.rateMaps)
 %         template = squeeze(circ_mean(binnedPhaseMaps{t},[],2))+pi;
-        template = squeeze(mean(firingMaps.rateMaps{t},2));
+%         template = squeeze(mean(firingMaps.rateMaps{t},2));
+        template = squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_ls,:,:),2));
+        template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_ls,:,:),2)));
+        for i = 1:size(template,1)
+           template(i,:) = Smooth(template(i,:),9);
+           template_shuf(i,:) = Smooth(template_shuf(i,:),9);
+        end
         for event = 1:length(ripples.peaks)
 %             [n ts] = min(abs(spkmatNREM_ls.timestamps-ripples.peaks(event)));
             ts = round(ripples.peaks(event)*(1/spkmatNREM_ls.dt));
             if ts+20 < size(spkmatNREM_ls.data,1) & ts > 20
             data = spkmatNREM_ls.data(ts-20:ts+20,:);    
-            [Pr_shuf prMax_shuf] = placeBayes((data')', bz_shuffleCircular(template(idx_ls,:)), spkmatNREM_ls.dt);
-            [Pr, prMax] = placeBayes(data, template(idx_ls,:), spkmatNREM_ls.dt);
+
+            for iter = 1:100
+                template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_ls,:,:),2)));
+                for i = 1:size(template,1)
+                   template_shuf(i,:) = Smooth(template_shuf(i,:),9);
+                end
+                [Pr_shuf prMax_shuf] = placeBayes((data')', template_shuf, spkmatNREM_ls.dt*5);
+                [slope_ls_shuf(t,event,iter) integral_ls_shuf(t,event,iter)] = Pr2Radon(Pr_shuf);
+            end
+            
+            [Pr, prMax] = placeBayes(data, template, spkmatNREM_ls.dt*5);
 %             for i = 1:41
 %             Pr(i,:) = minmax_norm(Pr(i,:));
 %             Pr_shuf(i,:) = minmax_norm(Pr_shuf(i,:));
@@ -87,14 +102,14 @@ for ii=1
 %                 corrs_ls_NaN(t,event) = corr([1:41]',prMax,'rows','complete');
 %                 corrs_ls_NaN_shuf(t,event) = corr([1:41]',prMax_shuf,'rows','complete');
                 [slope_ls(t,event) integral_ls(t,event)] = Pr2Radon(Pr);
-                [slope_ls_shuf(t,event) integral_ls_shuf(t,event)] = Pr2Radon(Pr_shuf);
+%                 [slope_ls_shuf(t,event) integral_ls_shuf(t,event)] = Pr2Radon(Pr_shuf);
             else
 %                 corrs_ls_NaN(t,event) = nan;
 %                 corrs_ls_NaN_shuf(t,event) = nan;
                 slope_ls(t,event) = nan;
                 integral_ls(t,event) =nan;
-                slope_ls_shuf(t,event) = nan;
-                integral_ls_shuf(t,event) = nan;
+%                 slope_ls_shuf(t,event) = nan;
+%                 integral_ls_shuf(t,event) = nan;
             end
             
             else
@@ -103,8 +118,8 @@ for ii=1
 %                 corrs_ls_NaN_shuf(t,event) = nan;
                 slope_ls(t,event) = nan;
                 integral_ls(t,event) =nan;
-                slope_ls_shuf(t,event) = nan;
-                integral_ls_shuf(t,event) = nan;
+%                 slope_ls_shuf(t,event) = nan;
+%                 integral_ls_shuf(t,event) = nan;
             
             end
         end
@@ -124,6 +139,7 @@ for ii=1
 %         behav_ls_NaN_shuf{count_ls} = corrs_ls_NaN_shuf(:,ripples.peaks>intervals(1,2) &...
 %                              ripples.peaks<intervals(3,1));
                          
+        ls_rZ{count_ls} = (integral_ls - nanmean(integral_ls_shuf,3)) ./ nanstd(integral_ls_shuf,[],3);
         ls_integral{count_ls} = integral_ls;
         ls_max_int{count_ls} = max(integral_ls);
         ls_max_int_shuf{count_ls} = max(integral_ls_shuf);
@@ -174,15 +190,26 @@ for ii=1
     spkmatNREM_hpc = bz_SpktToSpkmat(hpc_spikesNREM.times,'overlap',overlap,'binSize',binSize(bins)* overlap);
     for t = 1:length(firingMaps.rateMaps)
 %         template = squeeze(circ_mean(binnedPhaseMaps{t},[],2))+pi;
-        template = squeeze(mean(firingMaps.rateMaps{t},2));
+%         template = squeeze(mean(firingMaps.rateMaps{t},2));
+        template = squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_hpc,:,:),2));
+        for i = 1:size(template,1)
+           template(i,:) = Smooth(template(i,:),9);
+        end
         for event = 1:length(ripples.peaks)
 %             [n ts] = min(abs(spkmatNREM_hpc.timestamps-ripples.peaks(event)));
             ts = round(ripples.peaks(event)*(1/spkmatNREM_hpc.dt));
             if ts+20 < size(spkmatNREM_hpc.data,1) & ts > 20
-            data = spkmatNREM_hpc.data(ts-20:ts+20,:);    
-            [Pr_shuf prMax_shuf] = placeBayes((data')', bz_shuffleCircular(template(idx_hpc,:)), spkmatNREM_hpc.dt);
+            data = spkmatNREM_hpc.data(ts-20:ts+20,:);  
+            for iter = 1:100
+                template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_hpc,:,:),2)));
+                for i = 1:size(template,1)
+                   template_shuf(i,:) = Smooth(template_shuf(i,:),9);
+                end
+                [Pr_shuf prMax_shuf] = placeBayes((data')', template_shuf, spkmatNREM_hpc.dt*5);
+                [slope_hpc_shuf(t,event,iter) integral_hpc_shuf(t,event,iter)] = Pr2Radon(Pr_shuf);
+            end
             %shuffle template, not ripple, to preserve population burst?
-            [Pr, prMax] = placeBayes(data, template(idx_hpc,:), spkmatNREM_hpc.dt);
+            [Pr, prMax] = placeBayes(data, template, spkmatNREM_hpc.dt*5);
 %             for i = 1:41
 %                 Pr(i,:) = minmax_norm(Pr(i,:));
 %                 Pr_shuf(i,:) = minmax_norm(Pr_shuf(i,:));
@@ -197,14 +224,14 @@ for ii=1
 %                 corrs_hpc_NaN(t,event) = corr([1:41]',prMax,'rows','complete');
 %                 corrs_hpc_NaN_shuf(t,event) = corr([1:41]',prMax_shuf,'rows','complete');
                   [slope_hpc(t,event) integral_hpc(t,event) ] = Pr2Radon(Pr);
-                  [slope_hpc_shuf(t,event) integral_hpc_shuf(t,event)] = Pr2Radon(Pr_shuf);
+%                   [slope_hpc_shuf(t,event) integral_hpc_shuf(t,event)] = Pr2Radon(Pr_shuf);
             else 
 %                 corrs_hpc_NaN(t,event) = nan;
 %                 corrs_hpc_NaN_shuf(t,event) = nan;
                 slope_hpc(t,event) = nan;
                 integral_hpc(t,event) =nan;
-                slope_hpc_shuf(t,event) = nan;
-                integral_hpc_shuf(t,event) = nan;
+%                 slope_hpc_shuf(t,event) = nan;
+%                 integral_hpc_shuf(t,event) = nan;
             end
             else
 %                 corrs_hpc(t,event) = NaN;
@@ -212,8 +239,8 @@ for ii=1
 %                 corrs_hpc_NaN_shuf(t,event) = nan;
                 slope_hpc(t,event) = nan;
                 integral_hpc(t,event) =nan;
-                slope_hpc_shuf(t,event) = nan;
-                integral_hpc_shuf(t,event) = nan;
+%                 slope_hpc_shuf(t,event) = nan;
+%                 integral_hpc_shuf(t,event) = nan;
             end
         end
     end
@@ -231,7 +258,7 @@ for ii=1
 %         postSleep_hpc_NaN_shuf{count_hpc} = corrs_hpc_NaN_shuf(:,ripples.peaks>intervals(3,1));
 %         behav_hpc_NaN_shuf{count_hpc} = corrs_hpc_NaN_shuf(:,ripples.peaks>intervals(1,2) &...
 %                              ripples.peaks<intervals(3,1));
-                         
+        hpc_rZ{count_hpc} = (integral_hpc - nanmean(integral_hpc_shuf,3)) ./ nanstd(integral_hpc_shuf,[],3);                 
         hpc_integral{count_hpc} = integral_hpc;
         hpc_max_int{count_hpc} = max(integral_hpc);
         hpc_max_int_shuf{count_hpc} = max(integral_hpc_shuf);
@@ -254,9 +281,9 @@ for ii=1
     behavType{ii} = behavior.description;
    
     subplot(3,2,1)
-    histogram(removeNAN(cell2vec(hpc_slope)),-.2:.01:.2,'Normalization','pdf','FaceColor','k')
+    histogram(removeNAN(cell2vec(hpc_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','k')
     hold on
-    histogram(removeNAN(cell2vec(ls_slope)),-.2:.01:.2,'Normalization','pdf','FaceColor','m')
+    histogram(removeNAN(cell2vec(ls_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','m')
     hold off
     title('slope')
     subplot(3,2,2)
@@ -265,6 +292,12 @@ for ii=1
     histogram(removeNAN(cell2vec(hpc_max_int_shuf)),'Normalization','pdf','FaceColor','r')
     hold off
     title('integral')
+    subplot(3,2,3)
+    histogram(removeNAN(cell2vec(hpc_max_int))-removeNAN(cell2vec(hpc_max_int_shuf)),'Normalization','pdf','FaceColor','k')
+%     subplot(3,2,4)
+    hold on
+    histogram(removeNAN(cell2vec(ls_max_int))-removeNAN(cell2vec(ls_max_int_shuf)),'Normalization','pdf','FaceColor','m')
+    hold off
     subplot(3,2,5)
     histogram(removeNAN(cell2vec(ls_max_int)),'Normalization','pdf','FaceColor','b')
     hold on
@@ -272,7 +305,7 @@ for ii=1
     hold off
     title('integral')
     subplot(3,2,6)
-    scatter(max(hpc_integral{count_hpc-1}),ls_max{count_hpc-1},'.k')
+    scatter(max(hpc_rZ{count_hpc-1}),ls_max{count_hpc-1},'.k')
     hold on
     pause(.1)
     end
@@ -284,4 +317,5 @@ for ii=1
 % cd E:\datasets\ripples_LS
 % savefig('/home/david/Dropbox/bayesianDecoder.fig')
 % save('/home/david/Dropbox/bayesianDecoder_noExclusion.mat','-v7.3')
+
 end

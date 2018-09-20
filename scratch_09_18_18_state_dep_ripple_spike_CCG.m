@@ -88,5 +88,23 @@ for i=1:length(d)
     cd /home/david/datasets/ripples_LS/
 end
 
+c=1
+for i=1:length(d)
+    cd(d(i).name)
+    spikes = bz_GetSpikes('noprompts',true,'region','hpc');
+    ripples = bz_LoadEvents(pwd,'CA1Ripples');
+    state = bz_LoadStates(pwd,'SleepState');
+    if ~isempty(spikes) & ~isempty(ripples)
+        if length(ripples.peaks) > 15
+        [times groups] = spikes2sorted([ripples.peaks,spikes.times]);
+        [ccg t] = CCG(times,groups,'binSize',.001);
+        for j = 1:length(spikes.times)
+        cc_hpc(c,:) = ccg(:,1,j);c=1+c;
+        end
+        end
+    end
+    cd /home/david/datasets/ripples_LS/
+end
+
 
 whos cc*
