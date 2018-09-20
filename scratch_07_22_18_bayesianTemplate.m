@@ -23,10 +23,10 @@ overlap = 5;
     ls_spikesBEHAV = ls_spikes;
     idx_ls = find(strcmp(spikes.region,'ls'));
     
-    hpcRegion{ii} = 'ca1';
+    hpcRegion{count_hpc} = 'ca1';
     if isempty(hpc_spikes) % comment out to exclude CA3 recs
         hpc_spikes = bz_GetSpikes('region','ca3','noprompts',true);
-        hpcRegion{ii} = 'ca3';
+        hpcRegion{count_hpc} = 'ca3';
     end
     idx_hpc = find(strcmp(spikes.region,'hpc') | strcmp(spikes.region,'ca3'));
     
@@ -278,7 +278,7 @@ overlap = 5;
 %         pause(.1)
         clear corrs_hpc* slope_hpc* integral_hpc*
     end
-    behavType{ii} = behavior.description;
+    behavType{count_hpc} = behavior.description;
    
     subplot(3,2,1)
     histogram(removeNAN(cell2vec(hpc_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','k')
