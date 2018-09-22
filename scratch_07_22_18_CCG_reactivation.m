@@ -7,6 +7,7 @@ for int =1:3
     ccg_cross{int} = [];
 end
 ls_rec = []; hpc_rec = [];
+binSizes = [5 150 5];
 
 for ii=1:length(d)
     cd(d(ii).name)
@@ -71,7 +72,7 @@ for ii=1:length(d)
         for c1 = 1:size(ccg{int},2)
             for c2 = c1:size(ccg{int},3)
                 if sum(ccg{1}(:,c1,c2)) > 1 & sum(ccg{2}(:,c1,c2)) > 1 & sum(ccg{3}(:,c1,c2)) > 1
-                ccg_ls{int} = [ccg_ls{int}, zscore(Smooth(squeeze(ccg{int}(:,c1,c2)),5))];
+                ccg_ls{int} = [ccg_ls{int}, zscore(Smooth(squeeze(ccg{int}(:,c1,c2)),binSizes(int)))];
                 ls_rec = [ls_rec ii];
                 end
             end
@@ -116,7 +117,7 @@ for ii=1:length(d)
         for c1 = 1:size(ccg{int},2)
             for c2 = c1:size(ccg{int},3)
                 if sum(ccg{1}(:,c1,c2)) > 1 & sum(ccg{2}(:,c1,c2)) > 1 & sum(ccg{3}(:,c1,c2)) > 1
-                ccg_hpc{int} = [ccg_hpc{int}, zscore(Smooth(squeeze(ccg{int}(:,c1,c2)),5))];
+                ccg_hpc{int} = [ccg_hpc{int}, zscore(Smooth(squeeze(ccg{int}(:,c1,c2)),binSizes(int)))];
                 hpc_rec = [hpc_rec ii];
                 end
             end
@@ -159,7 +160,7 @@ for ii=1:length(d)
             for c2 = c1:size(ccg{int},3)
                 if strcmp(spikes.region{c1},'ls') & sum(ccg{1}(:,c1,c2)) > 1 & sum(ccg{2}(:,c1,c2)) > 1 & sum(ccg{3}(:,c1,c2)) > 1
                     if strcmp(spikes.region{c2},'hpc') | strcmp(spikes.region{c2},'ca3')
-                ccg_cross{int} = [ccg_cross{int}, zscore(Smooth(squeeze(ccg{int}(:,c1,c2)),5))];
+                ccg_cross{int} = [ccg_cross{int}, zscore(Smooth(squeeze(ccg{int}(:,c1,c2)),binSizes(int)))];
                     end
             end
         end

@@ -52,13 +52,13 @@ overlap = 5;
     intervals = [pre; behav; post];
     
     
-    if ~isempty(ls_spikes)
-    for spk = 1:length(ls_spikes.times)
-%        ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},double(SleepState.ints.NREMstate)); 
-%        ls_spikesBEHAV.times{spk} = Restrict(ls_spikes.times{spk},behavior.events.trialIntervals);
-       ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},[ripples.peaks-.2 ripples.peaks+.2]); 
-    end
-    end
+%     if ~isempty(ls_spikes)
+%     for spk = 1:length(ls_spikes.times)
+% %        ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},double(SleepState.ints.NREMstate)); 
+% %        ls_spikesBEHAV.times{spk} = Restrict(ls_spikes.times{spk},behavior.events.trialIntervals);
+%        ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},[ripples.peaks-.2 ripples.peaks+.2]); 
+%     end
+%     end
    
     for bins = 1:length(binSize)
     if ~isempty(ls_spikes) & ~isempty(SleepState.ints.NREMstate) & exist([ls_spikes.sessionName '.behavior.mat']) & all(diff(intervals')>600)
@@ -178,17 +178,17 @@ overlap = 5;
     
     hpc_spikesNREM = hpc_spikes;
 %     hpc_spikesBEHAV = hpc_spikes;
-    for spk = 1:length(hpc_spikes.times)
-%         if length(hpc_spikes.times{spk})./hpc_spikes.times{spk}(end) < 5 % 2.5Hz FR limit
-%        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},double(SleepState.ints.NREMstate));   
-%        hpc_spikesBEHAV.times{spk} = Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals); 
-       hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},[ripples.peaks-.2 ripples.peaks+.2]); 
-%         else
-%        hpc_spikesNREM.times{spk} = [];   
-%        hpc_spikesBEHAV.times{spk} = []; 
-%        disp('excluded a cell...')
-%         end
-    end
+%     for spk = 1:length(hpc_spikes.times)
+% %         if length(hpc_spikes.times{spk})./hpc_spikes.times{spk}(end) < 5 % 2.5Hz FR limit
+% %        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},double(SleepState.ints.NREMstate));   
+% %        hpc_spikesBEHAV.times{spk} = Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals); 
+%        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},[ripples.peaks-.2 ripples.peaks+.2]); 
+% %         else
+% %        hpc_spikesNREM.times{spk} = [];   
+% %        hpc_spikesBEHAV.times{spk} = []; 
+% %        disp('excluded a cell...')
+% %         end
+%     end
 %     spkmat_hpc = bz_SpktToSpkmat(hpc_spikesBEHAV.times,'overlap',overlap,'binSize',binSize(bins) * overlap);
     spkmatNREM_hpc = bz_SpktToSpkmat(hpc_spikesNREM.times,'overlap',overlap,'binSize',binSize(bins)* overlap);
     for t = 1:length(firingMaps.rateMaps)
