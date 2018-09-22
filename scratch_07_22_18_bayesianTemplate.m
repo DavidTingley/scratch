@@ -17,6 +17,9 @@ overlap = 5;
     spikes = bz_GetSpikes('noprompts',true);
     SleepState = bz_LoadStates(pwd,'SleepState');
     ripples = bz_LoadEvents(pwd,'CA1Ripples');
+    popBursts = bz_LoadEvents(pwd,'popBursts');
+    ripples.peaks = popBursts.bursts;
+    
     if exist([sessionInfo.FileName '.firingMaps.cellinfo.mat'])
 
     ls_spikesNREM = ls_spikes;
@@ -108,8 +111,8 @@ overlap = 5;
 %                 corrs_ls_NaN_shuf(t,event) = nan;
                 slope_ls(t,event) = nan;
                 integral_ls(t,event) =nan;
-%                 slope_ls_shuf(t,event) = nan;
-%                 integral_ls_shuf(t,event) = nan;
+                slope_ls_shuf(t,event) = nan;
+                integral_ls_shuf(t,event,1:100) = nan;
             end
             
             else
@@ -118,8 +121,8 @@ overlap = 5;
 %                 corrs_ls_NaN_shuf(t,event) = nan;
                 slope_ls(t,event) = nan;
                 integral_ls(t,event) =nan;
-%                 slope_ls_shuf(t,event) = nan;
-%                 integral_ls_shuf(t,event) = nan;
+                slope_ls_shuf(t,event) = nan;
+                integral_ls_shuf(t,event,1:100) = nan;
             
             end
         end
@@ -165,8 +168,8 @@ overlap = 5;
     
     if ~isempty(hpc_spikes) 
     lfp = bz_GetLFP(sessionInfo.ls);
-    ls_power = zscore(fastrms(bz_Filter(double(lfp.data),'filter','butter','passband',[140 180],'order', 3),12));
-    for event = 1:size(ripples.timestamps,1)
+    ls_power = zscore(fastrms(bz_Filter(double(lfp.data),'filter','butter','passband',[120 180],'order', 3),12));
+    for event = 1:length(ripples.peaks)
         start = round((ripples.peaks(event)-.025) * 1250);
         stop = round((ripples.peaks(event)+.025) * 1250);
 
@@ -230,8 +233,8 @@ overlap = 5;
 %                 corrs_hpc_NaN_shuf(t,event) = nan;
                 slope_hpc(t,event) = nan;
                 integral_hpc(t,event) =nan;
-%                 slope_hpc_shuf(t,event) = nan;
-%                 integral_hpc_shuf(t,event) = nan;
+                slope_hpc_shuf(t,event) = nan;
+                integral_hpc_shuf(t,event,1:100) = nan;
             end
             else
 %                 corrs_hpc(t,event) = NaN;
@@ -239,9 +242,24 @@ overlap = 5;
 %                 corrs_hpc_NaN_shuf(t,event) = nan;
                 slope_hpc(t,event) = nan;
                 integral_hpc(t,event) =nan;
-%                 slope_hpc_shuf(t,event) = nan;
-%                 integral_hpc_shuf(t,event) = nan;
+                slope_hpc_shuf(t,event) = nan;
+                integral_hpc_shuf(t,event,1:100) = nan;
             end
+% subplot(2,2,1); histogram(integral_hpc,[0:.001:.02],'Normalization','pdf');title(corr(ls_max(1:event)',max(integral_hpc(:,1:event))','rows','complete'));
+% hold on
+% histogram(integral_hpc_shuf,[0:.001:.02],'Normalization','pdf')
+% hold off
+% subplot(2,2,2)
+% scatter(ls_max(1:event),max(integral_hpc(:,1:event)),'.k'); line([0 12],[.012 .012],'color','r');
+% subplot(2,2,3)
+% plot(max(integral_hpc(:,1:event)),'.k');
+% subplot(2,2,4)
+% d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
+% scatter(ls_max(1:event),max(d(:,1:event)),'.k')
+% title(corr(ls_max(1:event)',max(d(:,1:event))','rows','complete'))
+% pause(.1)
+
+
         end
     end
 %         preSleep_hpc{count_hpc} = corrs_hpc(:,ripples.peaks<intervals(1,2));
@@ -280,39 +298,39 @@ overlap = 5;
     end
     behavType{count_hpc} = behavior.description;
    
-    subplot(3,2,1)
-    histogram(removeNAN(cell2vec(hpc_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','k')
-    hold on
-    histogram(removeNAN(cell2vec(ls_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','m')
-    hold off
-    title('slope')
-    subplot(3,2,2)
-    histogram(removeNAN(cell2vec(hpc_max_int)),'Normalization','pdf','FaceColor','k')
-    hold on
-    histogram(removeNAN(cell2vec(hpc_max_int_shuf)),'Normalization','pdf','FaceColor','r')
-    hold off
-    title('integral')
-    subplot(3,2,3)
-    histogram(removeNAN(cell2vec(hpc_max_int))-removeNAN(cell2vec(hpc_max_int_shuf)),'Normalization','pdf','FaceColor','k')
-%     subplot(3,2,4)
-    hold on
-    histogram(removeNAN(cell2vec(ls_max_int))-removeNAN(cell2vec(ls_max_int_shuf)),'Normalization','pdf','FaceColor','m')
-    hold off
-    subplot(3,2,5)
-    histogram(removeNAN(cell2vec(ls_max_int)),'Normalization','pdf','FaceColor','b')
-    hold on
-    histogram(removeNAN(cell2vec(ls_max_int_shuf)),'Normalization','pdf','FaceColor','r')
-    hold off
-    title('integral')
-    subplot(3,2,6)
-    scatter(max(hpc_rZ{count_hpc-1}),ls_max{count_hpc-1},'.k')
-    hold on
-    pause(.1)
+%     subplot(3,2,1)
+%     histogram(removeNAN(cell2vec(hpc_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','k')
+%     hold on
+%     histogram(removeNAN(cell2vec(ls_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','m')
+%     hold off
+%     title('slope')
+%     subplot(3,2,2)
+%     histogram(removeNAN(cell2vec(hpc_max_int)),'Normalization','pdf','FaceColor','k')
+%     hold on
+%     histogram(removeNAN(cell2vec(hpc_max_int_shuf)),'Normalization','pdf','FaceColor','r')
+%     hold off
+%     title('integral')
+%     subplot(3,2,3)
+%     histogram(removeNAN(cell2vec(hpc_max_int))-removeNAN(cell2vec(hpc_max_int_shuf)),'Normalization','pdf','FaceColor','k')
+% %     subplot(3,2,4)
+%     hold on
+%     histogram(removeNAN(cell2vec(ls_max_int))-removeNAN(cell2vec(ls_max_int_shuf)),'Normalization','pdf','FaceColor','m')
+%     hold off
+%     subplot(3,2,5)
+%     histogram(removeNAN(cell2vec(ls_max_int)),'Normalization','pdf','FaceColor','b')
+%     hold on
+%     histogram(removeNAN(cell2vec(ls_max_int_shuf)),'Normalization','pdf','FaceColor','r')
+%     hold off
+%     title('integral')
+%     subplot(3,2,6)
+%     scatter(max(hpc_rZ{count_hpc-1}),ls_max{count_hpc-1},'.k')
+%     hold on
+%     pause(.1)
     end
     end
     end
     
-    save([sessionInfo.FileName '.bayesianResults.mat'],'-v7.3')
+    save([sessionInfo.FileName '.bayesianResults_popBursts.mat'],'-v7.3')
 % cd ~/datasets/ripples_LS/
 % cd E:\datasets\ripples_LS
 % savefig('/home/david/Dropbox/bayesianDecoder.fig')

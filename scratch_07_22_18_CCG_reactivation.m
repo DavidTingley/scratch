@@ -6,9 +6,9 @@ for int =1:3
     ccg_hpc{int} = [];
     ccg_cross{int} = [];
 end
+ls_rec = []; hpc_rec = [];
 
-
-for ii=61:length(d)
+for ii=1:length(d)
     cd(d(ii).name)
     sessionInfo = bz_getSessionInfo;
     ls_spikes = bz_GetSpikes('region','ls','noprompts',true);
@@ -38,21 +38,21 @@ for ii=61:length(d)
     if ~isempty(ls_spikes)
     if ~isempty(ls_spikes) & ~isempty(SleepState.ints.NREMstate) & exist([ls_spikes.sessionName '.behavior.mat']) & all(diff(intervals')>600)
       
-    for spk = 1:length(ls_spikes.times) 
-       ls_spikesBEHAV.times{spk} = [0;Restrict(ls_spikes.times{spk},behavior.events.trialIntervals)];
-       ls_spikesNREM_pre.times{spk} = [0;Restrict(Restrict(Restrict(ls_spikes.times{spk},[ripples.peaks-.2 ...
-           ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
-       ls_spikesNREM_post.times{spk} = [0;Restrict(Restrict(Restrict(ls_spikes.times{spk},[ripples.peaks-.2 ...
-           ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
-    end
-    
-%      for spk = 1:length(ls_spikes.times)
+%     for spk = 1:length(ls_spikes.times) 
 %        ls_spikesBEHAV.times{spk} = [0;Restrict(ls_spikes.times{spk},behavior.events.trialIntervals)];
-%        ls_spikesNREM_pre.times{spk} = [0;Restrict(Restrict((ls_spikes.times{spk} ...
-%            ),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
-%        ls_spikesNREM_post.times{spk} = [0;Restrict(Restrict((ls_spikes.times{spk} ...
-%            ),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
+%        ls_spikesNREM_pre.times{spk} = [0;Restrict(Restrict(Restrict(ls_spikes.times{spk},[ripples.peaks-.2 ...
+%            ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
+%        ls_spikesNREM_post.times{spk} = [0;Restrict(Restrict(Restrict(ls_spikes.times{spk},[ripples.peaks-.2 ...
+%            ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
 %     end
+    
+     for spk = 1:length(ls_spikes.times)
+       ls_spikesBEHAV.times{spk} = [spk;Restrict(ls_spikes.times{spk},behavior.events.trialIntervals)];
+       ls_spikesNREM_pre.times{spk} = [spk;Restrict(Restrict((ls_spikes.times{spk} ...
+           ),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
+       ls_spikesNREM_post.times{spk} = [spk;Restrict(Restrict((ls_spikes.times{spk} ...
+           ),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
+    end
     end
    
 
@@ -65,10 +65,15 @@ for ii=61:length(d)
         elseif int == 2
             [times groups]= spikes2sorted(ls_spikesBEHAV.times);
         end
-        [ccg t] = CCG(times,groups,'binSize',.001);
-        for c1 = 1:size(ccg,2)
-            for c2 = c1:size(ccg,3)
-                ccg_ls{int} = [ccg_ls{int}, zscore(Smooth(squeeze(ccg(:,c1,c2)),5))];
+        [ccg{int} t] = CCG(times,groups,'binSize',.001);
+    end
+    for int = 1:size(intervals,1)
+        for c1 = 1:size(ccg{int},2)
+            for c2 = c1:size(ccg{int},3)
+                if sum(ccg{1}(:,c1,c2)) > 1 & sum(ccg{2}(:,c1,c2)) > 1 & sum(ccg{3}(:,c1,c2)) > 1
+                ccg_ls{int} = [ccg_ls{int}, zscore(Smooth(squeeze(ccg{int}(:,c1,c2)),5))];
+                ls_rec = [ls_rec ii];
+                end
             end
         end
     end 
@@ -81,21 +86,21 @@ for ii=61:length(d)
         hpcRegion{ii} = 'ca3';
     end
     if ~isempty(hpc_spikes) 
-    for spk = 1:length(hpc_spikes.times)
-       hpc_spikesBEHAV.times{spk} = [0;Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals)];
-       hpc_spikesNREM_pre.times{spk} = [0;Restrict(Restrict(Restrict(hpc_spikes.times{spk},[ripples.peaks-.2 ...
-           ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
-       hpc_spikesNREM_post.times{spk} = [0;Restrict(Restrict(Restrict(hpc_spikes.times{spk},[ripples.peaks-.2 ...
-           ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
-    end
-    % no ripple restriction
 %     for spk = 1:length(hpc_spikes.times)
 %        hpc_spikesBEHAV.times{spk} = [0;Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals)];
-%        hpc_spikesNREM_pre.times{spk} = [0;Restrict(Restrict((hpc_spikes.times{spk} ...
-%            ),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
-%        hpc_spikesNREM_post.times{spk} = [0;Restrict(Restrict((hpc_spikes.times{spk} ...
-%            ),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
+%        hpc_spikesNREM_pre.times{spk} = [0;Restrict(Restrict(Restrict(hpc_spikes.times{spk},[ripples.peaks-.2 ...
+%            ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
+%        hpc_spikesNREM_post.times{spk} = [0;Restrict(Restrict(Restrict(hpc_spikes.times{spk},[ripples.peaks-.2 ...
+%            ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
 %     end
+    % no ripple restriction
+    for spk = 1:length(hpc_spikes.times)
+       hpc_spikesBEHAV.times{spk} = [spk;Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals)];
+       hpc_spikesNREM_pre.times{spk} = [spk;Restrict(Restrict((hpc_spikes.times{spk} ...
+           ),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
+       hpc_spikesNREM_post.times{spk} = [spk;Restrict(Restrict((hpc_spikes.times{spk} ...
+           ),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
+    end
 
     for int = 1:size(intervals,1)
         if int == 1 
@@ -105,10 +110,15 @@ for ii=61:length(d)
         elseif int == 2
             [times groups]= spikes2sorted(hpc_spikesBEHAV.times);
         end
-        [ccg t] = CCG(times,groups,'binSize',.001);
-        for c1 = 1:size(ccg,2)
-            for c2 = c1:size(ccg,3)
-                ccg_hpc{int} = [ccg_hpc{int}, zscore(Smooth(squeeze(ccg(:,c1,c2)),5))];
+        [ccg{int} t] = CCG(times,groups,'binSize',.001);
+    end
+    for int = 1:size(intervals,1)
+        for c1 = 1:size(ccg{int},2)
+            for c2 = c1:size(ccg{int},3)
+                if sum(ccg{1}(:,c1,c2)) > 1 & sum(ccg{2}(:,c1,c2)) > 1 & sum(ccg{3}(:,c1,c2)) > 1
+                ccg_hpc{int} = [ccg_hpc{int}, zscore(Smooth(squeeze(ccg{int}(:,c1,c2)),5))];
+                hpc_rec = [hpc_rec ii];
+                end
             end
         end
     end
@@ -118,21 +128,21 @@ for ii=61:length(d)
     %% cross region
     spikes = bz_GetSpikes('noprompts',true);
     if ~isempty(spikes) 
-    for spk = 1:length(spikes.times)
-       spikesBEHAV.times{spk} = [0;Restrict(spikes.times{spk},behavior.events.trialIntervals)];
-       spikesNREM_pre.times{spk} = [0;Restrict(Restrict(Restrict(spikes.times{spk},[ripples.peaks-.2 ...
-           ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
-       spikesNREM_post.times{spk} = [0;Restrict(Restrict(Restrict(spikes.times{spk},[ripples.peaks-.2 ...
-           ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
-    end
-    % no ripple restriction
 %     for spk = 1:length(spikes.times)
 %        spikesBEHAV.times{spk} = [0;Restrict(spikes.times{spk},behavior.events.trialIntervals)];
-%        spikesNREM_pre.times{spk} = [0;Restrict(Restrict((spikes.times{spk} ...
-%            ),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
-%        spikesNREM_post.times{spk} = [0;Restrict(Restrict((spikes.times{spk} ...
-%            ),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
+%        spikesNREM_pre.times{spk} = [0;Restrict(Restrict(Restrict(spikes.times{spk},[ripples.peaks-.2 ...
+%            ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
+%        spikesNREM_post.times{spk} = [0;Restrict(Restrict(Restrict(spikes.times{spk},[ripples.peaks-.2 ...
+%            ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
 %     end
+    % no ripple restriction
+    for spk = 1:length(spikes.times)
+       spikesBEHAV.times{spk} = [spk;Restrict(spikes.times{spk},behavior.events.trialIntervals)];
+       spikesNREM_pre.times{spk} = [spk;Restrict(Restrict((spikes.times{spk} ...
+           ),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
+       spikesNREM_post.times{spk} = [spk;Restrict(Restrict((spikes.times{spk} ...
+           ),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
+    end
 
     for int = 1:size(intervals,1)
         if int == 1 
@@ -142,12 +152,14 @@ for ii=61:length(d)
         elseif int == 2
             [times groups]= spikes2sorted(spikesBEHAV.times);
         end
-        [ccg t] = CCG(times,groups,'binSize',.001);
-        for c1 = 1:size(ccg,2)
-            for c2 = c1:size(ccg,3)
-                if strcmp(spikes.region{c1},'ls') 
+        [ccg{int} t] = CCG(times,groups,'binSize',.001);
+    end
+    for int = 1:size(intervals,1)
+        for c1 = 1:size(ccg{int},2)
+            for c2 = c1:size(ccg{int},3)
+                if strcmp(spikes.region{c1},'ls') & sum(ccg{1}(:,c1,c2)) > 1 & sum(ccg{2}(:,c1,c2)) > 1 & sum(ccg{3}(:,c1,c2)) > 1
                     if strcmp(spikes.region{c2},'hpc') | strcmp(spikes.region{c2},'ca3')
-                ccg_cross{int} = [ccg_cross{int}, zscore(Smooth(squeeze(ccg(:,c1,c2)),5))];
+                ccg_cross{int} = [ccg_cross{int}, zscore(Smooth(squeeze(ccg{int}(:,c1,c2)),5))];
                     end
             end
         end
@@ -164,7 +176,7 @@ for ii=61:length(d)
     end
     
     
-for warp = 1:10:999
+for warp = 1:10:950
     for c=1:size(ccg_hpc{1},2)
     cc(:,c) = makeLength(ccg_hpc{1}(warp:2001-warp,c),2001);
     ccc(:,c) = makeLength(ccg_hpc{3}(warp:2001-warp,c),2001);
@@ -173,18 +185,24 @@ for warp = 1:10:999
     post_hpc(warp) = corr2(ccg_hpc{2},ccc);
     pre_hpc_shuf(warp) = corr2(ccg_hpc{2},bz_shuffleCircular(cc));
     post_hpc_shuf(warp) = corr2(ccg_hpc{2},bz_shuffleCircular(ccc));
-    subplot(2,2,1)
+    subplot(3,2,1)
     plot(pre_hpc,'.k')
     hold on
     plot(pre_hpc_shuf,'.r')
-    hold off
-    subplot(2,2,2)
-    plot(post_hpc,'.k')
+%     hold off
+%     subplot(3,2,1)
+    plot(post_hpc,'+k')
     hold on
-    plot(post_hpc_shuf,'.r')
+    plot(post_hpc_shuf,'+r')
     hold off
     title('HPC CCG reactivation')
     clear cc ccc
+    subplot(3,2,3)
+    [a b o] = sort_cells(ccg_hpc{2}',ccg_hpc{3}(warp:2001-warp,:)',1);
+    imagesc(b)
+    subplot(3,2,5)
+    imagesc(a)
+    title('ccg HPC behav')
     
     for c=1:size(ccg_ls{1},2)
     cc(:,c) = makeLength(ccg_ls{1}(warp:2001-warp,c),2001);
@@ -194,17 +212,25 @@ for warp = 1:10:999
     post_ls(warp) = corr2(ccg_ls{2},ccc);
     pre_ls_shuf(warp) = corr2(ccg_ls{2},bz_shuffleCircular(cc));
     post_ls_shuf(warp) = corr2(ccg_ls{2},bz_shuffleCircular(ccc));
-    subplot(2,2,3)
+    subplot(3,2,2)
     plot(pre_ls,'.m')
     hold on
     plot(pre_ls_shuf,'.r')
-    hold off
-    subplot(2,2,4)
-    plot(post_ls,'.m')
+%     hold off
+%     subplot(3,2,2)
+    plot(post_ls,'+m')
     hold on
-    plot(post_ls_shuf,'.r')
+    plot(post_ls_shuf,'+r')
     hold off
     title('LS CCG reactivation')
+    
+    subplot(3,2,4)
+    [a b o] = sort_cells(ccg_ls{2}',ccg_ls{3}(warp:2001-warp,:)',1);
+    imagesc(b)
+    subplot(3,2,6)
+    imagesc(a)
+    title('ccg LS behav')
+    
     clear cc ccc
     
     pause(.01)
