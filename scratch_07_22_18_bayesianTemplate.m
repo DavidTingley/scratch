@@ -81,7 +81,7 @@ overlap = 5;
             if ts+20 < size(spkmatNREM_ls.data,1) & ts > 20
             data = spkmatNREM_ls.data(ts-20:ts+20,:);    
 
-            for iter = 1:100
+            for iter = 1:50
                 template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_ls,:,:),2)));
                 for i = 1:size(template,1)
                    template_shuf(i,:) = Smooth(template_shuf(i,:),9);
@@ -112,7 +112,7 @@ overlap = 5;
                 slope_ls(t,event) = nan;
                 integral_ls(t,event) =nan;
                 slope_ls_shuf(t,event) = nan;
-                integral_ls_shuf(t,event,1:100) = nan;
+                integral_ls_shuf(t,event,1:50) = nan;
             end
             
             else
@@ -122,7 +122,7 @@ overlap = 5;
                 slope_ls(t,event) = nan;
                 integral_ls(t,event) =nan;
                 slope_ls_shuf(t,event) = nan;
-                integral_ls_shuf(t,event,1:100) = nan;
+                integral_ls_shuf(t,event,1:50) = nan;
             
             end
         end
@@ -203,7 +203,7 @@ overlap = 5;
             ts = round(ripples.peaks(event)*(1/spkmatNREM_hpc.dt));
             if ts+20 < size(spkmatNREM_hpc.data,1) & ts > 20
             data = spkmatNREM_hpc.data(ts-20:ts+20,:);  
-            for iter = 1:100
+            for iter = 1:50
                 template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_hpc,:,:),2)));
                 for i = 1:size(template,1)
                    template_shuf(i,:) = Smooth(template_shuf(i,:),9);
@@ -234,7 +234,7 @@ overlap = 5;
                 slope_hpc(t,event) = nan;
                 integral_hpc(t,event) =nan;
                 slope_hpc_shuf(t,event) = nan;
-                integral_hpc_shuf(t,event,1:100) = nan;
+                integral_hpc_shuf(t,event,1:50) = nan;
             end
             else
 %                 corrs_hpc(t,event) = NaN;
@@ -243,7 +243,7 @@ overlap = 5;
                 slope_hpc(t,event) = nan;
                 integral_hpc(t,event) =nan;
                 slope_hpc_shuf(t,event) = nan;
-                integral_hpc_shuf(t,event,1:100) = nan;
+                integral_hpc_shuf(t,event,1:50) = nan;
             end
 % subplot(2,2,1); histogram(integral_hpc,[0:.001:.02],'Normalization','pdf');title(corr(ls_max(1:event)',max(integral_hpc(:,1:event))','rows','complete'));
 % hold on

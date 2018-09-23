@@ -7,7 +7,7 @@ for int =1:3
     ccg_cross{int} = [];
 end
 ls_rec = []; hpc_rec = [];
-binSizes = [5 150 5];
+binSizes = [15 15 15];
 
 for ii=1:length(d)
     cd(d(ii).name)
