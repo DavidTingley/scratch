@@ -7,7 +7,7 @@ for int =1:3
     ccg_cross{int} = [];
 end
 ls_rec = []; hpc_rec = [];
-binSizes = [15 15 15];
+binSizes = [10 10 10];
 
 for ii=1:length(d)
     cd(d(ii).name)
@@ -15,7 +15,8 @@ for ii=1:length(d)
     ls_spikes = bz_GetSpikes('region','ls','noprompts',true);
     SleepState = bz_LoadStates(pwd,'SleepState');
     ripples = bz_LoadEvents(pwd,'CA1Ripples');
-    ls_spikesNREM = ls_spikes;
+    ls_spikesNREM_pre = ls_spikes;
+    ls_spikesNREM_post = ls_spikes;
     ls_spikesBEHAV = ls_spikes;
     
     

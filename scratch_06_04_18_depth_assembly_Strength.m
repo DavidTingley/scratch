@@ -9,9 +9,9 @@ load('assembliesCrossRegion_split_w_theta.mat','pairs','dev*')
 ripples = bz_LoadEvents(pwd,'CA1Ripples');
 spikes = bz_GetSpikes('noprompt',true);
 if ~isempty(ripples)
-%     for spk = 1:length(spikes.times)
-%        spikes.times{spk} = Restrict(spikes.times{spk},[ripples.peaks-.25 ripples.peaks+.25]); 
-%     end
+    for spk = 1:length(spikes.times)
+       spikes.times{spk} = Restrict(spikes.times{spk},[ripples.peaks-.25 ripples.peaks+.25]); 
+    end
     [times groups] = spikes2sorted(spikes.times);
     [ccg t] = CCG(times,groups,'binSize',.001);
     ls_idx = find(strcmp(spikes.region,'ls'));
@@ -63,6 +63,11 @@ if ~isempty(ripples)
                cc(ii+101,1:2001) = nan;
            end
         end
+        for ii=1:161
+        plot(cc(ii,:)*5+ii/2,'k')
+        hold on
+        end
+        axis([750 1250 0 81])
         hold off
         subplot(2,2,4)
         imagesc(-100:60,-1000:1000,cc')
