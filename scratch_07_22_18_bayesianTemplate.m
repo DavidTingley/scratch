@@ -172,7 +172,7 @@ overlap = 1;
     ls_power = zscore(fastrms(bz_Filter(double(lfp.data),'filter','butter','passband',[100 150],'order', 4),12));
     
     spkmat_ls = bz_SpktToSpkmat(ls_spikes,'binSize',.001,'overlap',1);
-    for i=1:50
+    for i=1:size(spkmat_ls.data,2)
         s(i,:) = zscore(Smooth(spkmat_ls.data(:,i),10));
     end
     pr = squeeze(mean(s));
