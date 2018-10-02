@@ -223,7 +223,7 @@ save([sessionInfo.FileName '.content_GLM.mat'],'-v7.3')
     clear State meanPeakRate condition rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content* PF cellLoc*
         end
     end
-   cd /home/david/datasets/ripples_LS 
+%    cd /home/david/datasets/ripples_LS 
 %    save('/home/david/datasets/ripples_LS/hpc_ripple_content_50ms_popBursts.mat','-v7.3')
 % end
 
