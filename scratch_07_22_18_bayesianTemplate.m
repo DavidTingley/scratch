@@ -154,7 +154,7 @@ overlap = 1;
 %         
 %         
 % 
-% %         subplot(3,2,3)
+% %         subplot(4,2,3)
 % %         histogram(removeNAN(cell2vec(preSleep_ls_NaN)),'Normalization','pdf','FaceColor','b')
 % %         hold on
 % %         histogram(removeNAN(cell2vec(postSleep_ls_NaN)),'Normalization','pdf','FaceColor','r')
@@ -242,7 +242,7 @@ overlap = 1;
 %             prMax_shuf(sum(spkmatNREM_hpc.data(ts-20:ts+20,:)')==0)=nan;
 %             Pr(sum(spkmatNREM_hpc.data(ts-20:ts+20,:)')==0,:) = nan;
 %             Pr_shuf(sum(spkmatNREM_hpc.data(ts-20:ts+20,:)')==0,:) = nan;
-            if sum(sum(spkmatNREM_hpc.data(ts-back:ts+forward,:)))> 10 * overlap & sum(~isnan(sum(Pr')))>10
+            if sum(sum(spkmatNREM_hpc.data(ts-back:ts+forward,:)))> 5 * overlap & sum(~isnan(sum(Pr')))>5
 %                 corrs_hpc_NaN(t,event) = corr([1:41]',prMax,'rows','complete');
                 
                   [slope_hpc(t,event) integral_hpc(t,event) ] = Pr2Radon(Pr);
@@ -264,32 +264,48 @@ overlap = 1;
                 slope_hpc_shuf(t,event) = nan;
                 integral_hpc_shuf(t,event,1:10) = nan;
             end
-% subplot(3,2,1); 
-% histogram(integral_hpc,[0:.001:.02],'Normalization','pdf');
-% title(corr(PR{count_hpc}(1:event)',max(integral_hpc(:,1:event))','rows','complete'));
-% hold on
-% histogram(integral_hpc_shuf,[0:.001:.02],'Normalization','pdf')
-% hold off
-% subplot(3,2,2)
-% scatter(PR{count_hpc}(1:event),max((integral_hpc(:,1:event))),'.k'); 
-% line([0 3],[.012 .012],'color','r');
-% subplot(3,2,3)
-% plot(max((integral_hpc(:,1:event))),'.k');
-% subplot(3,2,4)
-% d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
-% scatter(PR{count_hpc}(1:event),max((d(:,1:event))),'.k')
-% title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
-% subplot(3,2,5)
-% plot(PR{count_hpc}(1:event),'.k')
-% subplot(3,2,6)
-% nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
-% wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
-% errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
-% hold on
-% errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
-% hold off
-% axis([0 3 0.004 .015])
-% pause(.01)
+            
+subplot(4,2,1)
+histogram(integral_hpc,[0:.001:.03],'Normalization','pdf');
+title(corr(PR{count_hpc}(1:event)',max(integral_hpc(:,1:event))','rows','complete'));
+hold on
+histogram(integral_hpc_shuf,[0:.001:.03],'Normalization','pdf')
+hold off
+
+subplot(4,2,2)
+line([0 3],[.012 .012],'color','r');
+
+subplot(4,2,3)
+plot(max((integral_hpc(:,1:event))),'.k');
+
+subplot(4,2,4)
+d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
+scatter(PR{count_hpc}(1:event),max((d(:,1:event))),'.k')
+title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
+
+subplot(4,2,5)
+plot(PR{count_hpc}(1:event),'.k')
+
+subplot(4,2,6)
+nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
+wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
+errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
+hold on
+errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
+hold off        
+axis([0 3 0.004 .015])
+
+subplot(4,2,7)
+scatter(max((d(:,1:event))),popBursts.amplitudes(1:event),'.k')
+xlabel('hpc replay')
+ylabel('hpc rate')
+
+subplot(4,2,8)
+scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
+xlabel('ls rate')
+ylabel('hpc rate')
+pause(.01)
+
         end
     end
 %         preSleep_hpc{count_hpc} = corrs_hpc(:,ripples.peaks<intervals(1,2));
@@ -317,50 +333,52 @@ overlap = 1;
         
         
 
-%         subplot(3,2,4)
+%         subplot(4,2,4)
 %         histogram(removeNAN(cell2vec(preSleep_hpc_NaN)),'Normalization','pdf','FaceColor','b')
 %         hold on
 %         histogram(removeNAN(cell2vec(postSleep_hpc_NaN)),'Normalization','pdf','FaceColor','r')
 %         histogram(removeNAN(cell2vec(postSleep_hpc_NaN_shuf)),'Normalization','pdf','FaceColor','k')
 %         hold off
 %         pause(.1)
-        clear corrs_hpc* slope_hpc* integral_hpc*
-    end
-    behavType{count_hpc} = behavior.description;
+%         clear corrs_hpc* slope_hpc* integral_hpc*
+        
+     behavType{count_hpc} = behavior.description;
    
-%     subplot(3,2,1)
+%     subplot(4,2,1)
 %     histogram(removeNAN(cell2vec(hpc_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','k')
 %     hold on
 %     histogram(removeNAN(cell2vec(ls_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','m')
 %     hold off
 %     title('slope')
-%     subplot(3,2,2)
+%     subplot(4,2,2)
 %     histogram(removeNAN(cell2vec(hpc_max_int)),'Normalization','pdf','FaceColor','k')
 %     hold on
 %     histogram(removeNAN(cell2vec(hpc_max_int_shuf)),'Normalization','pdf','FaceColor','r')
 %     hold off
 %     title('integral')
-%     subplot(3,2,3)
+%     subplot(4,2,3)
 %     histogram(removeNAN(cell2vec(hpc_max_int))-removeNAN(cell2vec(hpc_max_int_shuf)),'Normalization','pdf','FaceColor','k')
-% %     subplot(3,2,4)
+% %     subplot(4,2,4)
 %     hold on
 %     histogram(removeNAN(cell2vec(ls_max_int))-removeNAN(cell2vec(ls_max_int_shuf)),'Normalization','pdf','FaceColor','m')
 %     hold off
-%     subplot(3,2,5)
+%     subplot(4,2,5)
 %     histogram(removeNAN(cell2vec(ls_max_int)),'Normalization','pdf','FaceColor','b')
 %     hold on
 %     histogram(removeNAN(cell2vec(ls_max_int_shuf)),'Normalization','pdf','FaceColor','r')
 %     hold off
 %     title('integral')
-%     subplot(3,2,6)
+%     subplot(4,2,6)
 %     scatter(max(hpc_rZ{count_hpc-1}),ls_max{count_hpc-1},'.k')
 %     hold on
 %     pause(.1)
-    end
-    end
-    end
+
     
     save([sessionInfo.FileName '.bayesianResults_popBursts.mat'],'-v7.3')
+    end
+    end
+    end
+    end
 % cd ~/datasets/ripples_LS/
 % cd E:\datasets\ripples_LS
 % savefig('/home/david/Dropbox/bayesianDecoder.fig')

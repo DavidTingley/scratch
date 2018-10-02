@@ -100,7 +100,8 @@ for rec = length(d):-1:1
       
     
 
-   cd E:\datasets\ripples_LS
+%    cd E:\datasets\ripples_LS
+cd /home/david/datasets/ripples_LS
     
 end
 

@@ -179,35 +179,26 @@ for ii=1:length(d)
     
     count = 1;
     warp = [2000 3000 3500 3600 3700 3750 3800 3900 3950];
-    pre_hpc = nan(length(warp),1);
-    post_hpc = nan(length(warp),1);
-    pre_ls = nan(length(warp),1);
-    post_ls = nan(length(warp),1);
-    pre_hpc_shuf = nan(length(warp),1);
-    post_hpc_shuf = nan(length(warp),1);
-    pre_ls_shuf = nan(length(warp),1);
-    post_ls_shuf = nan(length(warp),1);
     
-for w = 1:length(warp)
+for w =
     for c=1:size(ccg_hpc{1},2)
-        cc(:,c) = zscore(makeLength(Smooth(ccg_hpc{1}(warp(w):8001-warp(w),c),15),8001));
-        ccc(:,c) = zscore(makeLength(Smooth(ccg_hpc{3}(warp(w):8001-warp(w),c),15),8001));
-        cc_beh(:,c) = zscore(Smooth(ccg_hpc{2}(:,c),150));
+        cc(:,c) = zscore(makeLength(Smooth(ccg_hpc{1}(warp:8001-warp,c),15),8001));
+        ccc(:,c) = zscore(makeLength(Smooth(ccg_hpc{3}(warp:8001-warp,c),15),8001));
+        cc_beh(:,c) = zscore(Smooth(ccg_hpc{2}(:,c),15));
     end
     pre_hpc(count) = corr2(cc_beh,cc);
     post_hpc(count) = corr2(cc_beh,ccc);
     pre_hpc_shuf(count) = corr2(bz_shuffleCircular(cc_beh),cc);
     post_hpc_shuf(count) = corr2(bz_shuffleCircular(cc_beh),ccc);
     subplot(3,2,1)
-    plot(4000./(4000-warp),pre_hpc,'.k')
+    plot(warp,pre_hpc,'.k')
     hold on
-    plot(4000./(4000-warp),pre_hpc_shuf,'.r')
+    plot(warp,pre_hpc_shuf,'.r')
 %     hold off
 %     subplot(3,2,1)
-    plot(4000./(4000-warp),post_hpc,'+k')
+    plot(warp,post_hpc,'+k')
     hold on
-    plot(4000./(4000-warp),post_hpc_shuf,'+r')
-    xlabel('compression factor')
+    plot(warp,post_hpc_shuf,'+r')
     set(gca,'xscale','log')
     hold off
     title('HPC CCG reactivation')
@@ -220,25 +211,24 @@ for w = 1:length(warp)
     clear cc ccc cc_beh
     
     for c=1:size(ccg_ls{1},2)
-    cc(:,c) = zscore(makeLength(Smooth(ccg_ls{1}(warp(w):8001-warp(w),c),15),8001));
-    ccc(:,c) = zscore(makeLength(Smooth(ccg_ls{3}(warp(w):8001-warp(w),c),15),8001));
-    cc_beh(:,c) = zscore(Smooth(ccg_ls{2}(:,c),150));
+    cc(:,c) = zscore(makeLength(Smooth(ccg_ls{1}(warp:8001-warp,c),15),8001));
+    ccc(:,c) = zscore(makeLength(Smooth(ccg_ls{3}(warp:8001-warp,c),15),8001));
+    cc_beh(:,c) = zscore(Smooth(ccg_ls{2}(:,c),15));
     end
     pre_ls(count) = corr2(cc_beh,cc);
     post_ls(count) = corr2(cc_beh,ccc);
     pre_ls_shuf(count) = corr2(bz_shuffleCircular(cc_beh),cc);
     post_ls_shuf(count) = corr2(bz_shuffleCircular(cc_beh),ccc);
     subplot(3,2,2)
-    plot(4000./(4000-warp),pre_ls,'.m')
+    plot(warp,pre_ls,'.m')
     hold on
-    plot(4000./(4000-warp),pre_ls_shuf,'.r')
+    plot(warp,pre_ls_shuf,'.r')
 %     hold off
 %     subplot(3,2,2)
-    plot(4000./(4000-warp),post_ls,'+m')
+    plot(warp,post_ls,'+m')
     hold on
-    plot(4000./(4000-warp),post_ls_shuf,'+r')
+    plot(warp,post_ls_shuf,'+r')
     set(gca,'xscale','log')
-    xlabel('compression factor')
     hold off
     title('LS CCG reactivation')
     

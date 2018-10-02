@@ -4,13 +4,19 @@ count = 1;
 clf
 for i=1:length(d)
 cd(d(i).name)
-if exist('assembliesCrossRegion_split_w_theta.mat')
-load('assembliesCrossRegion_split_w_theta.mat','pairs','dev*')
+if exist(([d(i).name '.behavior.mat']))%exist('assembliesCrossRegion_split_w_theta.mat')
+% load('assembliesCrossRegion_split_w_theta.mat','pairs','dev*')
 ripples = bz_LoadEvents(pwd,'CA1Ripples');
+    load([d(i).name '.behavior.mat'])
 spikes = bz_GetSpikes('noprompt',true);
-if ~isempty(ripples)
+if ~isempty(ripples) & ~isempty(spikes)
+    
     for spk = 1:length(spikes.times)
-       spikes.times{spk} = Restrict(spikes.times{spk},[ripples.peaks-.25 ripples.peaks+.25]); 
+       spikes.times{spk} = Restrict(spikes.times{spk},[ripples.peaks-.25 ripples.peaks+.25]);
+%        spikes.times{spk} = Restrict(spikes.times{spk},[behavior.events.trialIntervals]); 
+%        if isempty(spikes.times{spk})
+%           spikes.times{spk} = 0; 
+%        end
     end
     [times groups] = spikes2sorted(spikes.times);
     [ccg t] = CCG(times,groups,'binSize',.001);
@@ -28,7 +34,7 @@ if ~isempty(ripples)
 %             end
 %         end
         for l = 1:length(ls_idx)
-            cellCCG(count,:) = zscore(fastrms(squeeze(mean(ccg(:,cell,ls_idx(l)),3)),7));
+            cellCCG(count,:) = zscore((squeeze(mean(ccg(:,cell,ls_idx(l)),3))));
 %         if ~isempty(f)
 %             cellContrib(count) = nanmean(nanmean(imp(:,f)));
             cellDepth(count) = spikes.chanDepthRelative_CA1PYR_wav(cell);
@@ -73,7 +79,9 @@ if ~isempty(ripples)
         imagesc(-100:60,-1000:1000,cc')
         axis([-100 60 -250 250])
         subplot(2,2,1)
-        plot(-100:60,nanmean(cc(:,1002:1015),2)-nanmean(cc(:,987:1000),2))
+        cla
+        boundedline(-100:60,nanmean(cc(:,1002:1015),2)-nanmean(cc(:,987:1000),2),nanstd(cc(:,1002:1015)-cc(:,987:1000),[],2))
+        hold off
         pause(.1)
     end
 %     clear cellContrib
