@@ -2,7 +2,7 @@ d = dir('*201*');
 count=0;
 % [b a] = butter(4,[110/625 200/625],'bandpass');
 [b a] = butter(4,[120/625 180/625],'bandpass');
-    
+    rec=1
 %     
 % for rec = 1:length(d)
 %     cd(d(rec).name)
