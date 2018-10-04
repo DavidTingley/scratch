@@ -128,7 +128,7 @@ count=0;
             cols = intersect(rows,cols);
             
             % olypher info variant
-            meanPeakRate(spk) = nanmax(olypherInfo.results{spk}.rateInfoScores(cols)); % used to be nanmean
+            meanPeakRate(spk) = nanmax(olypherInfo.results{spk}.ratePeakInfo(cols)); % used to be nanmean
             
             for ind = 1:length(ca1.ripples.peaks)
                 start = ((ca1.ripples.peaks(ind)-.025)); % used to be 20 ms
