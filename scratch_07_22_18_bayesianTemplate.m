@@ -265,46 +265,46 @@ overlap = 1;
                 integral_hpc_shuf(t,event,1:10) = nan;
             end
             
-subplot(4,2,1)
-histogram(integral_hpc,[0:.001:.03],'Normalization','pdf');
-title(corr(PR{count_hpc}(1:event)',max(integral_hpc(:,1:event))','rows','complete'));
-hold on
-histogram(integral_hpc_shuf,[0:.001:.03],'Normalization','pdf')
-hold off
-
-subplot(4,2,2)
-line([0 3],[.012 .012],'color','r');
-
-subplot(4,2,3)
-plot(max((integral_hpc(:,1:event))),'.k');
-
-subplot(4,2,4)
-d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
-scatter(PR{count_hpc}(1:event),max((d(:,1:event))),'.k')
-title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
-
-subplot(4,2,5)
-plot(PR{count_hpc}(1:event),'.k')
-
-subplot(4,2,6)
-nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
-wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
-errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
-hold on
-errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
-hold off        
-axis([0 3 0.004 .015])
-
-subplot(4,2,7)
-scatter(max((d(:,1:event))),popBursts.amplitudes(1:event),'.k')
-xlabel('hpc replay')
-ylabel('hpc rate')
-
-subplot(4,2,8)
-scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
-xlabel('ls rate')
-ylabel('hpc rate')
-pause(.01)
+% subplot(4,2,1)
+% histogram(integral_hpc,[0:.001:.03],'Normalization','pdf');
+% title(corr(PR{count_hpc}(1:event)',max(integral_hpc(:,1:event))','rows','complete'));
+% hold on
+% histogram(integral_hpc_shuf,[0:.001:.03],'Normalization','pdf')
+% hold off
+% 
+% subplot(4,2,2)
+% line([0 3],[.012 .012],'color','r');
+% 
+% subplot(4,2,3)
+% plot(max((integral_hpc(:,1:event))),'.k');
+% 
+% subplot(4,2,4)
+% d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
+% scatter(PR{count_hpc}(1:event),max((d(:,1:event))),'.k')
+% title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
+% 
+% subplot(4,2,5)
+% plot(PR{count_hpc}(1:event),'.k')
+% 
+% subplot(4,2,6)
+% nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
+% wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
+% errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
+% hold on
+% errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
+% hold off        
+% axis([0 3 0.004 .015])
+% 
+% subplot(4,2,7)
+% scatter(max((d(:,1:event))),popBursts.amplitudes(1:event),'.k')
+% xlabel('hpc replay')
+% ylabel('hpc rate')
+% 
+% subplot(4,2,8)
+% scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
+% xlabel('ls rate')
+% ylabel('hpc rate')
+% pause(.01)
 
         end
     end
