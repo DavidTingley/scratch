@@ -125,7 +125,7 @@ count=0;
         
         
         % cell specific stuff
-        for spk = 1:length(hpc_spikes.times)
+        for spk = 1:length(spikes.times)
 %             if strcmp(hpc_spikes.region{spk},'hpc') | strcmp(hpc_spikes.region{spk},'ca3') | strcmp(hpc_spikes.region{spk},'ca1') 
             rows = find(olypherInfo.results{spk}.discBins==2); 
             cols = find(olypherInfo.results{spk}.smoothing==20);
@@ -140,12 +140,12 @@ count=0;
                     start = 1;
                 end
                 stop = ((ca1.ripples.peaks(ind)+.025));
-                ripSpks = Restrict(hpc_spikes.times{spk},[start stop]);
+                ripSpks = Restrict(spikes.times{spk},[start stop]);
                 spatialContent(spk,ind) = meanPeakRate(spk).*length(ripSpks);
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk).*length(ripSpks);
                 PF(spk,ind) = (hasField(spk)>0).* length(ripSpks);
                 nSpikes(spk,ind) = length(ripSpks);
-                cellLoc_wav(spk,ind) = hpc_spikes.chanDepthRelative_CA1PYR_wav(spk);
+                cellLoc_wav(spk,ind) = spikes.chanDepthRelative_CA1PYR_wav(spk);
                 
             end   
            
