@@ -192,7 +192,7 @@ for w = 1:length(warp)
     for c=1:size(ccg_hpc{1},2)
         cc(:,c) = zscore(makeLength(Smooth(ccg_hpc{1}(warp(w):8001-warp(w),c),15),8001));
         ccc(:,c) = zscore(makeLength(Smooth(ccg_hpc{3}(warp(w):8001-warp(w),c),15),8001));
-        cc_beh(:,c) = zscore(Smooth(ccg_hpc{2}(:,c),150));
+        cc_beh(:,c) = zscore(Smooth(ccg_hpc{2}(:,c),15));
     end
     pre_hpc(count) = corr2(cc_beh,cc);
     post_hpc(count) = corr2(cc_beh,ccc);

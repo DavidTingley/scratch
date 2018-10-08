@@ -126,7 +126,7 @@ count=0;
         
         % cell specific stuff
         for spk = 1:length(hpc_spikes.times)
-            if strcmp(hpc_spikes.region{spk},'hpc') | strcmp(hpc_spikes.region{spk},'ca3') | strcmp(hpc_spikes.region{spk},'ca1') 
+%             if strcmp(hpc_spikes.region{spk},'hpc') | strcmp(hpc_spikes.region{spk},'ca3') | strcmp(hpc_spikes.region{spk},'ca1') 
             rows = find(olypherInfo.results{spk}.discBins==2); 
             cols = find(olypherInfo.results{spk}.smoothing==20);
             cols = intersect(rows,cols);
@@ -149,9 +149,9 @@ count=0;
                 
             end   
            
-            else 
-                meanPeakRate = [];
-            end
+%             else 
+%                 meanPeakRate = [];
+%             end
         end
     content.location{rec} = location;
     content.condition{rec} = condition; 
@@ -170,6 +170,7 @@ count=0;
     content.hpc_power_z{rec} = zscore(hpc_rec(:,2));
     content.ls_power{rec} = hpc_rec(:,1);
     content.animal(rec) = sum(double(sessionInfo.animal));
+    content.region{rec} = spikes.region;
     
     
 %% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

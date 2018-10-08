@@ -10,7 +10,8 @@ predictors = [nanmean(content(rec).nSpikes{1})' ...
               content(rec).condition{1}...
               content(rec).location{1}...
               content(rec).SleepState{1}...
-              double(content(rec).hpc_popBurst{1})];
+              max(bay{rec})'];%...
+%               bay{rec}'];
           
 actual = content(rec).ls_popBurst{1};
 % actual = content(rec).ls_power{1}';
@@ -45,7 +46,7 @@ devs(rec,:) = dev; clear dev dev_shuf
 imagesc(devZ)
 subplot(2,2,3)
 cla
-boundedline(1:size(devZ,2),nanmedian(devZ),sem(devZ))
+boundedline(1:size(devZ,2),nanmean(devZ),sem(devZ))
 pause(.001)
     end
 end
