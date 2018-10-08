@@ -40,7 +40,7 @@ count=0;
         
         hpc_spikes= bz_GetSpikes('noprompts',true,'region','hpc');
         if isempty(hpc_spikes)
-            hpc_spikes = bz_GetSpikes('noprompts',tue,'region','ca3');
+            hpc_spikes = bz_GetSpikes('noprompts',true,'region','ca3');
         end
         % 
         hasField = zeros(length(fields{1}),1);
