@@ -92,6 +92,7 @@ count=0;
         end
         
         %% get that content, initialize
+        spatialContent = zeros(1,length(ca1.ripples.peaks));
         spatialContent = zeros(length(spikes.times),length(ca1.ripples.peaks));
         rewardContent = zeros(length(spikes.times),length(ca1.ripples.peaks));
         nSpikes = zeros(length(spikes.times),length(ca1.ripples.peaks));
@@ -141,9 +142,10 @@ count=0;
                 end
                 stop = ((ca1.ripples.peaks(ind)+.025));
                 ripSpks = Restrict(spikes.times{spk},[start stop]);
-                spatialContent(spk,ind) = meanPeakRate(spk).*length(ripSpks);
-                rewardContent(spk,ind) = rewardModulation.rewardGain(spk).*length(ripSpks);
-                PF(spk,ind) = (hasField(spk)>0).* length(ripSpks);
+                duration(ind) = stop-start;
+                spatialContent(spk,ind) = meanPeakRate(spk);
+                rewardContent(spk,ind) = rewardModulation.rewardGain(spk);
+                PF(spk,ind) = (hasField(spk)>0);
                 nSpikes(spk,ind) = length(ripSpks);
                 cellLoc_wav(spk,ind) = spikes.chanDepthRelative_CA1PYR_wav(spk);
                 
@@ -153,6 +155,8 @@ count=0;
 %                 meanPeakRate = [];
 %             end
         end
+        
+    content.duration{rec} = duration;
     content.location{rec} = location;
     content.condition{rec} = condition; 
     content.SleepState{rec} = State;

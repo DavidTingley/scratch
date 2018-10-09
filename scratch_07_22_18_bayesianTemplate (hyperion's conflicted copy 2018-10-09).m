@@ -212,12 +212,12 @@ overlap = 1;
             pf(spk) = ~isempty(fields{t}{spk});
          end
          pf = find(pf);
-         keep = 1:length(idx_hpc);  intersect(pf,idx_hpc)-length(idx_ls);
+         keep = intersect(pf,idx_hpc)-length(idx_ls);
 %         template = squeeze(circ_mean(binnedPhaseMaps{t},[],2))+pi;
 %         template = squeeze(mean(firingMaps.rateMaps{t},2));
         template = squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_hpc,:,:),2));
         for i = 1:size(template,1)
-           template(i,:) = mean_norm(Smooth(template(i,:),5)')';
+           template(i,:) = zscore(Smooth(template(i,:),5));
         end
         for event = 1:length(ripples.peaks)
 %             [n ts] = min(abs(spkmatNREM_hpc.timestamps-ripples.peaks(event)));
@@ -227,12 +227,12 @@ overlap = 1;
             
             if ts+forward < size(spkmatNREM_hpc.data,1) & ts > back
                 for spk = 1:size(spkmatNREM_hpc.data,2)
-                    data(:,spk) = mean_norm(spkmatNREM_hpc.data(ts-back:ts+forward,spk)')';  
+                    data(:,spk) = zscore(spkmatNREM_hpc.data(ts-back:ts+forward,spk));  
                 end
             for iter = 1:10
                 template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_hpc,:,:),2)));
                 for i = 1:size(template,1)
-                   template_shuf(i,:) = mean_norm(Smooth(template_shuf(i,:),5)')';
+                   template_shuf(i,:) = Smooth(template_shuf(i,:),5);
                 end
                 [Pr_shuf prMax_shuf] = placeBayes((data(:,keep)')', template_shuf(keep,:), spkmatNREM_hpc.dt*5);
 %                 corrs_hpc_NaN_shuf(t,event,iter) = corr([1:41]',prMax_shuf,'rows','complete');
