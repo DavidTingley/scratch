@@ -231,8 +231,8 @@ overlap = 5;
         for event = 1:length(ripples.peaks)
 %             [n ts] = min(abs(spkmatNREM_hpc.timestamps-ripples.peaks(event)));
             ts = round(ripples.peaks(event)*(1/spkmatNREM_hpc.dt));
-            back = ceil((ripples.peaks(event)-ripples.timestamps(event,1))./spkmatNREM_hpc.dt)
-            forward = abs(ceil((ripples.peaks(event)-ripples.timestamps(event,2))./spkmatNREM_hpc.dt))
+            back = ceil((ripples.peaks(event)-ripples.timestamps(event,1))./spkmatNREM_hpc.dt)+3
+            forward = abs(ceil((ripples.peaks(event)-ripples.timestamps(event,2))./spkmatNREM_hpc.dt))+3
             
             if ts+forward < size(spkmatNREM_hpc.data,1) & ts > back
                 for spk = 1:size(spkmatNREM_hpc.data,2)
