@@ -92,7 +92,6 @@ count=0;
         end
         
         %% get that content, initialize
-        spatialContent = zeros(1,length(ca1.ripples.peaks));
         spatialContent = zeros(length(spikes.times),length(ca1.ripples.peaks));
         rewardContent = zeros(length(spikes.times),length(ca1.ripples.peaks));
         nSpikes = zeros(length(spikes.times),length(ca1.ripples.peaks));

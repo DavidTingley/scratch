@@ -21,8 +21,8 @@ overlap = 5;
 
     
     if exist([sessionInfo.FileName '.firingMaps.cellinfo.mat']) & ~isempty(popBursts)
-%     ripples.peaks = popBursts.bursts;
-%     ripples.timestamps = popBursts.timestamps;
+    ripples.peaks = popBursts.bursts;
+    ripples.timestamps = popBursts.timestamps;
     
     ls_spikesNREM = ls_spikes;
     ls_spikesBEHAV = ls_spikes;
@@ -283,58 +283,58 @@ overlap = 5;
             end
             
             
-%  
-% subplot(4,2,1)
-% histogram(integral_hpc,[0:.001:.03],'Normalization','pdf');
-% title(corr(PR{count_hpc}(1:event)',max(integral_hpc(:,1:event))','rows','complete'));
+ 
+subplot(4,2,1)
+histogram(integral_hpc,[0:.001:.03],'Normalization','pdf');
+title(corr(PR{count_hpc}(1:event)',max(integral_hpc(:,1:event))','rows','complete'));
+hold on
+histogram(integral_hpc_shuf,[0:.001:.03],'Normalization','pdf')
+hold off
+
+subplot(4,2,2)
+% line([0 3],[.012 .012],'color','r');
+bz_MultiLFPPlot(hpc,'spikes',spikes,...
+                    'spikeSpacingFactor',20,...  
+                    'scalelfp',5,...
+                    'timewin',[ripples.peaks(event)-back*spkmatNREM_hpc.dt ripples.peaks(event)+forward*spkmatNREM_hpc.dt],...
+                    'sortmetric',ord)
+
+subplot(4,2,3)
+% plot(max((integral_hpc(:,1:event))),'.k');
+imagesc(data')
+
+subplot(4,2,4)
+imagesc(Pr)
+d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
+% scatter(PR{count_hpc}(1:event),max((d(:,1:event))),'.k')
+% title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
+
+subplot(4,2,5)
+% plot(PR{count_hpc}(1:event),'.k')
+imagesc(data(:,ord)')
+title(integral_hpc(t,event))
+
+subplot(4,2,6)
+imagesc(rates(ord,:))
+% nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
+% wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
+% errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
 % hold on
-% histogram(integral_hpc_shuf,[0:.001:.03],'Normalization','pdf')
-% hold off
-% 
-% subplot(4,2,2)
-% % line([0 3],[.012 .012],'color','r');
-% bz_MultiLFPPlot(hpc,'spikes',spikes,...
-%                     'spikeSpacingFactor',100,...  
-%                     'scalelfp',5,...
-%                     'timewin',[ripples.peaks(event)-back*spkmatNREM_hpc.dt ripples.peaks(event)+forward*spkmatNREM_hpc.dt],...
-%                     'sortmetric',ord)
-% 
-% subplot(4,2,3)
-% % plot(max((integral_hpc(:,1:event))),'.k');
-% imagesc(data')
-% 
-% subplot(4,2,4)
-% imagesc(Pr)
-% d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
-% % scatter(PR{count_hpc}(1:event),max((d(:,1:event))),'.k')
-% % title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
-% 
-% subplot(4,2,5)
-% % plot(PR{count_hpc}(1:event),'.k')
-% imagesc(data(:,ord)')
-% title(integral_hpc(t,event))
-% 
-% subplot(4,2,6)
-% imagesc(rates(ord,:))
-% % nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
-% % wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
-% % errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
-% % hold on
-% % errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
-% % hold off        
-% % axis([0 3 0.004 .015])
-% 
-% subplot(4,2,7)
-% scatter(max((d(:,1:event))),popBursts.amplitudes(1:event),'.k')
-% xlabel('hpc replay')
+% errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
+% hold off        
+% axis([0 3 0.004 .015])
+
+subplot(4,2,7)
+scatter(max((d(:,1:event))),popBursts.amplitudes(1:event),'.k')
+xlabel('hpc replay')
+ylabel('hpc rate')
+
+subplot(4,2,8)
+imagesc(data(:,ord(keep))')
+% scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
+% xlabel('ls rate')
 % ylabel('hpc rate')
-% 
-% subplot(4,2,8)
-% imagesc(data(:,ord(keep))')
-% % scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
-% % xlabel('ls rate')
-% % ylabel('hpc rate')
-% pause
+pause
 clear data
         end
         end
@@ -405,7 +405,7 @@ clear data
 %     pause(.1)
 
     
-    save([sessionInfo.FileName '.bayesianResults_ripples.mat'],'-v7.3')
+    save([sessionInfo.FileName '.bayesianResults_popBursts.mat'],'-v7.3')
     end
     end
     end

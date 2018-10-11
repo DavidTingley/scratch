@@ -20,15 +20,22 @@ count = 1;
 
 for rec = 1:length(content)
     if ~isempty(content(rec).nSpikes)
-predictors = [nanmean(content(rec).nSpikes{1})' ...
-              nanmean(content(rec).PF{1})'...
-              [nanmean(content(rec).spatialContent{1})]' ... % check that this isn't just FR
-              nanmean(content(rec).rewardContent{1})'...
-              nanmean(content(rec).cellLoc_wav{1}.*content(rec).nSpikes{1})'...
+        idx_hpc = find(strcmp(content(rec).region{1},'hpc'));
+        if isempty(idx_hpc)
+            idx_hpc = find(strcmp(content(rec).region{1},'ca3'));
+        end
+        
+predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ...
+              content(rec).hpc_popBurst{1}...
+              [(nanmean(content(rec).PF{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0)))./nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'... % % of spikes from PF
+              [[nanmean(content(rec).spatialContent{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0))] ./nanmean(content(rec).nSpikes{1}(idx_hpc,:))]' ... 
+              [[nanmean(content(rec).rewardContent{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0))] ./ nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'...
+              nanmean(content(rec).cellLoc_wav{1}(idx_hpc,:).*content(rec).nSpikes{1}(idx_hpc,:))'...
               content(rec).condition{1}...
               content(rec).location{1}...
               content(rec).SleepState{1}...
-              max(bay{rec})'];%...
+              content(rec).duration{1}'...
+              nanmax(bay{rec})'];%...
 %               bay{rec}'];
           
 actual = content(rec).ls_popBurst{1};
@@ -38,14 +45,14 @@ for p = 1:size(predictors,2)
     if ~isnan(nansum(predictors(:,p)))
         [beta dev(p) ] = glmfit(predictors(:,p),actual,'normal');
         yfit = glmval(beta,predictors(:,p),'identity');
-        sse(p) = sum((yfit-actual').^2);
+        mse(p) = nanmean((yfit-actual').^2);
 
         for iter = 1:100
             pred_shuf = bz_shuffleCircular(predictors(:,p)')';
 %             pred_shuf = predictors(randperm(size(predictors,1)),p);
             [beta dev_shuf(p,iter)] = glmfit(pred_shuf,actual,'normal');
             yfit = glmval(beta,pred_shuf,'identity');
-            sse_shuf(p,iter) = sum((yfit-actual').^2);
+            mse_shuf(p,iter) = nanmean((yfit-actual').^2);
         end
     else
         dev(p) = nan;
@@ -68,7 +75,10 @@ boundedline(1:size(devZ,2),nanmean(devZ),sem(devZ))
 
 
 
-
+%%
+keep = find(~isnan(predictors(:,end)));
+%%
+if ~isempty(keep)
 
 
 idx = find(strcmp(content(rec).region{1},'ls'));
@@ -78,36 +88,42 @@ if ~isempty(hpc)
 end
 
 for spk = 1:length(idx)
-   actual = content(rec).nSpikes{1}(idx(spk),:); 
-   for p = 1:size(predictors,2)
-    if ~isnan(nansum(predictors(:,p)))
-        [beta dev(p) ] = glmfit(predictors(:,p),actual,'normal');
-        yfit = glmval(beta,predictors(:,p),'identity');
-        sse(p) = nanmean((yfit-actual').^2);
+   actual = content(rec).nSpikes{1}(idx(spk),keep); 
+   if mean(actual) > 0
+       for p = 1:size(predictors,2)
+        if ~isnan(nansum(predictors(:,p)))
+            [beta dev(p) ] = glmfit(predictors(keep,p),actual,'normal');
+            yfit = glmval(beta,predictors(keep,p),'identity');
+            mse(p) = nanmean((yfit-actual').^2);
 
-        for iter = 1:100
-            pred_shuf = bz_shuffleCircular(predictors(:,p)')';
-%             pred_shuf = predictors(randperm(size(predictors,1)),p);
-            [beta dev_shuf(p,iter)] = glmfit(pred_shuf,actual,'normal');
-            yfit = glmval(beta,pred_shuf,'identity');
-            sse_shuf(p,iter) = nanmean((yfit-actual').^2);
+            for iter = 1:100
+                pred_shuf = bz_shuffleCircular(predictors(keep,p)')';
+    %             pred_shuf = predictors(randperm(size(predictors,1)),p);
+                [beta dev_shuf(p,iter)] = glmfit(pred_shuf,actual,'normal');
+                yfit = glmval(beta,pred_shuf,'identity');
+                mse_shuf(p,iter) = nanmean((yfit-actual').^2);
+            end
+        else
+            dev(p) = nan;
+            dev_shuf(p,1:100) = nan;
         end
-    else
-        dev(p) = nan;
-        dev_shuf(p,1:100) = nan;
-    end
+       end
+       
+       meanCount(count) = mean(actual);
+       mseZ_cells(count,:) = (mse-nanmean(mse_shuf,2)')./nanstd(mse_shuf,[],2)';
+       mse_cells(count,:) = mse;
+       mse_shuf_cells(count,:,:) = mse_shuf;
+       recording(count) = rec;
+       count = 1+count;
    end
-   
-   sseZ_cells(count,:) = (sse-nanmean(sse_shuf,2)')./nanstd(sse_shuf,[],2)';
-   count = 1+count;
 end
 
 
-subplot(2,2,4)
-cla
-boundedline(1:size(sseZ_cells,2),nanmean(sseZ_cells),sem(sseZ_cells))
+% subplot(2,2,4)
+% cla
+% boundedline(1:size(mseZ_cells,2),nanmean(mseZ_cells),sem(mseZ_cells))
 
-
+    end
 
 
 pause(.001)
