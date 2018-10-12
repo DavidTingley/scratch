@@ -4,7 +4,8 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
 % for rec=1:length(d)
 %     cd(d(rec).name)
 %     nCells = 10;
-
+    spikes = bz_GetSpikes('noprompts',true);
+    nCells = length(spikes.times);
     sessionInfo = bz_getSessionInfo;
     disp(['running ' sessionInfo.FileName ', with ' num2str(nCells) ' cells'])
     ripples = bz_LoadEvents(pwd,'CA1Ripples');
@@ -42,32 +43,32 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
         
         idx = find(reg==1); % LS
 %         downsample idx to specific #
-        r = randperm(length(idx));
-        if length(r)>nCells
-            idx_ls = idx(r(1:nCells));
-        [W_ls, H_ls, cost_ls,loadings_ls,power_ls] = seqNMF(dat_smooth(idx_ls,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
+%         r = randperm(length(idx));
+%         if length(r)>nCells
+%             idx_ls = idx(r(1:nCells));
+        [W_ls, H_ls, cost_ls,loadings_ls,power_ls] = seqNMF(dat_smooth(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
 %         clear ind spk spk_smooth dat dat_smooth
-        else
-            W_ls = [];
-            H_ls = [];
-            cost_ls = [];
-            loadings_ls = [];
-            power_ls = [];
-        end
+%         else
+%             W_ls = [];
+%             H_ls = [];
+%             cost_ls = [];
+%             loadings_ls = [];
+%             power_ls = [];
+%         end
         
         idx = find(reg==2); % HPC
-        r = randperm(length(idx));
-        if length(r)>nCells
-            idx_hpc = idx(r(1:nCells));
-        [W_hpc, H_hpc, cost_hpc,loadings_hpc,power_hpc] = seqNMF(dat_smooth(idx_hpc,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
+%         r = randperm(length(idx));
+%         if length(r)>nCells
+%             idx_hpc = idx(r(1:nCells));
+        [W_hpc, H_hpc, cost_hpc,loadings_hpc,power_hpc] = seqNMF(dat_smooth(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
 %         clear ind spk spk_smooth dat dat_smooth
-        else
-            W_hpc = [];
-            H_hpc = [];
-            cost_hpc = [];
-            loadings_hpc = [];
-            power_hpc = [];
-        end
+%         else
+%             W_hpc = [];
+%             H_hpc = [];
+%             cost_hpc = [];
+%             loadings_hpc = [];
+%             power_hpc = [];
+%         end
 
 %% run shuffled data..
         for iter = 1:20
@@ -82,18 +83,18 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
          end
         dat_smooth_shuffle = cell2mat(spk_smooth_shuffled);
         if ~isempty(W_hpc)
-%         idx = find(reg==2); % HPC
-        [W_hpc_shuffle, H_hpc_shuffle, cost_hpc_shuffle,loadings_hpc_shuffle(iter,:),power_hpc_shuffle(iter)] = seqNMF(dat_smooth_shuffle(idx_hpc,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
+        idx = find(reg==2); % HPC
+        [W_hpc_shuffle, H_hpc_shuffle, cost_hpc_shuffle,loadings_hpc_shuffle(iter,:),power_hpc_shuffle(iter)] = seqNMF(dat_smooth_shuffle(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
         end
         if ~isempty(W_ls)
-%         idx = find(reg==1); % LS
-        [W_ls_shuffle, H_ls_shuffle, cost_ls_shuffle,loadings_ls_shuffle(iter,:),power_ls_shuffle(iter)] = seqNMF(dat_smooth_shuffle(idx_ls,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
+        idx = find(reg==1); % LS
+        [W_ls_shuffle, H_ls_shuffle, cost_ls_shuffle,loadings_ls_shuffle(iter,:),power_ls_shuffle(iter)] = seqNMF(dat_smooth_shuffle(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
         end
         end
 %     end
     
-    save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '_popbursts.hpc.' sprintf('%03d',idx_hpc) '.mat'],'*hpc*','-v7.3')
-    save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '_popbursts.ls.' sprintf('%03d',idx_ls) '.mat'],'*ls*','-v7.3')
+    save([sessionInfo.FileName '_popbursts.hpc.mat'],'*hpc*','-v7.3')
+    save([sessionInfo.FileName '_popbursts.ls.mat'],'*ls*','-v7.3')
     
     else
     disp('couldnt find any ripples...')

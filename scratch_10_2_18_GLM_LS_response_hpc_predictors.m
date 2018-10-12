@@ -16,7 +16,7 @@ end
 
 
 %% seqNMF data here
-seq = load([d(i).name '.seqNMF.mat']);
+seq = load([d(i).name '_popBursts.seqNMF.mat']);
 for e=1:length(dat.integral_hpc)
     ts= e*101+49;
     [vec] = max(seq.H_hpc(:,ts-25:ts+25)');
