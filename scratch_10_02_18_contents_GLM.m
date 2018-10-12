@@ -64,7 +64,7 @@ count=0;
         hpc_power = (fastrms(FiltFiltM(b,a,double(ca1.lfp.data)),12));
         ls_rec = []; 
         hpc_rec = [];
-        hpc_pop = [];
+%         hpc_pop = [];
         for event = 1:size(ca1.ripples.timestamps,1)
             start = round((ca1.ripples.timestamps(event,1)-.025) * 1250); % used to be 20 ms
             if start<1
@@ -77,7 +77,7 @@ count=0;
             [ls_max blah] = max(abs(ls_power(start:stop)));
             [hpc_max blah] = max(abs(hpc_power(start:stop)));
             hpc_rec=[hpc_rec;ls_max,hpc_max];
-            hpc_pop=[hpc_pop;popBursts.amplitudes(event)];
+%             hpc_pop=[hpc_pop;popBursts.amplitudes(event)];
 
             
             start = round((ca1.ripples.timestamps(event,1)-.025) * 1000); % used to be 20 ms
@@ -166,7 +166,7 @@ count=0;
     content.rewardContent{rec} = rewardContent;
     content.nSpikes{rec} = nSpikes;
     content.PF{rec} = PF;
-    content.hpc_popBurst{rec} = hpc_pop;
+%     content.hpc_popBurst{rec} = hpc_pop;
     content.ls_popBurst{rec} = ls_pop;
     content.cellLoc_wav{rec} = cellLoc_wav;
     content.meanPeakRate{rec} = meanPeakRate;
