@@ -33,8 +33,8 @@ count=0;
 %         ca1 = load([sessionInfo.FileName '.CA1Ripples.events.mat']);
         popBursts = bz_LoadEvents(pwd,'popBursts');
         if ~isempty(popBursts) & ~isempty(SleepState)
-        ca1.ripples.peaks = popBursts.bursts;
-        ca1.ripples.timestamps = popBursts.timestamps;
+%         ca1.ripples.peaks = ca1.ripples.peaks;
+%         ca1.ripples.timestamps = popBursts.timestamps;
         spikes = bz_GetSpikes('noprompts',true);
         ls_spikes= bz_GetSpikes('noprompts',true,'region','ls');
         
@@ -100,22 +100,22 @@ count=0;
         
         % state stuff
         State = zeros(length(ca1.ripples.peaks),1);
-        idx = InIntervals(popBursts.bursts,SleepState.ints.NREMstate);
+        idx = InIntervals(ca1.ripples.peaks,SleepState.ints.NREMstate);
         State(find(idx)) = 1;
-        idx = InIntervals(popBursts.bursts,SleepState.ints.WAKEstate);
+        idx = InIntervals(ca1.ripples.peaks,SleepState.ints.WAKEstate);
         State(find(idx)) = 2;
-        idx = InIntervals(popBursts.bursts,SleepState.ints.REMstate);
+        idx = InIntervals(ca1.ripples.peaks,SleepState.ints.REMstate);
         State(find(idx)) = 3;
         
         % behavioral condition (pre/behav/sleep)
         condition = zeros(length(ca1.ripples.peaks),1);
         for t = 1:3
-        idx = InIntervals(popBursts.bursts,intervals(t,:));
+        idx = InIntervals(ca1.ripples.peaks,intervals(t,:));
         condition(find(idx)) = t;
         end
         location = zeros(length(ca1.ripples.peaks),1);
         for t = 1:3
-        idx = InIntervals(popBursts.bursts,intervals(t,:));
+        idx = InIntervals(ca1.ripples.peaks,intervals(t,:));
         if t == 2
             location(find(idx)) = 2;
         else
@@ -226,7 +226,7 @@ count=0;
 % pause(.001)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-save([sessionInfo.FileName '.content_GLM.mat'],'-v7.3')
+save([sessionInfo.FileName '.content_GLM_ripple.mat'],'-v7.3')
     rec
     clear State meanPeakRate condition rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content* PF cellLoc*
         end
