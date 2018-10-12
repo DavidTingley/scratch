@@ -91,8 +91,8 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
         end
 %     end
     
-    save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '.hpc.' sprintf('%03d',idx_hpc) '.mat'],'*hpc*','-v7.3')
-    save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '.ls.' sprintf('%03d',idx_ls) '.mat'],'*ls*','-v7.3')
+    save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '_popbursts.hpc.' sprintf('%03d',idx_hpc) '.mat'],'*hpc*','-v7.3')
+    save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '_popbursts.ls.' sprintf('%03d',idx_ls) '.mat'],'*ls*','-v7.3')
     
     else
     disp('couldnt find any ripples...')
