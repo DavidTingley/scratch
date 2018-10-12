@@ -6,6 +6,13 @@ cd(d(i).name)
 if exist([d(i).name '.content_GLM.mat']) & exist([d(i).name '.bayesianResults_popBursts.mat']) % or ripple bayesianResults
 dat = load([d(i).name '.content_GLM.mat']);
 content(i) = dat.content;
+seq = load([d(i).name '.seqNMF.mat']);
+for e=1:
+    ts= e*101+49;
+    [vec] = max(seq.H_hpc(:,ts-50:ts+50)');
+    seq(e,:) = vec;
+end
+
 
 dat = load([d(i).name '.bayesianResults_popBursts.mat']);
 if isfield(dat,'integral_hpc')
@@ -13,18 +20,6 @@ bay{i} = dat.integral_hpc;
 else
 bay{i} = nan(2,length(content(i).nSpikes{1}));
 end
-
-
-%% seqNMF data here
-seq = load([d(i).name '.seqNMF.mat']);
-for e=1:length(dat.integral_hpc)
-    ts= e*101+49;
-    [vec] = max(seq.H_hpc(:,ts-25:ts+25)');
-    seqs{i}(e,:) = vec;
-end
-
-
-
 end
 cd ~/datasets/ripples_LS/
 end

@@ -7,6 +7,11 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
     sessionInfo = bz_getSessionInfo;
     disp(['running ' sessionInfo.FileName ', with ' num2str(nCells) ' cells'])
     ripples = bz_LoadEvents(pwd,'CA1Ripples');
+    
+    popBursts = bz_LoadEvents(pwd,'popBursts');
+    ripples.timestamps = popBursts.timestamps;
+    ripples.peaks = popBursts.bursts;
+    
     if ~isempty(ripples)
         spikes = bz_GetSpikes('noprompts',true);
         for i=1:length(spikes.times)
