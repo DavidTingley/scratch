@@ -216,11 +216,11 @@ overlap = 5;
         end
         [a b ord] = sort_cells(rates);
         
-         for spk=1:length(spikes.times)
-            pf(spk) = ~isempty(fields{t}{spk});
-         end
-         pf = find(pf);
-         keep = 1:length(idx_hpc); intersect(pf,idx_hpc)-length(idx_ls); % 1:length(idx_hpc);  %
+%          for spk=1:length(spikes.times)
+%             pf(spk) = ~isempty(fields{t}{spk});
+%          end
+%          pf = find(pf);
+         keep = 1:length(idx_hpc); %intersect(pf,idx_hpc)-length(idx_ls); % 1:length(idx_hpc);  %
 %         template = squeeze(circ_mean(binnedPhaseMaps{t},[],2))+pi;
 %         template = squeeze(mean(firingMaps.rateMaps{t},2));
         

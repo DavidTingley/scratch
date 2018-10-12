@@ -1,20 +1,20 @@
 % 
-% clear all
-% d = dir('*201*');
-% for i=1:length(d)
-% cd(d(i).name)
-% if exist([d(i).name '.content_GLM.mat']) & exist([d(i).name '.bayesianResults_popBursts.mat'])
-% dat = load([d(i).name '.content_GLM.mat']);
-% content(i) = dat.content;
-% dat = load([d(i).name '.bayesianResults_popBursts.mat']);
-% if isfield(dat,'integral_hpc')
-% bay{i} = dat.integral_hpc;
-% else
-% bay{i} = nan(2,length(content(i).nSpikes{1}));
-% end
-% end
-% cd ~/datasets/ripples_LS/
-% end
+clear all
+d = dir('*201*');
+for i=1:length(d)
+cd(d(i).name)
+if exist([d(i).name '.content_GLM.mat']) & exist([d(i).name '.bayesianResults_popBursts.mat']) % or ripple bayesianResults
+dat = load([d(i).name '.content_GLM.mat']);
+content(i) = dat.content;
+dat = load([d(i).name '.bayesianResults_popBursts.mat']);
+if isfield(dat,'integral_hpc')
+bay{i} = dat.integral_hpc;
+else
+bay{i} = nan(2,length(content(i).nSpikes{1}));
+end
+end
+cd ~/datasets/ripples_LS/
+end
 
 count = 1;
 
