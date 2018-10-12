@@ -7,6 +7,12 @@ function []=scratch_03_09_18_rippleSeqs_ls(nCells)
     sessionInfo = bz_getSessionInfo;
     disp(['running ' sessionInfo.FileName ', with ' num2str(nCells) ' cells'])
     ripples = bz_LoadEvents(pwd,'LSRipples');
+    
+        popBursts = bz_LoadEvents(pwd,'popBursts');
+    ripples.timestamps = popBursts.timestamps;
+    ripples.peaks = popBursts.bursts;
+    
+    
     if ~isempty(ripples)
         spikes = bz_GetSpikes('noprompts',true);
         for i=1:length(spikes.times)
@@ -87,7 +93,7 @@ function []=scratch_03_09_18_rippleSeqs_ls(nCells)
 %     end
     
 %     save(['/ifs/data/buzsakilab/seqResults/' sessionInfo.FileName '.hpc.' sprintf('%03d',idx_hpc) '.mat'],'*hpc*','-v7.3')
-    save(['/ifs/data/buzsakilab/seqResults_ls/' sessionInfo.FileName '.ls.' sprintf('%03d',idx_ls) '.mat'],'*ls*','-v7.3')
+    save(['/ifs/data/buzsakilab/seqResults_ls/' sessionInfo.FileName '_popbursts.ls.' sprintf('%03d',idx_ls) '.mat'],'*ls*','-v7.3')
     
     else
     disp('couldnt find any ripples...')
