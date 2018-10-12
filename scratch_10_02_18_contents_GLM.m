@@ -32,6 +32,7 @@ count=0;
     
 %         ca1 = load([sessionInfo.FileName '.CA1Ripples.events.mat']);
         popBursts = bz_LoadEvents(pwd,'popBursts');
+        ca1.ripples = bz_LoadEvents(pwd,'CA1Ripples');
         if ~isempty(popBursts) & ~isempty(SleepState)
 %         ca1.ripples.peaks = ca1.ripples.peaks;
 %         ca1.ripples.timestamps = popBursts.timestamps;
