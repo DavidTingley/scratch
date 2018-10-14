@@ -3,11 +3,11 @@ clear all
 d = dir('*201*');
 for i=1:length(d)
 cd(d(i).name)
-if exist([d(i).name '.content_GLM.mat']) & exist([d(i).name '.bayesianResults_popBursts.mat']) % or ripple bayesianResults
-dat = load([d(i).name '.content_GLM.mat']);
+if exist([d(i).name '.content_GLM_ripple.mat']) & exist([d(i).name '.bayesianResults_ripples.mat']) & exist([d(i).name '.seqNMF.mat']) % or ripple bayesianResults
+dat = load([d(i).name '.content_GLM_ripple.mat']);
 content(i) = dat.content;
 
-dat = load([d(i).name '.bayesianResults_popBursts.mat']);
+dat = load([d(i).name '.bayesianResults_ripples.mat']);
 if isfield(dat,'integral_hpc')
 bay{i} = dat.integral_hpc;
 else
@@ -16,10 +16,14 @@ end
 
 
 %% seqNMF data here
-seq = load([d(i).name '_popBursts.seqNMF.mat']);
+seq = load([d(i).name '.seqNMF.mat']);
 for e=1:length(dat.integral_hpc)
     ts= e*101+49;
-    [vec] = max(seq.H_hpc(:,ts-25:ts+25)');
+    if ts+25<=length(seq.H_hpc)
+        [vec] = max(seq.H_hpc(:,ts-25:ts+25)');
+    else
+        vec = nan; 
+    end
     seqs{i}(e,:) = vec;
 end
 
@@ -39,7 +43,6 @@ for rec = 1:length(content)
         end
         
 predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ...
-              content(rec).hpc_popBurst{1}...
               [(nanmean(content(rec).PF{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0)))./nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'... % % of spikes from PF
               [[nanmean(content(rec).spatialContent{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0))] ./nanmean(content(rec).nSpikes{1}(idx_hpc,:))]' ... 
               [[nanmean(content(rec).rewardContent{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0))] ./ nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'...
@@ -50,6 +53,7 @@ predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ...
               content(rec).duration{1}'...
               nanmax(bay{rec})'];%...
 %               bay{rec}'];
+%               content(rec).hpc_popBurst{1}...
           
 actual = content(rec).ls_popBurst{1};
 % actual = content(rec).ls_power{1}';
