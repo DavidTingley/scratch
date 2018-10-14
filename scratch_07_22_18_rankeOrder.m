@@ -21,8 +21,8 @@ overlap = 1;
 
     
     if exist([sessionInfo.FileName '.firingMaps.cellinfo.mat']) & ~isempty(popBursts)
-%     ripples.peaks = popBursts.bursts;
-%     ripples.timestamps = popBursts.timestamps;
+    ripples.peaks = popBursts.bursts;
+    ripples.timestamps = popBursts.timestamps;
     
     ls_spikesNREM = ls_spikes;
     ls_spikesBEHAV = ls_spikes;
@@ -393,7 +393,7 @@ clear data
 %     pause(.1)
 
     
-    save([sessionInfo.FileName '.rankOrder_ripples.mat'],'-v7.3')
+    save([sessionInfo.FileName '.rankOrder_popBursts.mat'],'-v7.3')
     end
     end
     end
