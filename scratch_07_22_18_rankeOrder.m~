@@ -206,9 +206,9 @@ overlap = 1;
 %     spkmat_hpc = bz_SpktToSpkmat(hpc_spikesBEHAV.times,'overlap',overlap,'binSize',binSize(bins) * overlap);
     spkmatNREM_hpc = bz_SpktToSpkmat(hpc_spikesNREM.times,'overlap',overlap,'binSize',binSize(bins)* overlap);
     %% smooth ripple spike trains here
-    for spk = 1:size(spkmatNREM_hpc.data,2)
-        spkmatNREM_hpc.data(:,spk) = Smooth(spkmatNREM_hpc.data(:,spk),10);
-    end
+%     for spk = 1:size(spkmatNREM_hpc.data,2)
+%         spkmatNREM_hpc.data(:,spk) = Smooth(spkmatNREM_hpc.data(:,spk),10);
+%     end
     
     rankOrder = nan(length(firingMaps.rateMaps),length(ripples.peaks));
     rankOrder_shuffle = nan(length(firingMaps.rateMaps),length(ripples.peaks),100);

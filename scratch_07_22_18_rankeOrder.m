@@ -1,4 +1,4 @@
-function [] = scratch_07_22_18_bayesianTemplate()
+function [] = scratch_07_22_18_rankeOrder()
 % cd D:\Dropbox\datasets\lsDataset
 d = dir('*201*');
 binSize = [.001];
@@ -21,8 +21,8 @@ overlap = 1;
 
     
     if exist([sessionInfo.FileName '.firingMaps.cellinfo.mat']) & ~isempty(popBursts)
-    ripples.peaks = popBursts.bursts;
-    ripples.timestamps = popBursts.timestamps;
+%     ripples.peaks = popBursts.bursts;
+%     ripples.timestamps = popBursts.timestamps;
     
     ls_spikesNREM = ls_spikes;
     ls_spikesBEHAV = ls_spikes;
@@ -279,7 +279,7 @@ overlap = 1;
 % subplot(4,2,2)
 % % line([0 3],[.012 .012],'color','r');
 % bz_MultiLFPPlot(lfp,'spikes',hpc_spikes,...
-%                     'spikeSpacingFactor',100,...  
+%                     'spikeSpacingFactor',20,...  
 %                     'scalelfp',5,...
 %                     'timewin',[ripples.peaks(event)-back*spkmatNREM_hpc.dt ripples.peaks(event)+forward*spkmatNREM_hpc.dt],...
 %                     'sortmetric',ord)
@@ -287,18 +287,18 @@ overlap = 1;
 % subplot(4,2,3)
 % % plot(max((integral_hpc(:,1:event))),'.k');
 % % imagesc(data')
-% plot(max(rankOrder(:,1:event)),spkCount(1:event),'.k')
+% plot(absmax(rankOrder(:,1:event)),spkCount(1:event),'.k')
 % xlabel('rank order corr')
 % ylabel('spk count')
 % 
 % subplot(4,2,4)
-% plot(max(rankOrder(:,1:event)),'.k')
+% plot(absmax(rankOrder(:,1:event)),'.k')
 % d = (rankOrder-mean(rankOrder_shuffle,3))./std(rankOrder_shuffle,[],3);
 % % scatter(PR{count_hpc}(1:event),max((d(:,1:event))),'.k')
 % % title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
 % 
 % subplot(4,2,5)
-% scatter(max(rankOrder(:,1:event)),eventDuration(1:event),'.k')
+% scatter(absmax(rankOrder(:,1:event)),eventDuration(1:event),'.k')
 % xlabel('hpc rank order corr')
 % ylabel('event duration (s)')
 % 
@@ -322,7 +322,7 @@ overlap = 1;
 % % scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
 % % xlabel('ls rate')
 % % ylabel('hpc rate')
-% pause(.001)
+%  pause(.001)
 clear data
         end
         end
@@ -341,13 +341,13 @@ clear data
 %         postSleep_hpc_NaN_shuf{count_hpc} = corrs_hpc_NaN_shuf(:,ripples.peaks>intervals(3,1));
 %         behav_hpc_NaN_shuf{count_hpc} = corrs_hpc_NaN_shuf(:,ripples.peaks>intervals(1,2) &...
 %                              ripples.peaks<intervals(3,1));
-        hpc_rZ{count_hpc} = (integral_hpc - nanmean(integral_hpc_shuf,3)) ./ nanstd(integral_hpc_shuf,[],3);                 
-        hpc_integral{count_hpc} = integral_hpc;
-        hpc_max_int{count_hpc} = max(integral_hpc);
-        hpc_max_int_shuf{count_hpc} = max(integral_hpc_shuf);
-        hpc_slope{count_hpc} = slope_hpc;
-        hpc_integral_shuf{count_hpc} = integral_hpc_shuf;
-        hpc_slope_shuf{count_hpc} = slope_hpc_shuf;
+%         hpc_rZ{count_hpc} = (integral_hpc - nanmean(integral_hpc_shuf,3)) ./ nanstd(integral_hpc_shuf,[],3);                 
+%         hpc_integral{count_hpc} = integral_hpc;
+%         hpc_max_int{count_hpc} = max(integral_hpc);
+%         hpc_max_int_shuf{count_hpc} = max(integral_hpc_shuf);
+%         hpc_slope{count_hpc} = slope_hpc;
+%         hpc_integral_shuf{count_hpc} = integral_hpc_shuf;
+%         hpc_slope_shuf{count_hpc} = slope_hpc_shuf;
         count_hpc = count_hpc +1;       
         
         
@@ -393,7 +393,7 @@ clear data
 %     pause(.1)
 
     
-    save([sessionInfo.FileName '.rankOrder_popBursts.mat'],'-v7.3')
+    save([sessionInfo.FileName '.rankOrder_ripples.mat'],'-v7.3')
     end
     end
     end
