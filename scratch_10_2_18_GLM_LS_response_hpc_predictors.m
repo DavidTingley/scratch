@@ -3,7 +3,11 @@ clear all
 d = dir('*201*');
 for i=1:length(d)
 cd(d(i).name)
-if exist([d(i).name '.content_GLM_ripple.mat']) & exist([d(i).name '.bayesianResults_ripples.mat']) & exist([d(i).name '.seqNMF.mat']) % or ripple bayesianResults
+if exist([d(i).name '.content_GLM_ripple.mat']) & ...
+        exist([d(i).name '.bayesianResults_ripples.mat']) & ...
+        exist([d(i).name '.rankeOrder_ripples.mat']) & ...
+        exist([d(i).name '.seqNMF.mat']) 
+    
 dat = load([d(i).name '.content_GLM_ripple.mat']);
 content(i) = dat.content;
 
@@ -14,6 +18,8 @@ else
 bay{i} = nan(2,length(content(i).nSpikes{1}));
 end
 
+dat = load([d(i).name '.rankeOrder_ripples.mat']);
+rankOrder{i} = dat.rankeOrder;
 
 %% seqNMF data here
 seq = load([d(i).name '.seqNMF.mat']);
