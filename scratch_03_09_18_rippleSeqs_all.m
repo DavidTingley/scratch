@@ -10,9 +10,9 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
     disp(['running ' sessionInfo.FileName ', with ' num2str(nCells) ' cells'])
     ripples = bz_LoadEvents(pwd,'CA1Ripples');
 %     
-%     popBursts = bz_LoadEvents(pwd,'popBursts');
-%     ripples.timestamps = popBursts.timestamps;
-%     ripples.peaks = popBursts.bursts;
+    popBursts = bz_LoadEvents(pwd,'popBursts');
+    ripples.timestamps = popBursts.timestamps;
+    ripples.peaks = popBursts.bursts;
     
     if ~isempty(ripples)
         spikes = bz_GetSpikes('noprompts',true);
@@ -93,8 +93,8 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
         end
 %     end
     
-    save([sessionInfo.FileName '.hpc.mat'],'*hpc*','-v7.3')
-    save([sessionInfo.FileName '.ls.mat'],'*ls*','-v7.3')
+    save([sessionInfo.FileName '_seqNMF.popBursts.hpc.mat'],'*hpc*','-v7.3')
+    save([sessionInfo.FileName '_seqNMF.popBursts.ls.mat'],'*ls*','-v7.3')
     
     else
     disp('couldnt find any ripples...')
