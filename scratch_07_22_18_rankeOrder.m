@@ -6,11 +6,12 @@ count_ls = 1;
 count_hpc = 1;
 overlap = 1;
 
-
+sessionInfo = bz_getSessionInfo;
+if ~exist(([sessionInfo.FileName '.rankOrder_ripples.mat']))
 
 % for ii=61:length(d)
 %     cd(d(ii).name)
-    sessionInfo = bz_getSessionInfo;
+  
     disp(['working on ' sessionInfo.FileName])
     ls_spikes = bz_GetSpikes('region','ls','noprompts',true);
     hpc_spikes = bz_GetSpikes('region','hpc','noprompts',true);
@@ -402,5 +403,5 @@ clear data
 % cd E:\datasets\ripples_LS
 % savefig('/home/david/Dropbox/bayesianDecoder.fig')
 % save('/home/david/Dropbox/bayesianDecoder_noExclusion.mat','-v7.3')
-
+end
 end
