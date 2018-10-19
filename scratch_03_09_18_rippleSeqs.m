@@ -46,21 +46,38 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
 %         r = randperm(length(idx));
 %         if length(r)>nCells
 %             idx_ls = idx(r(1:nCells));
-        [W_ls, H_ls, cost_ls,loadings_ls,power_ls] = seqNMF(dat_smooth(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
-%         clear ind spk spk_smooth dat dat_smooth
-%         else
-%             W_ls = [];
-%             H_ls = [];
-%             cost_ls = [];
-%             loadings_ls = [];
-%             power_ls = [];
-%         end
-        
-        idx = find(reg==2); % HPC
-%         r = randperm(length(idx));
-%         if length(r)>nCells
-%             idx_hpc = idx(r(1:nCells));
-        [W_hpc, H_hpc, cost_hpc,loadings_hpc,power_hpc] = seqNMF(dat_smooth(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
+       if ~isempty(idx)
+        [W_ls, H_ls, cost_ls,loadings_ls,power_ls] = seqNMF(dat_smooth(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);     
+        else
+                W_ls=[];
+                H_ls=[];
+                cost_ls[];
+                loadings_ls=[];
+                power_ls=[];
+        end
+        %         clear ind spk spk_smooth dat dat_smooth
+        %         else
+        %             W_ls = [];
+        %             H_ls = [];
+        %             cost_ls = [];
+        %             loadings_ls = [];
+        %             power_ls = [];
+        %         end
+
+                idx = find(reg==2); % HPC
+        %         r = randperm(length(idx));
+        %         if length(r)>nCells
+        %             idx_hpc = idx(r(1:nCells));
+        if ~isempty(idx)
+                [W_hpc, H_hpc, cost_hpc,loadings_hpc,power_hpc] = seqNMF(dat_smooth(idx,:),'L',100,'K',40,'lambda',.000001,'showplot',0);
+
+        else
+                W_hpc=[];
+                H_hpc=[];
+                cost_hpc=[];
+                loadings_hpc=[];
+                power_hpc=[];
+        end
 %         clear ind spk spk_smooth dat dat_smooth
 %         else
 %             W_hpc = [];
