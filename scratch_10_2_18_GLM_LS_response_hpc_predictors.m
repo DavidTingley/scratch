@@ -1,65 +1,28 @@
 % 
 clear all
 d = dir('*201*');
-for i=1:length(d)
-cd(d(i).name)
-if exist([d(i).name '.content_GLM.mat']) & ...
-        exist([d(i).name '.bayesianResults_popBursts.mat']) & ...
-        exist([d(i).name '.rankOrder_popBursts.mat'])% & ...
-%         exist([d(i).name '_seqNMF.popBursts.hpc.mat']) 
-    
-dat = load([d(i).name '.content_GLM.mat']);
-content(i) = dat.content;
-
-dat = load([d(i).name '.bayesianResults_popBursts.mat']);
-if isfield(dat,'integral_hpc')
-bay{i} = dat.integral_hpc;
-else
-bay{i} = nan(2,length(content(i).nSpikes{1}));
-end
-
-dat = load([d(i).name '.rankOrder_popBursts.mat']);
-rankOrder{i} = dat.rankOrder;
-
-%% seqNMF data here
-% seq = load([d(i).name '_seqNMF.popBursts.hpc.mat']);
-% for e=1:length(dat.integral_hpc)
-%     ts= e*101+49;
-%     if ts+25<=length(seq.H_hpc)
-%         [vec] = max(seq.H_hpc(:,ts-25:ts+25)');
-%     else
-%         vec = nan; 
-%     end
-%     seqs{i}(e,:) = vec;
-% end
-
-end
-cd ~/datasets/ripples_LS/
-end
-
-
 % for i=1:length(d)
 % cd(d(i).name)
-% if exist([d(i).name '.content_GLM_ripple.mat']) & ...
-%         exist([d(i).name '.bayesianResults_ripples.mat'])& ...
-%         exist([d(i).name '.rankOrder_ripples.mat'])% & ...
-% %         exist([d(i).name '_seqNMF.ripples.hpc.mat']) 
+% if exist([d(i).name '.content_GLM.mat']) & ...
+%         exist([d(i).name '.bayesianResults_popBursts.mat']) & ...
+%         exist([d(i).name '.rankOrder_popBursts.mat'])% & ...
+% %         exist([d(i).name '_seqNMF.popBursts.hpc.mat']) 
 %     
-% dat = load([d(i).name '.content_GLM_ripple.mat']);
+% dat = load([d(i).name '.content_GLM.mat']);
 % content(i) = dat.content;
 % 
-% dat = load([d(i).name '.bayesianResults_ripples.mat']);
+% dat = load([d(i).name '.bayesianResults_popBursts.mat']);
 % if isfield(dat,'integral_hpc')
 % bay{i} = dat.integral_hpc;
 % else
 % bay{i} = nan(2,length(content(i).nSpikes{1}));
 % end
 % 
-% dat = load([d(i).name '.rankOrder_ripples.mat']);
+% dat = load([d(i).name '.rankOrder_popBursts.mat']);
 % rankOrder{i} = dat.rankOrder;
 % 
 % %% seqNMF data here
-% % seq = load([d(i).name '_seqNMF.ripples.hpc.mat']);
+% % seq = load([d(i).name '_seqNMF.popBursts.hpc.mat']);
 % % for e=1:length(dat.integral_hpc)
 % %     ts= e*101+49;
 % %     if ts+25<=length(seq.H_hpc)
@@ -73,6 +36,43 @@ end
 % end
 % cd ~/datasets/ripples_LS/
 % end
+
+
+for i=1:length(d)
+cd(d(i).name)
+if exist([d(i).name '.content_GLM_ripple.mat']) & ...
+        exist([d(i).name '.bayesianResults_ripples.mat'])& ...
+        exist([d(i).name '.rankOrder_ripples.mat'])% & ...
+%         exist([d(i).name '_seqNMF.ripples.hpc.mat']) 
+    
+dat = load([d(i).name '.content_GLM_ripple.mat']);
+content(i) = dat.content;
+
+dat = load([d(i).name '.bayesianResults_ripples.mat']);
+if isfield(dat,'integral_hpc')
+bay{i} = dat.integral_hpc;
+else
+bay{i} = nan(2,length(content(i).nSpikes{1}));
+end
+
+dat = load([d(i).name '.rankOrder_ripples.mat']);
+rankOrder{i} = dat.rankOrder;
+
+%% seqNMF data here
+% seq = load([d(i).name '_seqNMF.ripples.hpc.mat']);
+% for e=1:length(dat.integral_hpc)
+%     ts= e*101+49;
+%     if ts+25<=length(seq.H_hpc)
+%         [vec] = max(seq.H_hpc(:,ts-25:ts+25)');
+%     else
+%         vec = nan; 
+%     end
+%     seqs{i}(e,:) = vec;
+% end
+
+end
+cd ~/datasets/ripples_LS/
+end
 
 
 
@@ -192,13 +192,14 @@ for spk = 1:length(idx)
         adj_R(p,:) = [r1.adjrsquare r2.adjrsquare];
         
         else
+            corrs(count,p) = nan;
             dev(p) = nan;
             dev_shuf(p,1:100) = nan;
             adj_R(p,1:2) = nan;
         end
        end
        
-       meanCount(count) = mean(actual);
+       meanCount(count) = nanmean(actual);
        mseZ_cells(count,:) = (mse-nanmean(mse_shuf,2)')./nanstd(mse_shuf,[],2)';
        adjRSqaure(count,:,:) = adj_R;
 %        mseZ_cells(count,:) = (mse_shuf(:,:,1)-nanmean(mse_shuf,2)')./nanstd(mse_shuf,[],2)';
