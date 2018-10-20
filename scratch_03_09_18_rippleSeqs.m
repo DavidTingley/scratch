@@ -51,7 +51,7 @@ function []=scratch_03_09_18_rippleSeqs(nCells)
         else
                 W_ls=[];
                 H_ls=[];
-                cost_ls[];
+                cost_ls=[];
                 loadings_ls=[];
                 power_ls=[];
         end
