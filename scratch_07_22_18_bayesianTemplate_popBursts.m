@@ -21,8 +21,8 @@ overlap = 5;
 
     
     if exist([sessionInfo.FileName '.firingMaps.cellinfo.mat']) & ~isempty(popBursts)
-%     ripples.peaks = popBursts.bursts;
-%     ripples.timestamps = popBursts.timestamps;
+    ripples.peaks = popBursts.bursts;
+    ripples.timestamps = popBursts.timestamps;
     
     ls_spikesNREM = ls_spikes;
     ls_spikesBEHAV = ls_spikes;
@@ -282,7 +282,6 @@ overlap = 5;
                 slope_hpc_shuf(t,event) = nan;
                 integral_hpc_shuf(t,event,1:10) = nan;
             end
-%             nCells(event) = length(keep);
             spkCount(event) = sum(sum(spkmatNREM_hpc.data(ts-back:ts+forward,:)));
             eventDuration(event) = (forward+back)*spkmatNREM_hpc.dt;
 %  
@@ -299,7 +298,8 @@ bz_MultiLFPPlot([],'spikes',hpc_spikes,...
                     'scalelfp',5,...
                     'timewin',[ripples.peaks(event)-back*spkmatNREM_hpc.dt ripples.peaks(event)+forward*spkmatNREM_hpc.dt],...
                     'sortmetric',ord)
-
+                
+                
 subplot(4,2,3)
 % plot(max((integral_hpc(:,1:event))),'.k');
 imagesc(data')
@@ -406,7 +406,7 @@ clear data
 %     pause(.1)
 
     
-    save([sessionInfo.FileName '.bayesianResults_ripples.mat'],'-v7.3')
+    save([sessionInfo.FileName '.bayesianResults_popBursts.mat'],'-v7.3')
     end
     end
     end

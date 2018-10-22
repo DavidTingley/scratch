@@ -27,13 +27,25 @@ for ii=1:length(d)
     
     %% get initial correlations
     intervals = [pre; behav; post];
+    wind = 1;
+    for window = 0:300:3000
+    % get the first XXX minutes of sleep..
+    temp = 1;
+    epoch = 0;
+    while sum(epoch) < 600 & temp < intervals(end)
+        it = SubtractIntervals(double(SleepState.ints.NREMstate),[0 intervals(2,2)+window; intervals(2,2)+temp+window intervals(end)]);
+        epoch = sum(diff(it));
+        temp = temp+1;
+    end
     
     
-    if ~isempty(ls_spikes)
+    
+    if ~isempty(ls_spikes) & ~isempty(it)
     for spk = 1:length(ls_spikes.times)
-%        ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},double(SleepState.ints.NREMstate)); 
+       ls_spikesNREM_post.times{spk} = Restrict(ls_spikes.times{spk},it); 
+       ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},double(SleepState.ints.NREMstate)); 
        ls_spikesBEHAV.times{spk} = Restrict(ls_spikes.times{spk},behavior.events.trialIntervals);
-       ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
+%        ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
     end
     end
    
@@ -42,9 +54,11 @@ for ii=1:length(d)
         
     spkmat_ls = bz_SpktToSpkmat(ls_spikesBEHAV.times,'binSize',binSize(bins));
     spkmatNREM_ls = bz_SpktToSpkmat(ls_spikesNREM.times,'binSize',binSize(bins));
+    spkmatNREM_post_ls = bz_SpktToSpkmat(ls_spikesNREM_post.times,'binSize',binSize(bins));
     for spk = 1:size(spkmat_ls.data,2)
        spkmat_ls.zscoredData(:,spk) = zscore(spkmat_ls.data(:,spk));
        spkmatNREM_ls.zscoredData(:,spk) = zscore(spkmatNREM_ls.data(:,spk)); 
+       spkmatNREM_post_ls.zscoredData(:,spk) = zscore(spkmatNREM_post_ls.data(:,spk)); 
     end
 %     clear ls_spikes*
 
@@ -55,10 +69,14 @@ for ii=1:length(d)
         [nah stop] = min(abs(spkmat_ls.timestamps-intervals(int,2)));
 
         [corrmat{int} pval{int}] = corr(spkmat_ls.zscoredData(start:stop,:));
-        if int == 1 | int == 3
+        if int == 1 
             [nah start] = min(abs(spkmatNREM_ls.timestamps-intervals(int,1)));
             [nah stop] = min(abs(spkmatNREM_ls.timestamps-intervals(int,2)));
-            [corrmat{int} pval{int}] = corr(spkmatNREM_ls.zscoredData(start:stop,:));
+            [corrmat{int} pval{int}] = corr(spkmatNREM_ls.zscoredData(start:stop,:),'rows','complete');
+        elseif int == 3
+            [nah start] = min(abs(spkmatNREM_post_ls.timestamps-intervals(int,1)));
+            [nah stop] = min(abs(spkmatNREM_post_ls.timestamps-intervals(int,2)));
+            [corrmat{int} pval{int}] = corr(spkmatNREM_post_ls.zscoredData(start:stop,:),'rows','complete');
         end
         corrmat{int}(abs(corrmat{int})>.99) = nan;
     end 
@@ -70,9 +88,9 @@ for ii=1:length(d)
         end
     end
 
-    EV_ls(bins,ii) = ((Rmod(2,3) - Rmod(2,1) * Rmod(1,3)) / sqrt((1 - Rmod(2,1)^2) * (1 - Rmod(1,3)^2)))^2;
-    REV_ls(bins,ii) = ((Rmod(2,1) - Rmod(2,3) * Rmod(1,3)) / sqrt((1 - Rmod(2,3)^2) * (1 - Rmod(1,3)^2)))^2;
-    if EV_ls(bins,ii) > 1
+    EV_ls(wind,bins,ii) = ((Rmod(2,3) - Rmod(2,1) * Rmod(1,3)) / sqrt((1 - Rmod(2,1)^2) * (1 - Rmod(1,3)^2)))^2;
+    REV_ls(wind,bins,ii) = ((Rmod(2,1) - Rmod(2,3) * Rmod(1,3)) / sqrt((1 - Rmod(2,3)^2) * (1 - Rmod(1,3)^2)))^2;
+    if EV_ls(wind,bins,ii) > 1
        error('problem..') 
     end
     end
@@ -83,14 +101,16 @@ for ii=1:length(d)
         hpc_spikes = bz_GetSpikes('region','ca3','noprompts',true);
         hpcRegion{ii} = 'ca3';
     end
-    if ~isempty(hpc_spikes) 
+    if ~isempty(hpc_spikes)  & ~isempty(it)
     hpc_spikesNREM = hpc_spikes;
     hpc_spikesBEHAV = hpc_spikes;
+
     for spk = 1:length(hpc_spikes.times)
 %         if length(hpc_spikes.times{spk})./hpc_spikes.times{spk}(end) < 5 % 2.5Hz FR limit
-%        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},double(SleepState.ints.NREMstate));   
+       hpc_spikesNREM_post.times{spk} = Restrict(hpc_spikes.times{spk},it);   
+       hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},double(SleepState.ints.NREMstate));   
        hpc_spikesBEHAV.times{spk} = Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals); 
-       hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
+%        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
 %         else
 %        hpc_spikesNREM.times{spk} = [];   
 %        hpc_spikesBEHAV.times{spk} = []; 
@@ -100,9 +120,11 @@ for ii=1:length(d)
 
     spkmat_hpc = bz_SpktToSpkmat(hpc_spikesBEHAV.times,'binSize',binSize(bins));
     spkmatNREM_hpc = bz_SpktToSpkmat(hpc_spikesNREM.times,'binSize',binSize(bins));
+    spkmatNREM_post_hpc = bz_SpktToSpkmat(hpc_spikesNREM_post.times,'binSize',binSize(bins));
     for spk = 1:size(spkmat_hpc.data,2)
     spkmat_hpc.zscoredData(:,spk) = zscore(spkmat_hpc.data(:,spk));
     spkmatNREM_hpc.zscoredData(:,spk) = zscore(spkmatNREM_hpc.data(:,spk)); 
+    spkmatNREM_post_hpc.zscoredData(:,spk) = zscore(spkmatNREM_post_hpc.data(:,spk)); 
     end
 
     for int = 1:size(intervals,1)
@@ -110,10 +132,14 @@ for ii=1:length(d)
         [nah stop] = min(abs(spkmat_hpc.timestamps-intervals(int,2)));
 
         [corrmat{int} pval{int}] = corr(spkmat_hpc.zscoredData(start:stop,:));
-        if  int == 1 | int == 3
+        if  int == 1 
             [nah start] = min(abs(spkmatNREM_hpc.timestamps-intervals(int,1)));
             [nah stop] = min(abs(spkmatNREM_hpc.timestamps-intervals(int,2)));
-            [corrmat{int} pval{int}] = corr(spkmatNREM_hpc.zscoredData(start:stop,:));
+            [corrmat{int} pval{int}] = corr(spkmatNREM_hpc.zscoredData(start:stop,:),'rows','complete');
+        elseif int == 3
+            [nah start] = min(abs(spkmatNREM_post_hpc.timestamps-intervals(int,1)));
+            [nah stop] = min(abs(spkmatNREM_post_hpc.timestamps-intervals(int,2)));
+            [corrmat{int} pval{int}] = corr(spkmatNREM_post_hpc.zscoredData(start:stop,:),'rows','complete');            
         end
         corrmat{int}(abs(corrmat{int})>.99) = nan;
     end
@@ -125,23 +151,24 @@ for ii=1:length(d)
         end
     end
 
-    EV_hpc(bins,ii) = ((Rmod(2,3) - Rmod(2,1) * Rmod(1,3)) / sqrt((1 - Rmod(2,1)^2) * (1 - Rmod(1,3)^2)))^2;
-    REV_hpc(bins,ii) = ((Rmod(2,1) - Rmod(2,3) * Rmod(1,3)) / sqrt((1 - Rmod(2,3)^2) * (1 - Rmod(1,3)^2)))^2;
+    EV_hpc(wind,bins,ii) = ((Rmod(2,3) - Rmod(2,1) * Rmod(1,3)) / sqrt((1 - Rmod(2,1)^2) * (1 - Rmod(1,3)^2)))^2;
+    REV_hpc(wind,bins,ii) = ((Rmod(2,1) - Rmod(2,3) * Rmod(1,3)) / sqrt((1 - Rmod(2,3)^2) * (1 - Rmod(1,3)^2)))^2;
         
-    if EV_hpc(bins,ii) > 1
+    if EV_hpc(wind,bins,ii) > 1
        error('problem..') 
     end
     end
     
     %% cross region
     spikes = bz_GetSpikes('noprompts',true);
-    if ~isempty(spikes) 
+    if ~isempty(spikes)  & ~isempty(it)
     spikesNREM = spikes;
     spikesBEHAV = spikes;
     for spk = 1:length(spikes.times)
-%         spikesNREM.times{spk} = Restrict(spikes.times{spk},double(SleepState.ints.NREMstate));   
+        spikesNREM.times{spk} = Restrict(spikes.times{spk},double(SleepState.ints.NREMstate));   
         spikesBEHAV.times{spk} = Restrict(spikes.times{spk},behavior.events.trialIntervals);  
-        spikesNREM.times{spk} = Restrict(spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
+        spikesNREM_post.times{spk} = Restrict(spikes.times{spk},it); 
+%         spikesNREM.times{spk} = Restrict(spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
        for spk2 = 1:length(spikes.times)
            if strcmp(spikes.region{spk},'hpc') & strcmp(spikes.region{spk2},'ls')
               idx(spk,spk2) = 1;
@@ -153,9 +180,11 @@ for ii=1:length(d)
 
     spkmat = bz_SpktToSpkmat(spikesBEHAV.times,'binSize',binSize(bins));
     spkmatNREM = bz_SpktToSpkmat(spikesNREM.times,'binSize',binSize(bins));
+    spkmatNREM_post = bz_SpktToSpkmat(spikesNREM_post.times,'binSize',binSize(bins));
     for spk = 1:size(spkmat.data,2)
     spkmat.zscoredData(:,spk) = zscore(spkmat.data(:,spk));
     spkmatNREM.zscoredData(:,spk) = zscore(spkmatNREM.data(:,spk)); 
+    spkmatNREM_post.zscoredData(:,spk) = zscore(spkmatNREM_post.data(:,spk)); 
     end
 %     clear spikes*
     for int = 1:size(intervals,1)
@@ -163,10 +192,14 @@ for ii=1:length(d)
         [nah stop] = min(abs(spkmat.timestamps-intervals(int,2)));
 
         [corrmat{int} pval{int}] = corr(spkmat.zscoredData(start:stop,:));
-        if int == 1 | int == 3
+        if int == 1 
             [nah start] = min(abs(spkmatNREM.timestamps-intervals(int,1)));
             [nah stop] = min(abs(spkmatNREM.timestamps-intervals(int,2)));
-            [corrmat{int} pval{int}] = corr(spkmatNREM.zscoredData(start:stop,:));
+            [corrmat{int} pval{int}] = corr(spkmatNREM.zscoredData(start:stop,:),'rows','complete');
+        elseif int == 3
+            [nah start] = min(abs(spkmatNREM_post.timestamps-intervals(int,1)));
+            [nah stop] = min(abs(spkmatNREM_post.timestamps-intervals(int,2)));
+            [corrmat{int} pval{int}] = corr(spkmatNREM_post.zscoredData(start:stop,:),'rows','complete');
         end
         corrmat{int}(abs(corrmat{int})>.99) = nan;
         corrmat{int}(find(idx==0)) = nan;
@@ -180,8 +213,8 @@ for ii=1:length(d)
         end
     end
 
-    EV_cross(bins,ii) = ((Rmod(2,3) - Rmod(2,1) * Rmod(1,3)) / sqrt((1 - Rmod(2,1)^2) * (1 - Rmod(1,3)^2)))^2;
-    REV_cross(bins,ii) = ((Rmod(2,1) - Rmod(2,3) * Rmod(1,3)) / sqrt((1 - Rmod(2,3)^2) * (1 - Rmod(1,3)^2)))^2;
+    EV_cross(wind,bins,ii) = ((Rmod(2,3) - Rmod(2,1) * Rmod(1,3)) / sqrt((1 - Rmod(2,1)^2) * (1 - Rmod(1,3)^2)))^2;
+    REV_cross(wind,bins,ii) = ((Rmod(2,1) - Rmod(2,3) * Rmod(1,3)) / sqrt((1 - Rmod(2,3)^2) * (1 - Rmod(1,3)^2)))^2;
 
     end
     behavType{ii} = behavior.description;
@@ -199,10 +232,13 @@ for ii=1:length(d)
     EV_cross(EV_cross==Inf) = nan;
     REV_cross(REV_cross==Inf) = nan;
     
+    
+    figure(wind)
+    
     subplot(3,4,bins)
-    histogram(EV_ls(bins,EV_ls(bins,:)~=0)-REV_ls(bins,EV_ls(bins,:)~=0),-1:.1:1,'normalization','pdf','FaceColor','m')
+    histogram(EV_ls(wind,bins,EV_ls(wind,bins,:)~=0)-REV_ls(wind,bins,EV_ls(wind,bins,:)~=0),-1:.1:1,'normalization','pdf','FaceColor','m')
     hold on
-    histogram(EV_hpc(bins,EV_hpc(bins,:)~=0)-REV_hpc(bins,EV_hpc(bins,:)~=0),-1:.1:1,'normalization','pdf','FaceColor','k')
+    histogram(EV_hpc(wind,bins,EV_hpc(wind,bins,:)~=0)-REV_hpc(wind,bins,EV_hpc(wind,bins,:)~=0),-1:.1:1,'normalization','pdf','FaceColor','k')
     hold off
     title(binSize(bins))
     subplot(3,4,10)
@@ -216,12 +252,12 @@ for ii=1:length(d)
 %     boxplot(REV_ls(bins,:),'colors','k','symbol','')
 %     hold on
 %     plot(bins+.5,REV_cross(bins,:),'.b')
-    boxplot((EV_ls(1:bins,:))','colors','b')
-    boxplot((EV_ls(1:bins,:))','colors','b')
+    boxplot(squeeze(EV_ls(wind,1:bins,:))','colors','b')
+    boxplot(squeeze(EV_ls(wind,1:bins,:))','colors','b')
     
 %     boxplot(binSize(1:bins),nanmedian(EV_cross(1:bins,:),2),sem(EV_cross(1:bins,:),2),'.b')
 %     hold on
-    errorbar(binSize(1:bins),nanmedian(REV_cross(1:bins,:),2),sem(REV_cross(1:bins,:),2),'.r')
+    errorbar(binSize(1:bins),nanmedian(REV_cross(wind,1:bins,:),3),sem((REV_cross(wind,1:bins,:)),3),'.r')
     title('hpc-ls cross region')
     set(gca,'xscale','log')
     hold off
@@ -232,9 +268,9 @@ for ii=1:length(d)
 %     raincloud_plot('X',REV_ls(bins,:),'box_on', 1, 'bandwidth',.025,'color', [0 0 1], 'alpha', 0.5,...
 %     'box_dodge', 1, 'box_dodge_amount', .15+bins/2, 'dot_dodge_amount', .15+bins/2, 'box_col_match', 1,'cloud_edge_col', [0 0 1]);
 
-    errorbar(binSize(1:bins),nanmedian(EV_ls(1:bins,:),2),sem(EV_ls(1:bins,:),2),'.b')
+    errorbar(binSize(1:bins),nanmedian(EV_ls(wind,1:bins,:),3),sem((EV_ls(wind,1:bins,:)),3),'.b')
     hold on
-    errorbar(binSize(1:bins),nanmedian(REV_ls(1:bins,:),2),sem(REV_ls(1:bins,:),2),'.r')
+    errorbar(binSize(1:bins),nanmedian(REV_ls(wind,1:bins,:),3),sem((REV_ls(wind,1:bins,:)),3),'.r')
     title('ls')
     set(gca,'xscale','log')
     hold off
@@ -244,9 +280,9 @@ for ii=1:length(d)
 % 
 %     raincloud_plot('X',REV_hpc(bins,:),'box_on', 1, 'bandwidth',.025,'color', [0 0 1], 'alpha', 0.5,...
 %     'box_dodge', 1, 'box_dodge_amount', .15+bins/2, 'dot_dodge_amount', .15+bins/2, 'box_col_match', 1,'cloud_edge_col', [0 0 1]);
-    errorbar(binSize(1:bins),nanmedian(EV_hpc(1:bins,:),2),sem(EV_hpc(1:bins,:),2),'.b')
+    errorbar(binSize(1:bins),nanmedian(EV_hpc(wind,1:bins,:),3),sem((EV_hpc(wind,1:bins,:)),3),'.b')
     hold on
-    errorbar(binSize(1:bins),nanmedian(REV_hpc(1:bins,:),2),sem(REV_hpc(1:bins,:),2),'.r')
+    errorbar(binSize(1:bins),nanmedian(REV_hpc(wind,1:bins,:),3),sem((REV_hpc(wind,1:bins,:)),3),'.r')
     hold off
     title('hpc')
     set(gca,'xscale','log')
@@ -255,7 +291,8 @@ for ii=1:length(d)
     
 
     pause(.1)
-
+    end
+    wind = 1+wind;
     end
     end
 cd ~/datasets/ripples_LS/
