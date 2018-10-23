@@ -217,11 +217,6 @@ sessionInfo = bz_getSessionInfo;
     
    for t = 1:length(firingMaps.rateMaps)
         if size(firingMaps.rateMaps{t},2) >= 9
-        rates = squeeze(mean(firingMaps.rateMaps{t}(idx_hpc,:,:),2));
-        for spk = 1:size(rates,1)
-            rates(spk,:) = mean_norm(rates(spk,:));
-        end
-        [a b ord] = sort_cells(rates);
 %         
          for spk=1:length(spikes.times)
             pf(spk) = ~isempty(fields{t}{spk});
