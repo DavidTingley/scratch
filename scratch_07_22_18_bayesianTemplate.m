@@ -284,13 +284,13 @@ overlap = 5;
                     end
                     [Pr_shuf prMax_shuf] = placeBayes((data(:,keep)')', template_shuf(keep,:), spkmatNREM_hpc.dt*150);
                     corrs_hpc_shuf(t,event,iter) = corr([1:length(prMax_shuf)]',prMax_shuf,'rows','complete');
-                    subplot(4,2,6)
-                    [slope_hpc_shuf(t,event,iter) integral_hpc_shuf(t,event,iter)] = Pr2Radon(Pr_shuf',1);
+%                     subplot(4,2,6)
+                    [slope_hpc_shuf(t,event,iter) integral_hpc_shuf(t,event,iter)] = Pr2Radon(Pr_shuf');
                 end
 
                 if sum(sum(spkmatNREM_hpc.data(start:stop,:)))> 5 * overlap & sum(~isnan(sum(Pr')))>5
-                    subplot(4,2,4)
-                    [slope_hpc(t,event) integral_hpc(t,event) ] = Pr2Radon(Pr',1);
+%                     subplot(4,2,4)
+                    [slope_hpc(t,event) integral_hpc(t,event) ] = Pr2Radon(Pr');
                 else 
                     corrs_hpc(t,event) = nan;
                     corrs_hpc_shuf(t,event,1:100) = nan;
