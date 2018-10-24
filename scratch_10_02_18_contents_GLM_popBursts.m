@@ -37,7 +37,7 @@ count=0;
         if ~isempty(SleepState) & ~isempty(ca1.ripples) & isfield(SleepState.ints,'NREMstate')
             
             
-        ca1.ripples.peaks = ca1.ripples.peaks;
+        ca1.ripples.peaks = popBursts.bursts;
         ca1.ripples.timestamps = popBursts.timestamps;
         
         
