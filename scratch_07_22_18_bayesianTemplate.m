@@ -238,42 +238,44 @@ overlap = 5;
             start = round((round(ripples.timestamps(event,1) * 1000)-50) ./ (spkmatNREM_hpc.dt*1000));
             stop = round((round(ripples.timestamps(event,2) * 1000)+50) ./ (spkmatNREM_hpc.dt*1000));
             
-            for spk = 1:size(spkmatNREM_hpc.data,2)
-                    data(:,spk) = mean_norm(spkmatNREM_hpc.data(start:stop,spk)')';  
-                    counts(:,spk) = (spkmatNREM_hpc.data(start:stop,spk)')';  
-            end
-             
-            % get max rate bin
-%             [a b] = max(sum(data(:,keep),2));
-            % or search from middle...
-            b = round(size(data,1)/2);
+            if stop < size(spkmatNREM_hpc.data,1) & stop-start > 10
+                
+                
+                for spk = 1:size(spkmatNREM_hpc.data,2)
+                        data(:,spk) = mean_norm(spkmatNREM_hpc.data(start:stop,spk)')';  
+                        counts(:,spk) = (spkmatNREM_hpc.data(start:stop,spk)')';  
+                end
+
+                % get max rate bin
+    %             [a b] = max(sum(data(:,keep),2));
+                % or search from middle...
+                b = round(size(data,1)/2);
+
+                 % find clipping point at beginning
+                 sta = 1;
+                while sum(counts(b-sta,keep),2) > 2 & b-sta > 1 % max length is +/-50
+                   sta = sta + 1;
+                end
+                 % find clipping point at beginning
+                 sto = 1;
+                while sum(counts(b+sto,keep),2) > 2 & sto +b < size(data,1)-1  % max length 500 ms
+                   sto = sto + 1;
+                end
+
+                % redefine start/stop by pop burst..
+                data = data(b-sta:b+sto,:);
+
+                if size(data,1) > 10
+                    [Pr, prMax] = placeBayes(data(:,keep), template(keep,:), spkmatNREM_hpc.dt*150);
+    %                 % horse shit pfieffer/foster event clipping...
+    %                 
+    %                 gaps = unique([1 find(abs(diff(prMax))>15)' length(prMax)]);
+    %                 [a b] = max(diff(gaps));
+    %                 % only cuts if gap is found...
+    %                 prMax = prMax(gaps(b):gaps(b+1));
+    %                 data = data(gaps(b):gaps(b+1),:); 
+                end
             
-             % find clipping point at beginning
-             sta = 1;
-            while sum(counts(b-sta,keep),2) > 2 & b-sta > 1 % max length is +/-50
-               sta = sta + 1;
-            end
-             % find clipping point at beginning
-             sto = 1;
-            while sum(counts(b+sto,keep),2) > 2 & sto +b < size(data,1)-1  % max length 500 ms
-               sto = sto + 1;
-            end
-            
-            % redefine start/stop by pop burst..
-            data = data(b-sta:b+sto,:);
-           
-            if size(data,1) > 10
-                [Pr, prMax] = placeBayes(data(:,keep), template(keep,:), spkmatNREM_hpc.dt*150);
-%                 % horse shit pfieffer/foster event clipping...
-%                 
-%                 gaps = unique([1 find(abs(diff(prMax))>15)' length(prMax)]);
-%                 [a b] = max(diff(gaps));
-%                 % only cuts if gap is found...
-%                 prMax = prMax(gaps(b):gaps(b+1));
-%                 data = data(gaps(b):gaps(b+1),:); 
-            end
-            
-            if stop < size(spkmatNREM_hpc.data,1) & size(data,1) > 10
                 % now calc correlations and control distro w/ cut data...
                 corrs_hpc(t,event) = corr([1:length(prMax)]',prMax,'rows','complete');
                 
