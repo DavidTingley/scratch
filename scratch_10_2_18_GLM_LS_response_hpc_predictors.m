@@ -1,4 +1,3 @@
- all% 
 % clear all
 d = dir('*201*');
 warning off
@@ -51,15 +50,15 @@ if exist([d(i).name '.content_GLM_ripple.mat']) & ...
 dat = load([d(i).name '.content_GLM_ripple.mat'],'content');
 content(i) = dat.content;
 
-dat = load([d(i).name '.bayesianResults_ripples.mat'],'integral_hpc');
-if isfield(dat,'integral_hpc')
-bay{i} = dat.integral_hpc;
-else
-bay{i} = nan(2,length(content(i).nSpikes{1}));
-end
-
-dat = load([d(i).name '.rankOrder_ripples.mat'],'rankOrder');
-rankOrder{i} = dat.rankOrder;
+% dat = load([d(i).name '.bayesianResults_ripples.mat'],'integral_hpc');
+% if isfield(dat,'integral_hpc')
+% bay{i} = dat.integral_hpc;
+% else
+% bay{i} = nan(2,length(content(i).nSpikes{1}));
+% end
+% 
+% dat = load([d(i).name '.rankOrder_ripples.mat'],'rankOrder');
+% rankOrder{i} = dat.rankOrder;
 
 %% seqNMF data here
 % seq = load([d(i).name '_seqNMF.ripples.hpc.mat']);
@@ -109,9 +108,9 @@ predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ...
               content(rec).condition{1}...
               content(rec).location{1}...
               content(rec).SleepState{1}...
-              content(rec).duration{1}'...
-              nanmax(bay{rec})'...
-              nanmean(rankOrder{rec})'];%...
+              content(rec).duration{1}'];%...
+%               nanmax(bay{rec})'...
+%               nanmean(rankOrder{rec})'];%...
           
 actual = content(rec).ls_popBurst{1};
 % actual = content(rec).ls_power{1}';
@@ -162,12 +161,12 @@ if isempty(hpc)
     hpc = find(strcmp(content(rec).region{1},'ca3'));
 end
 
-keep = find(~isnan(sum(predictors,2))); 
+% keep = find(~isnan(sum(predictors,2))); 
 
 for spk = 1:length(idx)
 %       if mean(actual) > 0
        for p = 1:size(predictors,2)
-%            keep = find(~isnan((predictors(:,p)))); 
+           keep = find(~isnan((predictors(:,p)))); 
            actual = content(rec).nSpikes{1}(idx(spk),keep); 
         if ~isnan(nansum(predictors(:,p))) & length(keep) > 10
             [beta dev(p) ] = glmfit(predictors(keep,:),actual,'normal');

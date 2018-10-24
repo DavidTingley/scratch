@@ -32,11 +32,15 @@ count=0;
         intervals = [pre; behav; post];
     
 %         ca1 = load([sessionInfo.FileName '.CA1Ripples.events.mat']);
-%         popBursts = bz_LoadEvents(pwd,'popBursts');
+        popBursts = bz_LoadEvents(pwd,'popBursts');
         ca1.ripples = bz_LoadEvents(pwd,'CA1Ripples');
         if ~isempty(SleepState) & ~isempty(ca1.ripples) & isfield(SleepState.ints,'NREMstate')
-%         ca1.ripples.peaks = ca1.ripples.peaks;
-%         ca1.ripples.timestamps = popBursts.timestamps;
+            
+            
+        ca1.ripples.peaks = ca1.ripples.peaks;
+        ca1.ripples.timestamps = popBursts.timestamps;
+        
+        
         spikes = bz_GetSpikes('noprompts',true);
         ls_spikes= bz_GetSpikes('noprompts',true,'region','ls');
         if ~isempty(ls_spikes)
@@ -242,7 +246,7 @@ count=0;
 % pause(.001)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-save([sessionInfo.FileName '.content_GLM_ripple.mat'],'-v7.3')
+save([sessionInfo.FileName '.content_GLM_popBursts_50ms.mat'],'-v7.3')
     rec
     clear totSpks State meanPeakRate condition rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content* PF cellLoc*
         end
