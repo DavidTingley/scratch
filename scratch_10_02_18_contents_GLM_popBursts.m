@@ -1,4 +1,4 @@
-function []  = scratch_10_02_18_contents_GLM_ripples()
+function []  = scratch_10_02_18_contents_GLM_popBursts()
 % d = dir('*201*');
 count=0;
 % [b a] = butter(4,[110/625 200/625],'bandpass');
