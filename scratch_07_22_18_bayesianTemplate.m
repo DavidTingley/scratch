@@ -253,12 +253,12 @@ overlap = 5;
 
                  % find clipping point at beginning
                  sta = 1;
-                while sum(counts(b-sta,keep),2) > 2 & b-sta > 1 % max length is +/-50
+                while sum(counts(b-sta,keep),2) > 1 & b-sta > 1 % max length is +/-50
                    sta = sta + 1;
                 end
                  % find clipping point at beginning
                  sto = 1;
-                while sum(counts(b+sto,keep),2) > 2 & sto +b < size(data,1)-1  % max length 500 ms
+                while sum(counts(b+sto,keep),2) > 1 & sto +b < size(data,1)-1  % max length 500 ms
                    sto = sto + 1;
                 end
 
