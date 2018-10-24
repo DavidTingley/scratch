@@ -275,7 +275,8 @@ overlap = 5;
     %                 prMax = prMax(gaps(b):gaps(b+1));
     %                 data = data(gaps(b):gaps(b+1),:); 
                 end
-            
+            end
+            if stop < size(spkmatNREM_hpc.data,1) & size(data,1) > 10
                 % now calc correlations and control distro w/ cut data...
                 corrs_hpc(t,event) = corr([1:length(prMax)]',prMax,'rows','complete');
                 
