@@ -87,11 +87,11 @@ count=0;
         hpc_rec = [];
 %         hpc_pop = [];
         for event = 1:size(ca1.ripples.timestamps,1)
-            start = round((ca1.ripples.timestamps(event,1)-.05) * 1250); % used to be 20 ms
+            start = round((ca1.ripples.timestamps(event,1)-.025) * 1250); % used to be 20 ms
             if start<1
                 start = 1;
             end
-            stop = round((ca1.ripples.timestamps(event,2)+.05) * 1250);
+            stop = round((ca1.ripples.timestamps(event,2)+.025) * 1250);
             if stop > length(ls_power)
                 stop = length(ls_power);
             end
@@ -100,11 +100,11 @@ count=0;
             hpc_rec=[hpc_rec;ls_max,hpc_max];
             
             
-            start = round((ca1.ripples.timestamps(event,1)-.05) * 1000); % used to be 20 ms
+            start = round((ca1.ripples.timestamps(event,1)-.025) * 1000); % used to be 20 ms
             if start<1
                 start = 1;
             end
-            stop = round((ca1.ripples.timestamps(event,2)+.05) * 1000);
+            stop = round((ca1.ripples.timestamps(event,2)+.025) * 1000);
             if stop > length(ls_power)
                 stop = length(ls_power);
             end
@@ -157,11 +157,11 @@ count=0;
             meanPeakRate(spk) = nanmax(olypherInfo.results{spk}.ratePeakInfo(cols)); % used to be nanmean
             
             for ind = 1:length(ca1.ripples.peaks)
-                start = ((ca1.ripples.peaks(ind)-.05)); % used to be 20 ms
+                start = ((ca1.ripples.peaks(ind)-.025)); % used to be 20 ms
                 if start<1
                     start = 1;
                 end
-                stop = ((ca1.ripples.peaks(ind)+.05));
+                stop = ((ca1.ripples.peaks(ind)+.025));
                 ripSpks = Restrict(spikes.times{spk},[start stop]);
                 duration(ind) = stop-start;
                 spatialContent(spk,ind) = meanPeakRate(spk);
@@ -254,7 +254,7 @@ count=0;
 % pause(.001)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-save([sessionInfo.FileName '.content_GLM_popBursts_50ms.mat'],'-v7.3')
+save([sessionInfo.FileName '.content_GLM_popBursts_25ms.mat'],'-v7.3')
     rec
     clear totSpks State meanPeakRate condition rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content* PF cellLoc*
         end
