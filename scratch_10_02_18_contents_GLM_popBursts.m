@@ -168,7 +168,9 @@ count=0;
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk);
                 PF(spk,ind) = (hasField(spk)>0);
                 nSpikes(spk,ind) = length(ripSpks);
-                cellLoc_wav(spk,ind) = spikes.chanDepthRelative_CA1PYR_wav(spk);
+                if isfield(spikes,'chanDepthRelative_CA1PYR_wav')
+                    cellLoc_wav(spk,ind) = spikes.chanDepthRelative_CA1PYR_wav(spk);
+                end
                 totSpks(spk,ind) = length(Restrict(spikes.times{spk},...
                                     [ca1.ripples.timestamps(ind,1)-.1 ca1.ripples.timestamps(ind,2)+.1]));
                 
