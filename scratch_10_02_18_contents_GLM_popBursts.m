@@ -60,7 +60,11 @@ count=0;
         end
         %% get LFP power for all events..        
         ls.lfp = bz_GetLFP(sessionInfo.ls);
-        ca1.lfp = bz_GetLFP(sessionInfo.ca1);
+        if ~isempty(sessionInfo.ca1)
+            ca1.lfp = bz_GetLFP(sessionInfo.ca1);
+        else
+            ca1.lfp = bz_GetLFP(sessionInfo.ca3);
+        end
         ls_power = (fastrms(FiltFiltM(b,a,double(ls.lfp.data)),12));
         spkmat_hpc = bz_SpktToSpkmat(hpc_spikes,'binSize',.001,'overlap',1);
         spkmat_ls = bz_SpktToSpkmat(ls_spikes,'binSize',.001,'overlap',1);
