@@ -169,22 +169,25 @@ for spk = 1:length(idx)
            keep = find(~isnan((predictors(:,p)))); 
            actual = content(rec).nSpikes{1}(idx(spk),keep); 
         if ~isnan(nansum(predictors(:,p))) & length(keep) > 10
-            [beta dev(p) ] = glmfit(predictors(keep,:),actual,'normal');
-            yfit = glmval(beta,predictors(keep,:),'identity');
+            [beta dev(p) ] = glmfit(predictors(keep,p),actual,'normal');
+            yfit = glmval(beta,predictors(keep,p),'identity');
+%             [beta dev(p) ] = glmfit(predictors(keep,:),actual,'normal');
+%             yfit = glmval(beta,predictors(keep,:),'identity');
             mse(p) = nanmean((yfit-actual').^2);
 
             
             [corrs(count,p)] = corr(predictors(keep,p),actual','rows','complete');
        
             for iter = 1:100
-                 pred_shuf = [predictors(keep,1:p-1) bz_shuffleCircular(predictors(keep,p)')' predictors(keep,p+1:end) ];
-%                 pred_shuf = bz_shuffleCircular(predictors(keep,p)')';
+%                  pred_shuf = [predictors(keep,1:p-1) bz_shuffleCircular(predictors(keep,p)')' predictors(keep,p+1:end) ];
+                pred_shuf = bz_shuffleCircular(predictors(keep,p)')';
     %             pred_shuf = predictors(randperm(size(predictors,1)),p);
                 [beta dev_shuf(p,iter)] = glmfit(pred_shuf,actual,'normal');
                 yfit = glmval(beta,pred_shuf,'identity');
                 mse_shuf(p,iter) = nanmean((yfit-actual').^2);
                 
-                [corrs_shuff(count,p,iter)] = corr(pred_shuf(:,p),actual','rows','complete');
+%                 [corrs_shuff(count,p,iter)] = corr(pred_shuf(:,p),actual','rows','complete');
+                [corrs_shuff(count,p,iter)] = corr(pred_shuf,actual','rows','complete');
             end
                     
         [ft r1]= fit(predictors(keep,p),actual','poly1');

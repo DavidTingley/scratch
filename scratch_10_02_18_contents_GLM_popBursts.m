@@ -34,12 +34,14 @@ count=0;
 %         ca1 = load([sessionInfo.FileName '.CA1Ripples.events.mat']);
         popBursts = bz_LoadEvents(pwd,'popBursts');
         ca1.ripples = bz_LoadEvents(pwd,'CA1Ripples');
-        if ~isempty(SleepState) & ~isempty(ca1.ripples) & isfield(SleepState.ints,'NREMstate')
-            
-            
         ca1.ripples.peaks = popBursts.bursts;
         ca1.ripples.timestamps = popBursts.timestamps;
         
+        
+        if ~isempty(SleepState) & ~isempty(ca1.ripples) & isfield(SleepState.ints,'NREMstate')
+            
+            
+
         
         spikes = bz_GetSpikes('noprompts',true);
         ls_spikes= bz_GetSpikes('noprompts',true,'region','ls');
