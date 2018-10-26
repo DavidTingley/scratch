@@ -1,4 +1,4 @@
-function [] = scratch_07_22_18_rankeOrder_popBursts(thresh)
+function [] = scratch_07_22_18_rankeOrder_popBursts()
 % cd D:\Dropbox\datasets\lsDataset
 d = dir('*201*');
 binSize = [.001];
@@ -39,7 +39,7 @@ overlap = 1;
         ~isempty(ripples) & ...
         isfield(SleepState.ints,'NREMstate') & ~isempty(SleepState.ints.NREMstate)
     load([sessionInfo.FileName '.behavior.mat'])
-    load([sessionInfo.FileName '.placeFields.' (thresh) '_pctThresh.mat'])
+    load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
     [firingMaps] = bz_firingMap1D(spikes,behavior,4);
 %     binnedPhaseMaps = bz_phaseMap2Bins(phaseMaps.phaseMaps,firingMaps.rateMaps,behavior);
     
