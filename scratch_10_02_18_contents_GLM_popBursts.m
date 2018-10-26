@@ -8,9 +8,9 @@ count=0;
 % for rec = 1:length(d)
 %     cd(d(rec).name)
     sessionInfo = bz_getSessionInfo;
-    if  exist([sessionInfo.FileName '.olypherInfo_w_disc.cellinfo.mat']) & exist([sessionInfo.FileName '.behavior.mat'])
+    if  exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat']) & exist([sessionInfo.FileName '.behavior.mat'])
         load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
-        load([sessionInfo.FileName '.olypherInfo_w_disc.cellinfo.mat'],'olypherInfo')
+%         load([sessionInfo.FileName '.olypherInfo_w_disc.cellinfo.mat'],'olypherInfo')
         load([sessionInfo.FileName '.rewardModulation.cellinfo.mat'],'rewardModulation')
         load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
         SleepState = bz_LoadStates(pwd,'SleepState');
@@ -34,15 +34,14 @@ count=0;
 %         ca1 = load([sessionInfo.FileName '.CA1Ripples.events.mat']);
         popBursts = bz_LoadEvents(pwd,'popBursts');
         ca1.ripples = bz_LoadEvents(pwd,'CA1Ripples');
-        ca1.ripples.peaks = popBursts.bursts;
-        ca1.ripples.timestamps = popBursts.timestamps;
-        
+        if ~isempty(popBursts)
+            ca1.ripples.peaks = popBursts.bursts;
+            ca1.ripples.timestamps = popBursts.timestamps;
+        end
         
         if ~isempty(SleepState) & ~isempty(ca1.ripples) & isfield(SleepState.ints,'NREMstate')
             
-            
-
-        
+                   
         spikes = bz_GetSpikes('noprompts',true);
         ls_spikes= bz_GetSpikes('noprompts',true,'region','ls');
         if ~isempty(ls_spikes)
@@ -114,7 +113,7 @@ count=0;
         end
         
         %% get that content, initialize
-        spatialContent = zeros(length(spikes.times),length(ca1.ripples.peaks));
+%         spatialContent = zeros(length(spikes.times),length(ca1.ripples.peaks));
         rewardContent = zeros(length(spikes.times),length(ca1.ripples.peaks));
         nSpikes = zeros(length(spikes.times),length(ca1.ripples.peaks));
         PF = zeros(length(spikes.times),length(ca1.ripples.peaks));
@@ -149,12 +148,12 @@ count=0;
         % cell specific stuff
         for spk = 1:length(spikes.times)
 %             if strcmp(hpc_spikes.region{spk},'hpc') | strcmp(hpc_spikes.region{spk},'ca3') | strcmp(hpc_spikes.region{spk},'ca1') 
-            rows = find(olypherInfo.results{spk}.discBins==2); 
-            cols = find(olypherInfo.results{spk}.smoothing==20);
-            cols = intersect(rows,cols);
+%             rows = find(olypherInfo.results{spk}.discBins==2); 
+%             cols = find(olypherInfo.results{spk}.smoothing==20);
+%             cols = intersect(rows,cols);
             
             % olypher info variant
-            meanPeakRate(spk) = nanmax(olypherInfo.results{spk}.ratePeakInfo(cols)); % used to be nanmean
+%             meanPeakRate(spk) = nanmax(olypherInfo.results{spk}.ratePeakInfo(cols)); % used to be nanmean
             
             for ind = 1:length(ca1.ripples.peaks)
                 start = ((ca1.ripples.peaks(ind)-.025)); % used to be 20 ms
@@ -164,7 +163,7 @@ count=0;
                 stop = ((ca1.ripples.peaks(ind)+.025));
                 ripSpks = Restrict(spikes.times{spk},[start stop]);
                 duration(ind) = stop-start;
-                spatialContent(spk,ind) = meanPeakRate(spk);
+%                 spatialContent(spk,ind) = meanPeakRate(spk);
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk);
                 PF(spk,ind) = (hasField(spk)>0);
                 nSpikes(spk,ind) = length(ripSpks);
@@ -188,15 +187,15 @@ count=0;
     content.condition{rec} = condition; 
     content.SleepState{rec} = State;
     content.region{rec} = spikes.region{end};
-    content.nCells{rec} = size(spatialContent,1);
-    content.spatialContent{rec} = spatialContent;
+    content.nCells{rec} = size(rewardContent,1);
+%     content.spatialContent{rec} = spatialContent;
     content.rewardContent{rec} = rewardContent;
     content.nSpikes{rec} = nSpikes;
     content.PF{rec} = PF;
     content.hpc_popBurst{rec} = hpc_pop;
     content.ls_popBurst{rec} = ls_pop;
     content.cellLoc_wav{rec} = cellLoc_wav;
-    content.meanPeakRate{rec} = meanPeakRate;
+%     content.meanPeakRate{rec} = meanPeakRate;
     content.rewardGain{rec} = rewardModulation.rewardGain;
     content.hpc_power{rec} = hpc_rec(:,2);
     content.ls_power{rec} = hpc_rec(:,1);
