@@ -1,31 +1,87 @@
 % clear all
 d = dir('*201*');
 warning off
-cd  ~/datasets/ripples_LS/
+% cd  ~/datasets/ripples_LS/
+
+for i=1:length(d)
+cd(d(i).name)
+if exist([d(i).name '.content_GLM_popBursts_25ms.mat'])% & ...
+%         exist([d(i).name '.bayesianResults_popBursts.mat']) & ...
+%         exist([d(i).name '_seqNMF.popBursts.hpc.mat']) 
+%         exist([d(i).name '.rankOrder_popBursts.mat'])% & ...
+        
+    
+dat = load([d(i).name '.content_GLM_popBursts_25ms.mat'],'content');
+content(i) = dat.content;
+% 
+if  exist([d(i).name '.bayesianResults_popBursts.mat']) 
+    dat = load([d(i).name '.bayesianResults_popBursts.mat'],'integral_hpc','corr*');
+    if isfield(dat,'integral_hpc')
+    bay{i} = dat.integral_hpc;
+    else
+    bay{i} = nan(2,length(content(i).nSpikes{1}));
+    end
+else
+    bay{i} = nan(2,length(content(i).nSpikes{1}));
+end
+
+%% rank order correlations here 
+% dat = load([d(i).name '.rankOrder_ripples.mat'],'rankOrder');
+if isfield(dat,'corrs_hpc')
+    rankOrder{i} = absmax(dat.corrs_hpc); %dat.rankOrder;
+else
+    rankOrder{i} = nan(1,length(content(i).nSpikes{1}));
+end
+
+
+%% seqNMF data here
+if exist([d(i).name '_seqNMF.popBursts.hpc.mat']) 
+seq = load([d(i).name '_seqNMF.popBursts.hpc.mat']);
+if isfield(dat,'corrs_hpc')
+    for e=1:length(dat.integral_hpc)
+        ts= e*101+49;
+        if ts+25<=length(seq.H_hpc)
+            [vec] = max(seq.H_hpc(:,ts-25:ts+25)');
+        else
+            vec = nan; 
+        end
+        seqs{i}(e,:) = vec;
+    end
+else
+    seqs{i} = nan(length(content(i).nSpikes{1}),2);
+end
+else
+     seqs{i} = nan(length(content(i).nSpikes{1}),2);
+end
+end
+% cd ..
+cd ~/datasets/ripples_LS/
+end
+
 
 % for i=1:length(d)
 % cd(d(i).name)
-% if exist([d(i).name '.content_GLM_popBursts_25ms.mat'])% & ...
-% %         exist([d(i).name '.bayesianResults_popBursts.mat']) & ...
-% %         exist([d(i).name '.rankOrder_popBursts.mat'])% & ...
-% %         exist([d(i).name '_seqNMF.popBursts.hpc.mat']) 
+% if exist([d(i).name '.content_GLM_ripple_25ms.mat']) & ...
+%         exist([d(i).name '.bayesianResults_ripples.mat'])% & ...
+% %         exist([d(i).name '.rankOrder_ripples.mat'])% & ...
+% %         exist([d(i).name '_seqNMF.ripples.hpc.mat']) 
 %     
-% dat = load([d(i).name '.content_GLM_popBursts_25ms.mat'],'content');
+% dat = load([d(i).name '.content_GLM_ripple_25ms.mat'],'content');
 % content(i) = dat.content;
+% 
+% dat = load([d(i).name '.bayesianResults_ripples.mat'],'integral_hpc*','corr*');
+% if isfield(dat,'integral_hpc')
+% bay{i} = absmax((dat.integral_hpc - nanmean(dat.integral_hpc_shuf,3)) ./ nanstd(dat.integral_hpc_shuf,[],3));
+% else
+% bay{i} = nan(2,length(content(i).nSpikes{1}));
+% end
 % % 
-% % dat = load([d(i).name '.bayesianResults_popBursts.mat'],'integral_hpc');
-% % if isfield(dat,'integral_hpc')
-% % bay{i} = dat.integral_hpc;
-% % else
-% % bay{i} = nan(2,length(content(i).nSpikes{1}));
-% % end
-% % 
-% % dat = load([d(i).name '.rankOrder_popBursts.mat'],'rankOrder');
-% % rankOrder{i} = dat.rankOrder;
+% % dat = load([d(i).name '.rankOrder_ripples.mat'],'rankOrder');
+% rankOrder{i} = absmax(dat.corrs_hpc); %dat.rankOrder;
 % 
 % %% seqNMF data here
-% % seq = load([d(i).name '_seqNMF.popBursts.hpc.mat']);
-% % for e=1:length(dat.integral_hpc)
+% % seq = load([d(i).name '_seqNMF.ripples.hpc.mat']);
+% % for e=1:length(dat.rankOrder)
 % %     ts= e*101+49;
 % %     if ts+25<=length(seq.H_hpc)
 % %         [vec] = max(seq.H_hpc(:,ts-25:ts+25)');
@@ -38,43 +94,6 @@ cd  ~/datasets/ripples_LS/
 % end
 % cd ~/datasets/ripples_LS/
 % end
-
-
-for i=1:length(d)
-cd(d(i).name)
-if exist([d(i).name '.content_GLM_ripple_25ms.mat']) & ...
-        exist([d(i).name '.bayesianResults_ripples.mat'])& ...
-        exist([d(i).name '.rankOrder_ripples.mat'])% & ...
-%         exist([d(i).name '_seqNMF.ripples.hpc.mat']) 
-    
-dat = load([d(i).name '.content_GLM_ripple_25ms.mat'],'content');
-content(i) = dat.content;
-
-% dat = load([d(i).name '.bayesianResults_ripples.mat'],'integral_hpc');
-% if isfield(dat,'integral_hpc')
-% bay{i} = dat.integral_hpc;
-% else
-% bay{i} = nan(2,length(content(i).nSpikes{1}));
-% end
-% 
-% dat = load([d(i).name '.rankOrder_ripples.mat'],'rankOrder');
-% rankOrder{i} = dat.rankOrder;
-
-%% seqNMF data here
-% seq = load([d(i).name '_seqNMF.ripples.hpc.mat']);
-% for e=1:length(dat.rankOrder)
-%     ts= e*101+49;
-%     if ts+25<=length(seq.H_hpc)
-%         [vec] = max(seq.H_hpc(:,ts-25:ts+25)');
-%     else
-%         vec = nan; 
-%     end
-%     seqs{i}(e,:) = vec;
-% end
-
-end
-cd ~/datasets/ripples_LS/
-end
 
 
 
@@ -96,19 +115,21 @@ for rec = 1:length(content)
                 'Sleep state',....
                 'duration',...
                 'rs1 (radon int)',...
-                'rs2 (rank ord)'};
+                'rs2 (rank ord)',...
+                'seqNMF'};
             
             
 predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ...
-              [(nanmean(content(rec).PF{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:))))./nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'... % % of spikes from PF
-              [[nanmean(content(rec).rewardContent{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0))] ./ nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'...
+              [(nanmean(content(rec).PF{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0)))./nanmean(content(rec).nSpikes{1}(idx_hpc,:)~=0)]'... % % of spikes from PF
+              [[nanmean(content(rec).rewardContent{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)))] ./ nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'...
               nanmean(content(rec).cellLoc_wav{1}(idx_hpc,:).*content(rec).nSpikes{1}(idx_hpc,:))'...
               content(rec).condition{1}...
               content(rec).location{1}...
               content(rec).SleepState{1}...
-              content(rec).duration{1}'];%...
-%               nanmax(bay{rec})'...
-%               nanmean(rankOrder{rec})'];%...
+              content(rec).duration{1}'...
+              max(bay{rec})'...
+              rankOrder{rec}'...
+              max(seqs{rec}')'];%...
           
 actual = content(rec).ls_popBurst{1};
 % actual = content(rec).ls_power{1}';
@@ -167,8 +188,8 @@ for spk = 1:length(idx)
            keep = find(~isnan((predictors(:,p)))); 
            actual = content(rec).nSpikes{1}(idx(spk),keep); 
         if ~isnan(nansum(predictors(:,p))) & length(keep) > 10
-            [beta dev(p) ] = glmfit(predictors(keep,p),actual,'normal');
-            yfit = glmval(beta,predictors(keep,p),'identity');
+            [beta dev(p) ] = glmfit([predictors(keep,p)],actual,'normal');
+            yfit = glmval(beta,[predictors(keep,p)],'identity');
 %             [beta dev(p) ] = glmfit(predictors(keep,:),actual,'normal');
 %             yfit = glmval(beta,predictors(keep,:),'identity');
             mse(p) = nanmean((yfit-actual').^2);
@@ -180,8 +201,8 @@ for spk = 1:length(idx)
 %                  pred_shuf = [predictors(keep,1:p-1) bz_shuffleCircular(predictors(keep,p)')' predictors(keep,p+1:end) ];
                 pred_shuf = bz_shuffleCircular(predictors(keep,p)')';
     %             pred_shuf = predictors(randperm(size(predictors,1)),p);
-                [beta dev_shuf(p,iter)] = glmfit(pred_shuf,actual,'normal');
-                yfit = glmval(beta,pred_shuf,'identity');
+                [beta dev_shuf(p,iter)] = glmfit([ pred_shuf],actual,'normal');
+                yfit = glmval(beta,[pred_shuf],'identity');
                 mse_shuf(p,iter) = nanmean((yfit-actual').^2);
                 
 %                 [corrs_shuff(count,p,iter)] = corr(pred_shuf(:,p),actual','rows','complete');
@@ -193,6 +214,8 @@ for spk = 1:length(idx)
         adj_R(p,:) = [r1.adjrsquare r2.adjrsquare];
         
         else
+            mse(p) = nan;
+            mse_shuf(p,1:100) = nan;
             corrs(count,p) = nan;
             pval(count,p) = nan;
             pval_shuff(count,p,1:100) = nan;
@@ -229,6 +252,7 @@ end
 % hold on
 % end
 
+mseZ_cells(mseZ_cells<-1000) = nan;
 idx = find(meanCount>.1);
 [a b] = sort(nanmean(corrs(idx,:)));
 
@@ -242,8 +266,18 @@ subplot(size(corrs,2),1,i)
 
 raincloud_plot('X',mseZ_cells(idx,i),'density_type', 'ks','bandwidth',.2,'color',[0 0 0]);
 raincloud_plot('X',mseZ_cells_shuf(idx,i,1),'density_type', 'ks','bandwidth',.2,'color',[1 0 0]);
-% axis([-20 2 -1 1])
+axis([-110 2 -1 3])
 title(names{i})
 end
 
+
+for i=1:11
+m{i,1} =mseZ_cells(:,i);
+m{i,2} =mseZ_cells_shuf(:,i);
+end
+raincloud_lineplot_2(m)
+m
+clz{1} = repmat([0 0 0],11,1);
+clz{2} = repmat([1 0 0],11,1);
+raincloud_lineplot_2(m,clz,1,1)
 

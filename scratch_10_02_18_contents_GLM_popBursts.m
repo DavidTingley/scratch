@@ -12,7 +12,7 @@ count=0;
         load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
 %         load([sessionInfo.FileName '.olypherInfo_w_disc.cellinfo.mat'],'olypherInfo')
         load([sessionInfo.FileName '.rewardModulation.cellinfo.mat'],'rewardModulation')
-        load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
+%         load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
         SleepState = bz_LoadStates(pwd,'SleepState');
         load([sessionInfo.FileName '.behavior.mat'])
         for i=1:length(behavior.events.trials)
@@ -44,12 +44,15 @@ count=0;
                    
         spikes = bz_GetSpikes('noprompts',true);
         ls_spikes= bz_GetSpikes('noprompts',true,'region','ls');
-        if ~isempty(ls_spikes)
-            
+        
         hpc_spikes= bz_GetSpikes('noprompts',true,'region','hpc');
         if isempty(hpc_spikes)
             hpc_spikes = bz_GetSpikes('noprompts',true,'region','ca3');
         end
+        
+        if ~isempty(ls_spikes) & ~isempty(hpc_spikes)
+            
+
         % 
         hasField = zeros(length(fields{1}),1);
         for i=1:length(fields)
@@ -162,7 +165,7 @@ count=0;
                 end
                 stop = ((ca1.ripples.peaks(ind)+.025));
                 ripSpks = Restrict(spikes.times{spk},[start stop]);
-                duration(ind) = stop-start;
+                duration(ind) = abs(diff(popBursts.timestamps(ind,:)));
 %                 spatialContent(spk,ind) = meanPeakRate(spk);
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk);
                 PF(spk,ind) = (hasField(spk)>0);

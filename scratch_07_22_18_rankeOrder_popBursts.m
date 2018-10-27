@@ -271,11 +271,13 @@ overlap = 1;
                 rankOrder(t,event) = NaN;
                 rankOrder_shuffle(t,event,:) = nan(100,1);
                 idx = [];
+                Pr = [];
             end
             nCells(t,event) = length(idx);
             spkCount(event) = sum(sum(spkmatNREM_hpc.data(start:stop,:)));
             eventDuration(event) = (stop-start)*spkmatNREM_hpc.dt;
 %  
+if ~isempty(Pr)
 subplot(4,2,1)
 histogram(rankOrder,[-1:.05:1],'Normalization','pdf');
 hold on
@@ -284,7 +286,7 @@ hold off
 
 subplot(4,2,2)
 % line([0 3],[.012 .012],'color','r');
-bz_MultiLFPPlot([],'spikes',hpc_spikes,...
+bz_plotEphys([],'spikes',hpc_spikes,...
                     'spikeSpacingFactor',20,...  
                     'scalelfp',5,...
                     'timewin',[ripples.timestamps(event,:)],...
@@ -330,6 +332,7 @@ imagesc(data(:,ord(keep))')
 % ylabel('hpc rate')
  pause(.001)
 clear data
+end
         end
         end
     end

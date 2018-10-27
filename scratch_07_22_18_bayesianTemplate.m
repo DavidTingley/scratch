@@ -1,10 +1,10 @@
 function [] = scratch_07_22_18_bayesianTemplate()
 % cd D:\Dropbox\datasets\lsDataset
 d = dir('*201*');
-binSize = [.005];
+binSize = [.01];
 count_ls = 1;
 count_hpc = 1;
-overlap = 5;
+overlap = 1;
 
 
 
@@ -54,155 +54,17 @@ overlap = 5;
     %% get initial correlations
     intervals = [pre; behav; post];
     
-    
-%     if ~isempty(ls_spikes)
-%     for spk = 1:length(ls_spikes.times)
-% %        ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},double(SleepState.ints.NREMstate)); 
-% %        ls_spikesBEHAV.times{spk} = Restrict(ls_spikes.times{spk},behavior.events.trialIntervals);
-%        ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},[ripples.peaks-.25 ripples.peaks+.25]); 
-%     end
-%     end
-%    for i=2:length(hpc_spikes.times)
+
     for bins = 1:length(binSize)
-%     if ~isempty(ls_spikes) & ~isempty(SleepState.ints.NREMstate) & exist([ls_spikes.sessionName '.behavior.mat']) & all(diff(intervals')>600)
-%         
-% %     spkmat_ls = bz_SpktToSpkmat(ls_spikesBEHAV.times,'overlap',overlap,'binSize',binSize(bins)* overlap);
-%     spkmatNREM_ls = bz_SpktToSpkmat(ls_spikesNREM.times,'overlap',overlap,'binSize',binSize(bins)* overlap);
-%     
-%     for t = 1:length(firingMaps.rateMaps)
-% %         template = squeeze(circ_mean(binnedPhaseMaps{t},[],2))+pi;
-% %         template = squeeze(mean(firingMaps.rateMaps{t},2));
-%         template = squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_ls,:,:),2));
-%         template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_ls,:,:),2)));
-%         for i = 1:size(template,1)
-%            template(i,:) = Smooth(template(i,:),5);
-%            template_shuf(i,:) = Smooth(template_shuf(i,:),5);
-%         end
-%         for event = 1:length(ripples.peaks)
-% %             [n ts] = min(abs(spkmatNREM_ls.timestamps-ripples.peaks(event)));
-%             ts = round(ripples.peaks(event)*(1/spkmatNREM_ls.dt));
-%             if ts+20 < size(spkmatNREM_ls.data,1) & ts > 20
-%             data = spkmatNREM_ls.data(ts-20:ts+20,:);    
-% 
-%             for iter = 1:100
-%                 template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_ls,:,:),2)));
-%                 for i = 1:size(template,1)
-%                    template_shuf(i,:) = Smooth(template_shuf(i,:),5);
-%                 end
-%                 [Pr_shuf prMax_shuf] = placeBayes((data')', template_shuf, spkmatNREM_ls.dt*5);
-%                 [slope_ls_shuf(t,event,iter) integral_ls_shuf(t,event,iter)] = Pr2Radon(Pr_shuf);
-%             end
-%             
-%             [Pr, prMax] = placeBayes(data, template, spkmatNREM_ls.dt*5);
-% %             for i = 1:41
-% %             Pr(i,:) = minmax_norm(Pr(i,:));
-% %             Pr_shuf(i,:) = minmax_norm(Pr_shuf(i,:));
-% %             end
-% %             Pr_shuf= bz_shuffleCircular(Pr);  prMax_shuf = prMax(randperm(length(prMax)));
-% %             corrs_ls(t,event) = corr([1:41]',prMax,'rows','complete'); % exclude nans?
-% %             prMax(sum(spkmatNREM_ls.data(ts-20:ts+20,:)')==0)=nan;
-% %             prMax_shuf(sum(spkmatNREM_ls.data(ts-20:ts+20,:)')==0)=nan;
-% %             Pr(sum(spkmatNREM_ls.data(ts-20:ts+20,:)')==0,:) = nan;
-% %             Pr_shuf(sum(spkmatNREM_ls.data(ts-20:ts+20,:)')==0,:) = nan;
-%             if sum(sum(spkmatNREM_ls.data(ts-20:ts+20,:)))> 10 * overlap & sum(~isnan(sum(Pr')))>10
-% %                 corrs_ls_NaN(t,event) = corr([1:41]',prMax,'rows','complete');
-% %                 corrs_ls_NaN_shuf(t,event) = corr([1:41]',prMax_shuf,'rows','complete');
-%                 [slope_ls(t,event) integral_ls(t,event)] = Pr2Radon(Pr);
-% %                 [slope_ls_shuf(t,event) integral_ls_shuf(t,event)] = Pr2Radon(Pr_shuf);
-%             else
-% %                 corrs_ls_NaN(t,event) = nan;
-% %                 corrs_ls_NaN_shuf(t,event) = nan;
-%                 slope_ls(t,event) = nan;
-%                 integral_ls(t,event) =nan;
-%                 slope_ls_shuf(t,event) = nan;
-%                 integral_ls_shuf(t,event,1:100) = nan;
-%             end
-%             
-%             else
-% %                 corrs_ls(t,event) = NaN;
-% %                 corrs_ls_NaN(t,event) = NaN;
-% %                 corrs_ls_NaN_shuf(t,event) = nan;
-%                 slope_ls(t,event) = nan;
-%                 integral_ls(t,event) =nan;
-%                 slope_ls_shuf(t,event) = nan;
-%                 integral_ls_shuf(t,event,1:100) = nan;
-%             
-%             end
-%         end
-%     end
-% %         preSleep_ls{count_ls} = corrs_ls(:,ripples.peaks<intervals(1,2));
-% %         postSleep_ls{count_ls} = corrs_ls(:,ripples.peaks>intervals(3,1));
-% %         behav_ls{count_ls} = corrs_ls(:,ripples.peaks>intervals(1,2) &...
-% %                              ripples.peaks<intervals(3,1));
-% %                          
-% %         preSleep_ls_NaN{count_ls} = corrs_ls_NaN(:,ripples.peaks<intervals(1,2));
-% %         postSleep_ls_NaN{count_ls} = corrs_ls_NaN(:,ripples.peaks>intervals(3,1));
-% %         behav_ls_NaN{count_ls} = corrs_ls_NaN(:,ripples.peaks>intervals(1,2) &...
-% %                              ripples.peaks<intervals(3,1));
-% %                          
-% %         preSleep_ls_NaN_shuf{count_ls} = corrs_ls_NaN_shuf(:,ripples.peaks<intervals(1,2));
-% %         postSleep_ls_NaN_shuf{count_ls} = corrs_ls_NaN_shuf(:,ripples.peaks>intervals(3,1));
-% %         behav_ls_NaN_shuf{count_ls} = corrs_ls_NaN_shuf(:,ripples.peaks>intervals(1,2) &...
-% %                              ripples.peaks<intervals(3,1));
-%                          
-%         ls_rZ{count_ls} = (integral_ls - nanmean(integral_ls_shuf,3)) ./ nanstd(integral_ls_shuf,[],3);
-%         ls_integral{count_ls} = integral_ls;
-%         ls_max_int{count_ls} = max(integral_ls);
-%         ls_max_int_shuf{count_ls} = max(integral_ls_shuf);
-%         ls_slope{count_ls} = slope_ls;
-%         ls_integral_shuf{count_ls} = integral_ls_shuf;
-%         ls_slope_shuf{count_ls} = slope_ls_shuf;
-%         count_ls = count_ls +1;       
-%         
-%         
-% 
-% %         subplot(4,2,3)
-% %         histogram(removeNAN(cell2vec(preSleep_ls_NaN)),'Normalization','pdf','FaceColor','b')
-% %         hold on
-% %         histogram(removeNAN(cell2vec(postSleep_ls_NaN)),'Normalization','pdf','FaceColor','r')
-% %         histogram(removeNAN(cell2vec(postSleep_ls_NaN_shuf)),'Normalization','pdf','FaceColor','k')
-% %         hold off
-% %         pause(.1) 
-%         clear corrs_ls* slope_ls* integral_ls*
-%     
-%     end
-    
+
     
     
     if ~isempty(hpc_spikes) & ~isempty(ls_spikes)
-%     lfp = bz_GetLFP(sessionInfo.ls);
-%     hpc = bz_GetLFP(sessionInfo.ca1);
-%     ls_power = zscore(fastrms(bz_Filter(double(lfp.data),'filter','butter','passband',[100 150],'order', 4),12));
-    
-%     spkmat_ls = bz_SpktToSpkmat(ls_spikes,'binSize',.001,'overlap',1);
-%     for i=1:size(spkmat_ls.data,2)
-%         s(i,:) = zscore(Smooth(spkmat_ls.data(:,i),10));
-%     end
-%     pr = squeeze(mean(s));
-
-    
-%     for event = 1:size(ripples.peaks,1)
-%         start = round((ripples.peaks(event)-.025) * 1250);
-%         stop = round((ripples.peaks(event)+.025) * 1250);
-%         
-%         sta = round((ripples.peaks(event)-.025) * 1000);
-%         sto = round((ripples.peaks(event)+.025) * 1000);
-%         [PR{count_hpc}(event) a] = max(abs(pr(sta:sto)));
-%         [ls_max{count_hpc}(event) a] = max(abs(ls_power(start:stop)));
-%     end
     
     hpc_spikesNREM = hpc_spikes;
 %     hpc_spikesBEHAV = hpc_spikes;
     for spk = 1:length(hpc_spikes.times)
-%         if length(hpc_spikes.times{spk})./hpc_spikes.times{spk}(end) < 5 % 2.5Hz FR limit
-%        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},double(SleepState.ints.NREMstate));   
-%        hpc_spikesBEHAV.times{spk} = Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals); 
        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},[ripples.peaks-.5 ripples.peaks+.5]); 
-%         else
-%        hpc_spikesNREM.times{spk} = [];   
-%        hpc_spikesBEHAV.times{spk} = []; 
-%        disp('excluded a cell...')
-%         end
     end
 %     spkmat_hpc = bz_SpktToSpkmat(hpc_spikesBEHAV.times,'overlap',overlap,'binSize',binSize(bins) * overlap);
     spkmatNREM_hpc = bz_SpktToSpkmat(hpc_spikesNREM.times,'overlap',overlap,'binSize',binSize(bins)* overlap);
@@ -238,18 +100,16 @@ overlap = 5;
             start = round((round(ripples.timestamps(event,1) * 1000)-50) ./ (spkmatNREM_hpc.dt*1000));
             stop = round((round(ripples.timestamps(event,2) * 1000)+50) ./ (spkmatNREM_hpc.dt*1000));
             
-            if stop < size(spkmatNREM_hpc.data,1) & stop-start > 10
-                
-                
+            if stop < size(spkmatNREM_hpc.data,1) & stop-start > 5
                 for spk = 1:size(spkmatNREM_hpc.data,2)
                         data(:,spk) = mean_norm(spkmatNREM_hpc.data(start:stop,spk)')';  
                         counts(:,spk) = (spkmatNREM_hpc.data(start:stop,spk)')';  
                 end
 
                 % get max rate bin
-    %             [a b] = max(sum(data(:,keep),2));
-                % or search from middle...
-                b = round(size(data,1)/2);
+                [a b] = max(sum(data,2));
+%                 or search from middle...
+%                 b = round(size(data,1)/2);
 
                  % find clipping point at beginning
                  sta = 1;
@@ -265,7 +125,7 @@ overlap = 5;
                 % redefine start/stop by pop burst..
                 data = data(b-sta:b+sto,:);
 
-                if size(data,1) > 10
+                if size(data,1) > 5
                     [Pr, prMax] = placeBayes(data(:,keep), template(keep,:), spkmatNREM_hpc.dt*150);
     %                 % horse shit pfieffer/foster event clipping...
     %                 
@@ -275,24 +135,25 @@ overlap = 5;
     %                 prMax = prMax(gaps(b):gaps(b+1));
     %                 data = data(gaps(b):gaps(b+1),:); 
                 end
-            if stop < size(spkmatNREM_hpc.data,1) & size(data,1) > 10
+            if stop < size(spkmatNREM_hpc.data,1) & size(data,1) > 5
                 % now calc correlations and control distro w/ cut data...
                 corrs_hpc(t,event) = corr([1:length(prMax)]',prMax,'rows','complete');
                 
                 for iter = 1:100
-                    template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_hpc,:,:),2)));
-                    for i = 1:size(template,1)
-                       template_shuf(i,:) = mean_norm(Smooth(template_shuf(i,:),5)')';
-                    end
+%                     template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_hpc,:,:),2)));
+%                     for i = 1:size(template,1)
+%                        template_shuf(i,:) = mean_norm(Smooth(template_shuf(i,:),5)')';
+%                     end
+                    template_shuf = bz_shuffleCellID(template);
                     [Pr_shuf prMax_shuf] = placeBayes((data(:,keep)')', template_shuf(keep,:), spkmatNREM_hpc.dt*150);
                     corrs_hpc_shuf(t,event,iter) = corr([1:length(prMax_shuf)]',prMax_shuf,'rows','complete');
-%                     subplot(4,2,6)
-                    [slope_hpc_shuf(t,event,iter) integral_hpc_shuf(t,event,iter)] = Pr2Radon(Pr_shuf');
+                    subplot(4,2,6)
+                    [slope_hpc_shuf(t,event,iter) integral_hpc_shuf(t,event,iter)] = Pr2Radon(Pr_shuf',1);
                 end
 
                 if sum(sum(spkmatNREM_hpc.data(start:stop,:)))> 5 * overlap & sum(~isnan(sum(Pr')))>5
-%                     subplot(4,2,4)
-                    [slope_hpc(t,event) integral_hpc(t,event) ] = Pr2Radon(Pr');
+                    subplot(4,2,4)
+                    [slope_hpc(t,event) integral_hpc(t,event) ] = Pr2Radon(Pr',1);
                 else 
                     corrs_hpc(t,event) = nan;
                     corrs_hpc_shuf(t,event,1:100) = nan;
@@ -312,140 +173,83 @@ overlap = 5;
             end
             
             nCells(event) = length(keep);
-            spkCount(event) = sum(sum(spkmatNREM_hpc.data(start:stop,:)))./overlap;
+            spkCount(event) = sum(sum(data(:,keep)))./overlap;
             eventDuration(event) = (stop-start)*spkmatNREM_hpc.dt;
             end
-%             if ~isempty(Pr)
-%                 
-% d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
-% 
-% subplot(4,2,1)
-% histogram(integral_hpc,[0:.01:.3],'Normalization','pdf');
+            
+            if ~isempty(Pr)
+                
+d = (integral_hpc-nanmean(integral_hpc_shuf,3))./nanstd(integral_hpc_shuf,[],3);
+
+subplot(4,2,1)
+histogram(integral_hpc,[0:.01:.3],'Normalization','pdf');
+hold on
+histogram(integral_hpc_shuf,[0:.01:.3],'Normalization','pdf')
+title(['condition: ' num2str(t) ', event: ' num2str(event)])
+
+% histogram(corrs_hpc,-1:.01:1,'Normalization','pdf');
 % hold on
-% histogram(integral_hpc_shuf,[0:.01:.3],'Normalization','pdf')
-% % histogram(corrs_hpc,-1:.01:1,'Normalization','pdf');
-% % hold on
-% % histogram((corrs_hpc_shuf),-1:.01:1,'Normalization','pdf')
-% hold off
+% histogram((corrs_hpc_shuf),-1:.01:1,'Normalization','pdf')
+hold off
+
+subplot(4,2,2)
+% line([0 3],[.012 .012],'color','r');
+bz_plotEphys([],'spikes',hpc_spikes,...
+                    'scalelfp',5,...
+                    'plotcells',hpc_spikes.UID(keep),...
+                    'timewin',[ripples.timestamps(event,1)-.05 ripples.timestamps(event,2)+.05])
+
+subplot(4,2,3)
+scatter(max((d(:,1:event))),spkCount(1:event),'.k')
+% scatter(absmax((corrs_hpc(:,1:event))),spkCount(1:event),'.k')
+% xlabel('rank order corr')
+ylabel('spk count')
+
+subplot(4,2,4)
+title([num2str(integral_hpc(t,event)) ' / ' num2str(d(t,event))])
+% imagesc((Pr'))
 % 
-% subplot(4,2,2)
-% % line([0 3],[.012 .012],'color','r');
-% bz_MultiLFPPlot([],'spikes',hpc_spikes,...
-%                     'scalelfp',5,...
-%                     'plotcells',hpc_spikes.UID(keep),...
-%                     'timewin',[ripples.timestamps(event,1)-.05 ripples.timestamps(event,2)+.05])
-% 
-% subplot(4,2,3)
-% scatter(max((d(:,1:event))),spkCount(1:event),'.k')
-% % scatter(absmax((corrs_hpc(:,1:event))),spkCount(1:event),'.k')
-% % xlabel('rank order corr')
-% ylabel('spk count')
-% 
-% subplot(4,2,4)
-% title([integral_hpc(t,event) '/' d(t,event)])
-% % imagesc((Pr'))
-% % 
-% % title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
-% 
-% subplot(4,2,5)
-% % plot(PR{count_hpc}(1:event),'.k')
-% plot(absmax((corrs_hpc(:,1:event))),'.k')
-% % imagesc(data(:,ord)')
-% title(corrs_hpc(t,event))
-% 
-% subplot(4,2,6)
-% title([mean(integral_hpc_shuf(t,event,:),3) '/' d(t,event)])
-% % imagesc((Pr_shuf'))
-% % imagesc(rates(ord,:))
-% % nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
-% % wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
-% % errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
-% % hold on
-% % errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
-% % hold off        
-% % axis([0 3 0.004 .015])
-% 
-% subplot(4,2,7)
-% scatter(max((d(:,1:event))),popBursts.amplitudes(1:event),'.k')
-% % scatter(absmax((corrs_hpc(:,1:event))),popBursts.amplitudes(1:event),'.k')
-% xlabel('hpc replay')
+% title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
+
+subplot(4,2,5)
+% plot(PR{count_hpc}(1:event),'.k')
+plot(absmax((corrs_hpc(:,1:event))),'.k')
+% imagesc(data(:,ord)')
+title(corrs_hpc(t,event))
+
+subplot(4,2,6)
+title([num2str(nanmean(integral_hpc_shuf(t,event,:),3)) ' / ' num2str(d(t,event))])
+% imagesc((Pr_shuf'))
+% imagesc(rates(ord,:))
+% nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
+% wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
+% errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
+% hold on
+% errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
+% hold off        
+% axis([0 3 0.004 .015])
+
+subplot(4,2,7)
+plot(max((d(:,1:event))),'.k')
+% scatter(absmax((corrs_hpc(:,1:event))),popBursts.amplitudes(1:event),'.k')
+xlabel('hpc replay')
+ylabel('hpc rate')
+
+subplot(4,2,8)
+imagesc(flipud(data(:,keep)'))
+% scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
+% xlabel('ls rate')
 % ylabel('hpc rate')
-% 
-% subplot(4,2,8)
-% imagesc(flipud(data(:,keep)'))
-% % scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
-% % xlabel('ls rate')
-% % ylabel('hpc rate')
-% pause(.001)
-%             end
+pause(.001)
+            end
 clear data counts
         end
         end
     end
-%         preSleep_hpc{count_hpc} = corrs_hpc(:,ripples.peaks<intervals(1,2));
-%         postSleep_hpc{count_hpc} = corrs_hpc(:,ripples.peaks>intervals(3,1));
-%         behav_hpc{count_hpc} = corrs_hpc(:,ripples.peaks>intervals(1,2) &...
-%                              ripples.peaks<intervals(3,1));
-%                          
-%         preSleep_hpc_NaN{count_hpc} = corrs_hpc_NaN(:,ripples.peaks<intervals(1,2));
-%         postSleep_hpc_NaN{count_hpc} = corrs_hpc_NaN(:,ripples.peaks>intervals(3,1));
-%         behav_hpc_NaN{count_hpc} = corrs_hpc_NaN(:,ripples.peaks>intervals(1,2) &...
-%                              ripples.peaks<intervals(3,1));
-%                          
-%         preSleep_hpc_NaN_shuf{count_hpc} = corrs_hpc_NaN_shuf(:,ripples.peaks<intervals(1,2));
-%         postSleep_hpc_NaN_shuf{count_hpc} = corrs_hpc_NaN_shuf(:,ripples.peaks>intervals(3,1));
-%         behav_hpc_NaN_shuf{count_hpc} = corrs_hpc_NaN_shuf(:,ripples.peaks>intervals(1,2) &...
-%                              ripples.peaks<intervals(3,1));
-%         hpc_rZ{count_hpc} = (integral_hpc - nanmean(integral_hpc_shuf,3)) ./ nanstd(integral_hpc_shuf,[],3);                 
-%         hpc_integral{count_hpc} = integral_hpc;
-%         hpc_max_int{count_hpc} = max(integral_hpc);
-%         hpc_max_int_shuf{count_hpc} = max(integral_hpc_shuf);
-%         hpc_slope{count_hpc} = slope_hpc;
-%         hpc_integral_shuf{count_hpc} = integral_hpc_shuf;
-%         hpc_slope_shuf{count_hpc} = slope_hpc_shuf;
-%         count_hpc = count_hpc +1;       
-        
-        
-
-%         subplot(4,2,4)
-%         histogram(removeNAN(cell2vec(preSleep_hpc_NaN)),'Normalization','pdf','FaceColor','b')
-%         hold on
-%         histogram(removeNAN(cell2vec(postSleep_hpc_NaN)),'Normalization','pdf','FaceColor','r')
-%         histogram(removeNAN(cell2vec(postSleep_hpc_NaN_shuf)),'Normalization','pdf','FaceColor','k')
-%         hold off
-%         pause(.1)
-%         clear corrs_hpc* slope_hpc* integral_hpc*
-        
+    
+    
      behavType{count_hpc} = behavior.description;
    
-%     subplot(4,2,1)
-%     histogram(removeNAN(cell2vec(hpc_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','k')
-%     hold on
-%     histogram(removeNAN(cell2vec(ls_slope)),-.5:.01:.5,'Normalization','pdf','FaceColor','m')
-%     hold off
-%     title('slope')
-%     subplot(4,2,2)
-%     histogram(removeNAN(cell2vec(hpc_max_int)),'Normalization','pdf','FaceColor','k')
-%     hold on
-%     histogram(removeNAN(cell2vec(hpc_max_int_shuf)),'Normalization','pdf','FaceColor','r')
-%     hold off
-%     title('integral')
-%     subplot(4,2,3)
-%     histogram(removeNAN(cell2vec(hpc_max_int))-removeNAN(cell2vec(hpc_max_int_shuf)),'Normalization','pdf','FaceColor','k')
-% %     subplot(4,2,4)
-%     hold on
-%     histogram(removeNAN(cell2vec(ls_max_int))-removeNAN(cell2vec(ls_max_int_shuf)),'Normalization','pdf','FaceColor','m')
-%     hold off
-%     subplot(4,2,5)
-%     histogram(removeNAN(cell2vec(ls_max_int)),'Normalization','pdf','FaceColor','b')
-%     hold on
-%     histogram(removeNAN(cell2vec(ls_max_int_shuf)),'Normalization','pdf','FaceColor','r')
-%     hold off
-%     title('integral')
-%     subplot(4,2,6)
-%     scatter(max(hpc_rZ{count_hpc-1}),ls_max{count_hpc-1},'.k')
-%     hold on
-%     pause(.1)
 
     
     save([sessionInfo.FileName '.bayesianResults_ripples.mat'],'-v7.3')
