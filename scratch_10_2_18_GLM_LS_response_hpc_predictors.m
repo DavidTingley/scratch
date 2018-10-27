@@ -260,13 +260,13 @@ figure
 
 for i=1:size(corrs,2)
 subplot(size(corrs,2),1,i)
-% raincloud_plot('X',corrs(idx,i),'density_type', 'ks','bandwidth',.025,'color',[0 0 0]);
-% raincloud_plot('X',corrs_shuff(idx,i,1),'density_type', 'ks','bandwidth',.025,'color',[1 0 0]);
+raincloud_plot('X',corrs(idx,i),'density_type', 'ks','bandwidth',.025,'color',[0 0 0]);
+raincloud_plot('X',corrs_shuff(idx,i,1),'density_type', 'ks','bandwidth',.025,'color',[1 0 0]);
 
 
-raincloud_plot('X',mseZ_cells(idx,i),'density_type', 'ks','bandwidth',.2,'color',[0 0 0]);
-raincloud_plot('X',mseZ_cells_shuf(idx,i,1),'density_type', 'ks','bandwidth',.2,'color',[1 0 0]);
-axis([-110 2 -1 3])
+% raincloud_plot('X',mseZ_cells(idx,i),'density_type', 'ks','bandwidth',.2,'color',[0 0 0]);
+% raincloud_plot('X',mseZ_cells_shuf(idx,i,1),'density_type', 'ks','bandwidth',.2,'color',[1 0 0]);
+% axis([-110 2 -1 3])
 title(names{i})
 end
 
