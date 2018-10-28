@@ -12,7 +12,7 @@ count=0;
         load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
 %         load([sessionInfo.FileName '.olypherInfo_w_disc.cellinfo.mat'],'olypherInfo')
         load([sessionInfo.FileName '.rewardModulation.cellinfo.mat'],'rewardModulation')
-        load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
+%         load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
         SleepState = bz_LoadStates(pwd,'SleepState');
         load([sessionInfo.FileName '.behavior.mat'])
         for i=1:length(behavior.events.trials)
