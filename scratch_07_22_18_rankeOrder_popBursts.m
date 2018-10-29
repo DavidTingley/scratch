@@ -198,7 +198,7 @@ overlap = 1;
 %        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},double(SleepState.ints.NREMstate));   
 %        hpc_spikesBEHAV.times{spk} = Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals); 
        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},[ripples.peaks-.5 ripples.peaks+.5]); 
-%         else
+%         else_160222_120902.01.rankOrde
 %        hpc_spikesNREM.times{spk} = [];   
 %        hpc_spikesBEHAV.times{spk} = []; 
 %        disp('excluded a cell...')
@@ -297,61 +297,61 @@ overlap = 1;
             spkCount(event) = sum(sum(spkmatNREM_hpc.data(start:stop,:)));
             eventDuration(event) = (stop-start)*spkmatNREM_hpc.dt;
 %  
-subplot(4,2,1)
-histogram(rankOrder,[-1:.05:1],'Normalization','pdf');
-hold on
-histogram(rankOrder_shuffle,[-1:.05:1],'Normalization','pdf')
-hold off
-
-subplot(4,2,2)
-% line([0 3],[.012 .012],'color','r');
-bz_plotEphys([],'spikes',hpc_spikes,...
-                    'spikeSpacingFactor',20,...  
-                    'scalelfp',5,...
-                    'timewin',[ripples.timestamps(event,:)],...
-                    'sortmetric',ord)
-
-subplot(4,2,3)
-% plot(max((integral_hpc(:,1:event))),'.k');
-% imagesc(data')
-plot(absmax(rankOrder(:,1:event)),spkCount(1:event),'.k')
-xlabel('rank order corr')
-ylabel('spk count')
-
-subplot(4,2,4)
-plot(absmax(rankOrder(:,1:event)),'.k')
-d = (rankOrder-mean(rankOrder_shuffle,3))./std(rankOrder_shuffle,[],3);
-% scatter(PR{count_hpc}(1:event),max((d(:,1:event))),'.k')
-% title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
-
-subplot(4,2,5)
-plot(pvals(:,1:event),'.k')
-set(gca,'yscale','log')
-% scatter(absmax(rankOrder(:,1:event)),eventDuration(1:event),'.k')
-% xlabel('hpc rank order corr')
-% ylabel('event duration (s)')
-
-subplot(4,2,6)
-imagesc(rates(ord,:))
-% nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
-% wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
-% errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
+% subplot(4,2,1)
+% histogram(rankOrder,[-1:.05:1],'Normalization','pdf');
 % hold on
-% errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
-% hold off        
-% axis([0 3 0.004 .015])
-
-subplot(4,2,7)
-plot((rankOrder(1:t,1:event)),nCells(1:t,1:event),'.k')
-xlabel('rank order corr')
-ylabel('# of cells in event')
-
-subplot(4,2,8)
-imagesc(data(:,ord(keep))')
-% scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
-% xlabel('ls rate')
-% ylabel('hpc rate')
- pause(.001)
+% histogram(rankOrder_shuffle,[-1:.05:1],'Normalization','pdf')
+% hold off
+% 
+% subplot(4,2,2)
+% % line([0 3],[.012 .012],'color','r');
+% bz_plotEphys([],'spikes',hpc_spikes,...
+%                     'spikeSpacingFactor',20,...  
+%                     'scalelfp',5,...
+%                     'timewin',[ripples.timestamps(event,:)],...
+%                     'sortmetric',ord)
+% 
+% subplot(4,2,3)
+% % plot(max((integral_hpc(:,1:event))),'.k');
+% % imagesc(data')
+% plot(absmax(rankOrder(:,1:event)),spkCount(1:event),'.k')
+% xlabel('rank order corr')
+% ylabel('spk count')
+% 
+% subplot(4,2,4)
+% plot(absmax(rankOrder(:,1:event)),'.k')
+% d = (rankOrder-mean(rankOrder_shuffle,3))./std(rankOrder_shuffle,[],3);
+% % scatter(PR{count_hpc}(1:event),max((d(:,1:event))),'.k')
+% % title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
+% 
+% subplot(4,2,5)
+% plot(pvals(:,1:event),'.k')
+% set(gca,'yscale','log')
+% % scatter(absmax(rankOrder(:,1:event)),eventDuration(1:event),'.k')
+% % xlabel('hpc rank order corr')
+% % ylabel('event duration (s)')
+% 
+% subplot(4,2,6)
+% imagesc(rates(ord,:))
+% % nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
+% % wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
+% % errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
+% % hold on
+% % errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
+% % hold off        
+% % axis([0 3 0.004 .015])
+% 
+% subplot(4,2,7)
+% plot((rankOrder(1:t,1:event)),nCells(1:t,1:event),'.k')
+% xlabel('rank order corr')
+% ylabel('# of cells in event')
+% 
+% subplot(4,2,8)
+% imagesc(data(:,ord(keep))')
+% % scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
+% % xlabel('ls rate')
+% % ylabel('hpc rate')
+%  pause(.001)
 clear data counts
         end
         end
@@ -422,7 +422,7 @@ clear data counts
 %     pause(.1)
 
     
-    save([sessionInfo.FileName '.' thresh '.rankOrder_popBursts.mat'],'-v7.3')
+    save([sessionInfo.FileName '.rankOrder_popBursts.mat'],'-v7.3')
     end
     end
     end

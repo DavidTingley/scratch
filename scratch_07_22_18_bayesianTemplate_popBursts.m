@@ -171,7 +171,7 @@ overlap = 1;
     
     if ~isempty(hpc_spikes) & ~isempty(ls_spikes)
 %     lfp = bz_GetLFP(sessionInfo.ls);
-%     hpc = bz_GetLFP(sessionInfo.ca1);
+    hpc = bz_GetLFP(sessionInfo.spikeGroups.groups{9});
 %     ls_power = zscore(fastrms(bz_Filter(double(lfp.data),'filter','butter','passband',[100 150],'order', 4),12));
     
 %     spkmat_ls = bz_SpktToSpkmat(ls_spikes,'binSize',.001,'overlap',1);
@@ -331,71 +331,73 @@ overlap = 1;
             spkCount(event) = sum(sum(spkmatNREM_hpc.data(start:stop,:)))./overlap;
             eventDuration(event) = (stop-start)*spkmatNREM_hpc.dt;
             end
-%             if ~isempty(Pr)
-%                 
-% d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
-% 
-% subplot(4,2,1)
-% histogram(integral_hpc,[0:.01:.3],'Normalization','pdf');
+            if ~isempty(Pr)
+                
+d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
+
+subplot(4,2,1)
+histogram(integral_hpc,[0:.01:.3],'Normalization','pdf');
+hold on
+histogram(integral_hpc_shuf,[0:.01:.3],'Normalization','pdf')
+title(['condition: ' num2str(t) ', event: ' num2str(event)])
+
+% histogram(corrs_hpc,-1:.01:1,'Normalization','pdf');
 % hold on
-% histogram(integral_hpc_shuf,[0:.01:.3],'Normalization','pdf')
-% title(['condition: ' num2str(t) ', event: ' num2str(event)])
+% histogram((corrs_hpc_shuf),-1:.01:1,'Normalization','pdf')
+hold off
+
+subplot(4,2,2)
+% line([0 3],[.012 .012],'color','r');
+bz_plotEphys(hpc,'spikes',hpc_spikes,...
+                    'scalelfp',5,...
+                    'plotcells',hpc_spikes.UID(keep),...
+                    'timewin',[ripples.timestamps(event,1)-.05 ripples.timestamps(event,2)+.05])
+
+subplot(4,2,3)
+scatter(max((d(:,1:event))),spkCount(1:event),'.k')
+% scatter(absmax((corrs_hpc(:,1:event))),spkCount(1:event),'.k')
+% xlabel('rank order corr')
+ylabel('spk count')
+
+subplot(4,2,4)
+title([num2str(integral_hpc(t,event)) ' / ' num2str(d(t,event))])
+% imagesc((Pr'))
 % 
-% % histogram(corrs_hpc,-1:.01:1,'Normalization','pdf');
-% % hold on
-% % histogram((corrs_hpc_shuf),-1:.01:1,'Normalization','pdf')
-% hold off
-% 
-% subplot(4,2,2)
-% % line([0 3],[.012 .012],'color','r');
-% bz_plotEphys([],'spikes',hpc_spikes,...
-%                     'scalelfp',5,...
-%                     'plotcells',hpc_spikes.UID(keep),...
-%                     'timewin',[ripples.timestamps(event,1)-.05 ripples.timestamps(event,2)+.05])
-% 
-% subplot(4,2,3)
-% scatter(max((d(:,1:event))),spkCount(1:event),'.k')
-% % scatter(absmax((corrs_hpc(:,1:event))),spkCount(1:event),'.k')
-% % xlabel('rank order corr')
-% ylabel('spk count')
-% 
-% subplot(4,2,4)
-% title([num2str(integral_hpc(t,event)) ' / ' num2str(d(t,event))])
-% % imagesc((Pr'))
-% % 
-% % title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
-% 
-% subplot(4,2,5)
-% % plot(PR{count_hpc}(1:event),'.k')
-% plot(absmax((corrs_hpc(:,1:event))),'.k')
-% % imagesc(data(:,ord)')
-% title(corrs_hpc(t,event))
-% 
-% subplot(4,2,6)
-% title([num2str(nanmean(integral_hpc_shuf(t,event,:),3)) ' / ' num2str(d(t,event))])
-% % imagesc((Pr_shuf'))
-% % imagesc(rates(ord,:))
-% % nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
-% % wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
-% % errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
-% % hold on
-% % errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
-% % hold off        
-% % axis([0 3 0.004 .015])
-% 
-% subplot(4,2,7)
-% plot(max((d(:,1:event))),'.k')
-% % scatter(absmax((corrs_hpc(:,1:event))),popBursts.amplitudes(1:event),'.k')
-% xlabel('hpc replay')
+% title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
+
+subplot(4,2,5)
+% plot(PR{count_hpc}(1:event),'.k')
+plot(absmax((corrs_hpc(:,1:event))),'.k')
+% imagesc(data(:,ord)')
+title(corrs_hpc(t,event))
+
+subplot(4,2,6)
+title([num2str(nanmean(integral_hpc_shuf(t,event,:),3)) ' / ' num2str(d(t,event))])
+% imagesc((Pr_shuf'))
+% imagesc(rates(ord,:))
+% nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
+% wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
+% errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
+% hold on
+% errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
+% hold off        
+% axis([0 3 0.004 .015])
+
+subplot(4,2,7)
+plot(max((d(:,1:event))),'.k')
+% scatter(absmax((corrs_hpc(:,1:event))),popBursts.amplitudes(1:event),'.k')
+xlabel('hpc replay')
+ylabel('hpc rate')
+
+subplot(4,2,8)
+imagesc(flipud(data(:,keep)'))
+% scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
+% xlabel('ls rate')
 % ylabel('hpc rate')
-% 
-% subplot(4,2,8)
-% imagesc(flipud(data(:,keep)'))
-% % scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
-% % xlabel('ls rate')
-% % ylabel('hpc rate')
-% pause(.001)
-%             end
+if d(t,event) > 2
+    pause
+end
+            end
 clear data counts
         end
         end
