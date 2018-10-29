@@ -54,7 +54,7 @@ count=0;
             
 
         % 
-        hasField = zeros(length(fields{1}),1);
+        hasField = nan(length(fields{1}),1);
         for i=1:length(fields)
             for j=1:length(fields{i})
                 hasField(j) = hasField(j) + ~isempty(fields{i}{j});    
@@ -116,28 +116,32 @@ count=0;
         end
         
         %% get that content, initialize
-%         spatialContent = zeros(length(spikes.times),length(ca1.ripples.peaks));
-        rewardContent = zeros(length(spikes.times),length(ca1.ripples.peaks));
-        nSpikes = zeros(length(spikes.times),length(ca1.ripples.peaks));
-        PF = zeros(length(spikes.times),length(ca1.ripples.peaks));
+%         spatialContent = nan(length(spikes.times),length(ca1.ripples.peaks));
+        rewardContent = nan(length(spikes.times),length(ca1.ripples.peaks));
+        nSpikes = nan(length(spikes.times),length(ca1.ripples.peaks));
+        PF = nan(length(spikes.times),length(ca1.ripples.peaks));
         cellLoc_wav = nan(length(spikes.times),length(ca1.ripples.peaks));
         
         % state stuff
-        State = zeros(length(ca1.ripples.peaks),1);
+        State = nan(length(ca1.ripples.peaks),1);
+        SleepState.ints.NREMstate(:,2) = SleepState.ints.NREMstate(:,2) + 1;
+        SleepState.ints.WAKEstate(:,2) = SleepState.ints.WAKEstate(:,2) + 1;
+        SleepState.ints.REMstate(:,2) = SleepState.ints.REMstate(:,2) + 1;
+        
         idx = InIntervals(ca1.ripples.peaks,SleepState.ints.NREMstate);
-        State(find(idx)) = 1;
+        State((idx)) = 1;
         idx = InIntervals(ca1.ripples.peaks,SleepState.ints.WAKEstate);
-        State(find(idx)) = 2;
+        State((idx)) = 2;
         idx = InIntervals(ca1.ripples.peaks,SleepState.ints.REMstate);
-        State(find(idx)) = 3;
+        State((idx)) = 3;
         
         % behavioral condition (pre/behav/sleep)
-        condition = zeros(length(ca1.ripples.peaks),1);
+        condition = nan(length(ca1.ripples.peaks),1);
         for t = 1:3
         idx = InIntervals(ca1.ripples.peaks,intervals(t,:));
         condition(find(idx)) = t;
         end
-        location = zeros(length(ca1.ripples.peaks),1);
+        location = nan(length(ca1.ripples.peaks),1);
         for t = 1:3
         idx = InIntervals(ca1.ripples.peaks,intervals(t,:));
         if t == 2

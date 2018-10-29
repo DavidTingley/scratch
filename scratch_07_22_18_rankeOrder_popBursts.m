@@ -242,42 +242,61 @@ overlap = 1;
 %             ts = round(ripples.peaks(event)*(1/spkmatNREM_hpc.dt));
 %             back = ceil((ripples.peaks(event)-ripples.timestamps(event,1))./spkmatNREM_hpc.dt);
 %             forward = abs(ceil((ripples.peaks(event)-ripples.timestamps(event,2))./spkmatNREM_hpc.dt));
-            start = round(ripples.timestamps(event,1) * 1000);
-            stop = round(ripples.timestamps(event,2) * 1000);
+            start = round(ripples.timestamps(event,1) * 1000) -50;
+            stop = round(ripples.timestamps(event,2) * 1000) + 50;
             
             if stop < size(spkmatNREM_hpc.data,1) & (stop-start) > 15
-                for spk = 1:size(spkmatNREM_hpc.data,2)
-                    data(:,spk) = mean_norm(spkmatNREM_hpc.data(start:stop,spk)')';  
-                end 
-                [a b ord2] = sort_cells(data');
+                 for spk = 1:size(spkmatNREM_hpc.data,2)
+                        data(:,spk) = mean_norm(spkmatNREM_hpc.data(start:stop,spk)')';  
+                        counts(:,spk) = (spkmatNREM_hpc.data(start:stop,spk)')';  
+                end
+                
+                % cut 0 rate bins..
+                while sum(counts(1,:)) < 1 & size(counts,1) > 1
+                   data = data(2:end,:);
+                   counts = counts(2:end,:);
+                end
+                while sum(counts(end,:)) < 1 & size(counts,1) > 1
+                   data = data(1:end-1,:);
+                   counts = counts(1:end-1,:);
+                end
+                
                 idx = intersect(find(nanmean(data)~=0),keep); % only take cells that spiked...
+                idx2 = find(nanmean(data)~=0);
+                
+                [a b ord_template] = sort_cells(template(idx,:));
+                [a b ord_data] = sort_cells(data(:,idx)');
+%                 [a b ord_data_all] = sort_cells(data(:,idx)');
+
                 if sum(sum(spkmatNREM_hpc.data(start:stop,:)))> 5 * overlap & length(idx) > 3                    
-                    rankOrder(t,event) = corr(ord(idx),ord2(idx),'rows','complete');
+                    [rankOrder(t,event) pvals(t,event)] = corr(ord_template,ord_data,'rows','complete');
                     for iter = 1:100
 %                        template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_hpc,:,:),2)));
 %                        for i = 1:size(template,1)
 %                           template_shuf(i,:) = mean_norm(Smooth(template_shuf(i,:),5)')';
 %                        end
                        template_shuf = bz_shuffleCellID(template);
-                       [a b ord_shuf] = sort_cells(template_shuf);
-                       rankOrder_shuffle(t,event,iter) = corr(ord_shuf(idx),ord2(idx),'rows','complete');
+                       [a b ord_shuf] = sort_cells(template_shuf(idx,:));
+                       [rankOrder_shuffle(t,event,iter)  pvals_shuf(t,event,iter)] = corr(ord_template,ord_shuf,'rows','complete');
                     end
                 else 
+                    pvals(t,event) = NaN;
+                    pvals_shuf(t,event,1:100) = nan;
                     rankOrder(t,event) = NaN;
                     rankOrder_shuffle(t,event,:) = nan(100,1);
                 end
             else
+                pvals(t,event) = NaN;
+                pvals_shuf(t,event,1:100) = nan;
                 data = zeros(stop-start,size(spkmatNREM_hpc.data,2));
                 rankOrder(t,event) = NaN;
                 rankOrder_shuffle(t,event,:) = nan(100,1);
                 idx = [];
-                Pr = [];
             end
             nCells(t,event) = length(idx);
             spkCount(event) = sum(sum(spkmatNREM_hpc.data(start:stop,:)));
             eventDuration(event) = (stop-start)*spkmatNREM_hpc.dt;
 %  
-if ~isempty(Pr)
 subplot(4,2,1)
 histogram(rankOrder,[-1:.05:1],'Normalization','pdf');
 hold on
@@ -306,9 +325,11 @@ d = (rankOrder-mean(rankOrder_shuffle,3))./std(rankOrder_shuffle,[],3);
 % title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
 
 subplot(4,2,5)
-scatter(absmax(rankOrder(:,1:event)),eventDuration(1:event),'.k')
-xlabel('hpc rank order corr')
-ylabel('event duration (s)')
+plot(pvals(:,1:event),'.k')
+set(gca,'yscale','log')
+% scatter(absmax(rankOrder(:,1:event)),eventDuration(1:event),'.k')
+% xlabel('hpc rank order corr')
+% ylabel('event duration (s)')
 
 subplot(4,2,6)
 imagesc(rates(ord,:))
@@ -331,8 +352,7 @@ imagesc(data(:,ord(keep))')
 % xlabel('ls rate')
 % ylabel('hpc rate')
  pause(.001)
-clear data
-end
+clear data counts
         end
         end
     end

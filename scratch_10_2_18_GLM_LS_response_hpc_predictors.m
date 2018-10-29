@@ -14,8 +14,8 @@ if exist([d(i).name '.content_GLM_popBursts_25ms.mat'])% & ...
 dat = load([d(i).name '.content_GLM_popBursts_25ms.mat'],'content');
 content(i) = dat.content;
 % 
-if  exist([d(i).name '.bayesianResults_popBursts.mat']) 
-    dat = load([d(i).name '.bayesianResults_popBursts.mat'],'integral_hpc*','corr*');
+if  exist([d(i).name '.bayesianResults_popBursts_all_evts.mat']) 
+    dat = load([d(i).name '.bayesianResults_popBursts_all_evts.mat'],'integral_hpc*','corr*');
     if isfield(dat,'integral_hpc')
     bay{i} = (dat.integral_hpc - nanmean(dat.integral_hpc_shuf,3)) ./ nanstd(dat.integral_hpc_shuf,[],3);
     else
@@ -25,10 +25,16 @@ else
     bay{i} = nan(2,length(content(i).nSpikes{1}));
 end
 
-%% rank order correlations here 
-% dat = load([d(i).name '.rankOrder_ripples.mat'],'rankOrder');
+%% rank order correlations here
 if isfield(dat,'corrs_hpc')
-    rankOrder{i} = absmax(dat.corrs_hpc); %dat.rankOrder;
+    rankOrder_bayes{i} = absmax(dat.corrs_hpc); %dat.rankOrder;
+else
+    rankOrder_bayes{i} = nan(1,length(content(i).nSpikes{1}));
+end
+
+if exist([d(i).name '.rankOrder_popBursts.mat']) 
+    dat = load([d(i).name '.rankOrder_popBursts.mat'],'rankOrder');
+    rankOrder{i} = absmax(dat.rankOrder);
 else
     rankOrder{i} = nan(1,length(content(i).nSpikes{1}));
 end
@@ -115,7 +121,8 @@ for rec = 1:length(content)
                 'Sleep state',....
                 'duration',...
                 'rs1 (radon int)',...
-                'rs2 (rank ord)',...
+                'rs2 (rank ord,bayes)',...
+                'rs3 (rank ord, raw)',...
                 'seqNMF'};
             
             
@@ -128,6 +135,7 @@ predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ...
               content(rec).SleepState{1}...
               content(rec).duration{1}'...
               max(bay{rec})'...
+              rankOrder_bayes{rec}'...
               rankOrder{rec}'...
               max(seqs{rec}')'];%...
           
@@ -232,6 +240,7 @@ for spk = 1:length(idx)
        mse_cells(count,:) = mse;
        mse_shuf_cells(count,:,:) = mse_shuf;
        recording(count) = rec;
+       cellID(count) = idx(spk);
        count = 1+count;
 %    end
 end
@@ -264,8 +273,8 @@ subplot(size(corrs,2),1,i)
 % raincloud_plot('X',corrs_shuff(idx,i,1),'density_type', 'ks','bandwidth',.025,'color',[1 0 0]);
 
 
-raincloud_plot('X',mse_cells(:,i),'density_type', 'ks','bandwidth',.2,'color',[0 0 0]);
-raincloud_plot('X',mse_cells_shuf(:,i,1),'density_type', 'ks','bandwidth',.2,'color',[1 0 0]);
+raincloud_plot('X',mseZ_cells(:,i),'density_type', 'ks','bandwidth',.2,'color',[0 0 0]);
+raincloud_plot('X',mseZ_cells_shuf(:,i,1),'density_type', 'ks','bandwidth',.2,'color',[1 0 0]);
 % axis([-110 2 -1 3])
 title(names{i})
 end

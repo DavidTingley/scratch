@@ -13,7 +13,7 @@ end
 binSizes = [10 10 10];
 
 
-for ii=length(d):-1:1
+for ii=1:length(d)
     cd(d(ii).name)
     sessionInfo = bz_getSessionInfo;
     ls_spikes = bz_GetSpikes('region','ls','noprompts',true);
@@ -50,10 +50,16 @@ for ii=length(d):-1:1
     %% get initial correlations
     intervals = [pre; behav; post];
     
+    % Skaggs 96 criteria for +/- 15 minutes
+%     intervals(1,1) = intervals(1,2) - 60*15;
+%     intervals(3,2) = intervals(3,1) + 60*15;
+
     
     if ~isempty(SleepState.ints.NREMstate) & ...
             exist([sessionInfo.FileName '.behavior.mat']) & all(diff(intervals')>300)
     if ~isempty(ls_spikes) 
+        
+        % ripples during NREM and intervals
 %     for spk = 1:length(ls_spikes.times) 
 %        ls_spikesBEHAV.times{spk} = [0;Restrict(ls_spikes.times{spk},behavior.events.trialIntervals)];
 %        ls_spikesNREM_pre.times{spk} = [0;Restrict(Restrict(Restrict(ls_spikes.times{spk},[ripples.peaks-.2 ...
@@ -62,15 +68,23 @@ for ii=length(d):-1:1
 %            ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
 %     end
     
+%     only NREM sleep and intervals
      for spk = 1:length(ls_spikes.times)
        ls_spikesBEHAV.times{spk} = [spk;Restrict(ls_spikes.times{spk},behavior.events.trialIntervals)];
        ls_spikesNREM_pre.times{spk} = [spk;Restrict(Restrict((ls_spikes.times{spk} ...
            ),double(SleepState.ints.NREMstate)),intervals(1,:))]; 
        ls_spikesNREM_post.times{spk} = [spk;Restrict(Restrict((ls_spikes.times{spk} ...
            ),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
-    end
+     end
 
-   
+    % all states, just intervals
+%     for spk = 1:length(ls_spikes.times)
+%        ls_spikesBEHAV.times{spk} = [spk;Restrict(ls_spikes.times{spk},behavior.events.trialIntervals)];
+%        ls_spikesNREM_pre.times{spk} = [spk;(Restrict(ls_spikes.times{spk} ...
+%            ,intervals(1,:)))]; 
+%        ls_spikesNREM_post.times{spk} = [spk;(Restrict(ls_spikes.times{spk} ...
+%            ,intervals(3,:)))]; 
+%     end
 
 
     for int = 1:size(intervals,1)
@@ -86,14 +100,14 @@ for ii=length(d):-1:1
     for int = 1:size(intervals,1)
         for c1 = 1:size(ccg{int},2)
             for c2 = c1:size(ccg{int},3)
-                if mean(ccg{1}(3801:4200,c1,c2)) > 1 & mean(ccg{2}(3801:4200,c1,c2)) > 1 & mean(ccg{3}(3801:4200,c1,c2)) > 1 & c1 ~= c2
+                if sum(ccg{1}(3801:4200,c1,c2)) > 2 & sum(ccg{2}(3801:4200,c1,c2)) > 2 & sum(ccg{3}(3801:4200,c1,c2)) > 2 & c1 ~= c2
                 ccg_ls{int} = [ccg_ls{int}, ((squeeze(ccg{int}(:,c1,c2))))];
                 ls_rec{int} = [ls_rec{int} ii];
                 end
             end
         end
     end 
-    clear ls_spikes*
+    clear ls_spikes* ccg
     end
         
     hpc_spikes = bz_GetSpikes('region','hpc','noprompts',true);
@@ -110,6 +124,7 @@ for ii=length(d):-1:1
 %        hpc_spikesNREM_post.times{spk} = [0;Restrict(Restrict(Restrict(hpc_spikes.times{spk},[ripples.peaks-.2 ...
 %            ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
 %     end
+    
     % no ripple restriction
     for spk = 1:length(hpc_spikes.times)
        hpc_spikesBEHAV.times{spk} = [spk;Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals)];
@@ -118,6 +133,15 @@ for ii=length(d):-1:1
        hpc_spikesNREM_post.times{spk} = [spk;Restrict(Restrict((hpc_spikes.times{spk} ...
            ),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
     end
+
+      % all states, just intervals
+%     for spk = 1:length(hpc_spikes.times)
+%        hpc_spikesBEHAV.times{spk} = [spk;Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals)];
+%        hpc_spikesNREM_pre.times{spk} = [spk;Restrict(hpc_spikes.times{spk} ...
+%            ,intervals(1,:))]; 
+%        hpc_spikesNREM_post.times{spk} = [spk;Restrict(hpc_spikes.times{spk} ...
+%            ,intervals(3,:))]; 
+%     end
 
     for int = 1:size(intervals,1)
         if int == 1 
@@ -132,7 +156,7 @@ for ii=length(d):-1:1
     for int = 1:size(intervals,1)
         for c1 = 1:size(ccg{int},2)
             for c2 = c1:size(ccg{int},3)
-                if mean(ccg{1}(3801:4200,c1,c2)) > 1 & mean(ccg{2}(3801:4200,c1,c2)) > 1 & mean(ccg{3}(3801:4200,c1,c2)) > 1 & c1 ~= c2
+                if sum(ccg{1}(3801:4200,c1,c2)) > 2 & sum(ccg{2}(3801:4200,c1,c2)) > 2 & sum(ccg{3}(3801:4200,c1,c2)) > 2 & c1 ~= c2
                 ccg_hpc{int} = [ccg_hpc{int}, ((squeeze(ccg{int}(:,c1,c2))))];
                 placeFields{int} = [placeFields{int}; pf(c1) pf(c2)];
                 hpc_rec{int} = [hpc_rec{int} ii];
@@ -140,12 +164,13 @@ for ii=length(d):-1:1
             end
         end
     end
-    clear hpc_spikes*
+    clear hpc_spikes* ccg
     end
     
     %% cross region
     spikes = bz_GetSpikes('noprompts',true);
     if ~isempty(spikes) 
+        
 %     for spk = 1:length(spikes.times)
 %        spikesBEHAV.times{spk} = [0;Restrict(spikes.times{spk},behavior.events.trialIntervals)];
 %        spikesNREM_pre.times{spk} = [0;Restrict(Restrict(Restrict(spikes.times{spk},[ripples.peaks-.2 ...
@@ -153,6 +178,7 @@ for ii=length(d):-1:1
 %        spikesNREM_post.times{spk} = [0;Restrict(Restrict(Restrict(spikes.times{spk},[ripples.peaks-.2 ...
 %            ripples.peaks+.2]),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
 %     end
+
     % no ripple restriction
     for spk = 1:length(spikes.times)
        spikesBEHAV.times{spk} = [spk;Restrict(spikes.times{spk},behavior.events.trialIntervals)];
@@ -162,6 +188,15 @@ for ii=length(d):-1:1
            ),double(SleepState.ints.NREMstate)),intervals(3,:))]; 
     end
 
+     % all states, just intervals
+%       for spk = 1:length(spikes.times)
+%        spikesBEHAV.times{spk} = [spk;Restrict(spikes.times{spk},behavior.events.trialIntervals)];
+%        spikesNREM_pre.times{spk} = [spk;Restrict((spikes.times{spk} ...
+%            ),intervals(1,:))]; 
+%        spikesNREM_post.times{spk} = [spk;Restrict((spikes.times{spk} ...
+%            ),intervals(3,:))]; 
+%       end
+    
     for int = 1:size(intervals,1)
         if int == 1 
             [times groups]= spikes2sorted(spikesNREM_pre.times);
@@ -175,7 +210,7 @@ for ii=length(d):-1:1
     for int = 1:size(intervals,1)
         for c1 = 1:size(ccg{int},2)
             for c2 = c1:size(ccg{int},3)
-                if strcmp(spikes.region{c1},'ls') & mean(ccg{1}(3801:4200,c1,c2)) > 1 & mean(ccg{2}(3801:4200,c1,c2)) > 1 & mean(ccg{3}(3801:4200,c1,c2)) > 1 & c1 ~= c2
+                if strcmp(spikes.region{c1},'ls') & sum(ccg{1}(3801:4200,c1,c2)) > 2 & sum(ccg{2}(3801:4200,c1,c2)) > 2 & sum(ccg{3}(3801:4200,c1,c2)) > 2 & c1 ~= c2
                     if strcmp(spikes.region{c2},'hpc') | strcmp(spikes.region{c2},'ca3')
                 ccg_cross{int} = [ccg_cross{int}, ((squeeze(ccg{int}(:,c1,c2))))];
                     end
@@ -184,7 +219,7 @@ for ii=length(d):-1:1
     end
     
     end
-    clear spikes*
+    clear spikes* ccg
     behavType{ii} = behavior.description;
       
 
@@ -278,36 +313,36 @@ ls_idx = ls_rec{1} == ii;
 
 if sum(hpc_idx(:))>2 & sum(ls_idx(:)) > 2
     subplot(7,2,7)
-    scatter(abslog(mean(ccg_hpc{2}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{2}(4001-200:4000,hpc_pf_idx))),...  % bias on track...
-            abslog(mean(ccg_hpc{1}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{1}(4001-200:4000,hpc_pf_idx))),'.k') % bias before
+    scatter((mean(ccg_hpc{2}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{2}(4001-200:4000,hpc_pf_idx))),...  % bias on track...
+            (mean(ccg_hpc{1}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{1}(4001-200:4000,hpc_pf_idx))),'.k') % bias before
     xlabel('on track bias')
     ylabel('pre-behav bias')
-    title(num2str(corr(abslog(mean(ccg_hpc{2}(4002:4001+200,hpc_idx)) - mean(ccg_hpc{2}(4001-200:4000,hpc_idx)))',...  % bias on track...
-            abslog(mean(ccg_hpc{1}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{1}(4001-200:4000,hpc_pf_idx)))')))
+    title(num2str(corr((mean(ccg_hpc{2}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{2}(4001-200:4000,hpc_pf_idx)))',...  % bias on track...
+            (mean(ccg_hpc{1}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{1}(4001-200:4000,hpc_pf_idx)))','rows','complete')))
 
     subplot(7,2,8)
-    scatter(abslog(mean(ccg_hpc{2}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{2}(4001-200:4000,hpc_pf_idx))),...  % bias on track...
-            abslog(mean(ccg_hpc{3}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{3}(4001-200:4000,hpc_pf_idx))),'.k') % bias before
+    scatter((mean(ccg_hpc{2}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{2}(4001-200:4000,hpc_pf_idx))),...  % bias on track...
+            (mean(ccg_hpc{3}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{3}(4001-200:4000,hpc_pf_idx))),'.k') % bias before
     xlabel('on track bias')
     ylabel('post-behav bias')
-    title(num2str(corr(abslog(mean(ccg_hpc{2}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{2}(4001-200:4000,hpc_pf_idx)))',...  % bias on track...
-            abslog(mean(ccg_hpc{3}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{3}(4001-200:4000,hpc_pf_idx)))')))
+    title(num2str(corr((mean(ccg_hpc{2}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{2}(4001-200:4000,hpc_pf_idx)))',...  % bias on track...
+            (mean(ccg_hpc{3}(4002:4001+200,hpc_pf_idx)) - mean(ccg_hpc{3}(4001-200:4000,hpc_pf_idx)))','rows','complete')))
 
     subplot(7,2,9)
-    scatter(abslog(mean(ccg_ls{2}(4002:4001+200,ls_idx)) - mean(ccg_ls{2}(4001-200:4000,ls_idx))),...  % bias on track...
-            abslog(mean(ccg_ls{1}(4002:4001+200,ls_idx)) - mean(ccg_ls{1}(4001-200:4000,ls_idx))),'.m') % bias before
+    scatter((mean(ccg_ls{2}(4002:4001+200,:)) - mean(ccg_ls{2}(4001-200:4000,:))),...  % bias on track...
+            (mean(ccg_ls{1}(4002:4001+200,:)) - mean(ccg_ls{1}(4001-200:4000,:))),'.m') % bias before
     xlabel('on track bias')
     ylabel('pre-behav bias')
-    title(num2str(corr(abslog(mean(ccg_ls{2}(4002:4001+200,ls_idx)) - mean(ccg_ls{2}(4001-200:4000,ls_idx)))',...  % bias on track...
-            abslog(mean(ccg_ls{1}(4002:4001+200,ls_idx)) - mean(ccg_ls{1}(4001-200:4000,ls_idx)))')))
+    title(num2str(corr((mean(ccg_ls{2}(4002:4001+200,:)) - mean(ccg_ls{2}(4001-200:4000,:)))',...  % bias on track...
+            (mean(ccg_ls{1}(4002:4001+200,:)) - mean(ccg_ls{1}(4001-200:4000,:)))','rows','complete')))
 
     subplot(7,2,10)
-    scatter(abslog(mean(ccg_ls{2}(4002:4001+200,:)) - mean(ccg_ls{2}(4001-200:4000,:))),...  % bias on track...
-            abslog(mean(ccg_ls{3}(4002:4001+200,:)) - mean(ccg_ls{3}(4001-200:4000,:))),'.m') % bias before
+    scatter((mean(ccg_ls{2}(4002:4001+200,:)) - mean(ccg_ls{2}(4001-200:4000,:))),...  % bias on track...
+            (mean(ccg_ls{3}(4002:4001+200,:)) - mean(ccg_ls{3}(4001-200:4000,:))),'.m') % bias before
     xlabel('on track bias')
     ylabel('post-behav bias')
-    title(num2str(corr(abslog(mean(ccg_ls{2}(4002:4001+200,:)) - mean(ccg_ls{2}(4001-200:4000,:)))',...  % bias on track...
-            abslog(mean(ccg_ls{3}(4002:4001+200,:)) - mean(ccg_ls{3}(4001-200:4000,:)))')))
+    title(num2str(corr((mean(ccg_ls{2}(4002:4001+200,:)) - mean(ccg_ls{2}(4001-200:4000,:)))',...  % bias on track...
+            (mean(ccg_ls{3}(4002:4001+200,:)) - mean(ccg_ls{3}(4001-200:4000,:)))','rows','complete')))
 
     subplot(7,2,11)
     N_p = union(find(mean(ccg_hpc{2}(4002:4001+200,hpc_idx)) - mean(ccg_hpc{2}(4001-200:4000,hpc_idx)) < 0 &...
@@ -324,7 +359,12 @@ if sum(hpc_idx(:))>2 & sum(ls_idx(:)) > 2
     hold on
     plot(ii,length(N_m)./sum(hpc_idx),'.g')
     title('N++/N-- HPC')
-
+    subplot(7,2,13)
+    plot(ii,length(N_p),'.r')
+    hold on
+    plot(ii,length(N_m),'.g')
+    title('N++/N-- HPC')
+    
     subplot(7,2,12)
     N_p = union(find(mean(ccg_ls{2}(4001:4001+200,ls_idx)) - mean(ccg_ls{2}(4001-200:4001,ls_idx)) < 0 &...
                      mean(ccg_ls{3}(4001:4001+200,ls_idx)) - mean(ccg_ls{3}(4001-200:4001,ls_idx)) < 0),...
@@ -338,7 +378,12 @@ if sum(hpc_idx(:))>2 & sum(ls_idx(:)) > 2
     plot(ii,length(N_p)./size(ccg_ls{1},2),'.r')
     hold on
     plot(ii,length(N_m)./size(ccg_ls{1},2),'.g')
-
+    title('N++/N-- LS')
+    
+    subplot(7,2,14)
+    plot(ii,length(N_p),'.r')
+    hold on
+    plot(ii,length(N_m),'.g')
     title('N++/N-- LS')
 
 
