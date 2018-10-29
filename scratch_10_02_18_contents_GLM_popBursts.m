@@ -113,7 +113,7 @@ count=0;
             [ls_pop(event)] = max(abs(pr(start:stop)));
             hpc_pop(event) =  max(abs(pr_hpc(start:stop)));
             
-            if event > 1 & event < length(ca1.ripples.peak)
+            if event > 1 & event < length(ca1.ripples.peaks)
                 IRI(event) = (abs(ca1.ripples.peaks(event-1)-ca1.ripples.peaks(event)) + ...
                              abs(ca1.ripples.peaks(event+1)-ca1.ripples.peaks(event)))/2;
             else
