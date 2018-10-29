@@ -112,6 +112,14 @@ count=0;
             end
             [ls_pop(event)] = max(abs(pr(start:stop)));
             hpc_pop(event) =  max(abs(pr_hpc(start:stop)));
+            
+            if event > 1 & event < length(ca1.ripples.peak)
+                IRI(event) = (abs(ca1.ripples.peaks(event-1)-ca1.ripples.peaks(event)) + ...
+                             abs(ca1.ripples.peaks(event+1)-ca1.ripples.peaks(event)))/2;
+            else
+                IRI(event) = nan;
+            end
+            
 %             hold on
         end
         
@@ -188,6 +196,9 @@ count=0;
 %             end
         end
         
+        
+        
+    content.interRipInterval{rec} = IRI;
     content.totalSpikes{rec} = totSpks;
     content.duration{rec} = duration;
     content.location{rec} = location;

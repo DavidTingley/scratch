@@ -112,9 +112,7 @@ for rec = 1:length(content)
             idx_hpc = find(strcmp(content(rec).region{1},'ca3'));
         end
         
-        names = {'# spikes',...
-                 '% PF spks',...
-                'reward content',...
+        names = {'# spikes',...%                  '% PF spks',...%                 'reward content',...
                 'ripple depth',...
                 'pre/behav/post condition',...
                 'location',...
@@ -126,9 +124,7 @@ for rec = 1:length(content)
                 'seqNMF'};
             
             
-predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ...
-              [(nanmean(content(rec).PF{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0)))./nanmean(content(rec).nSpikes{1}(idx_hpc,:)~=0)]'... % % of spikes from PF
-              [[nanmean(content(rec).rewardContent{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)))] ./ nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'...
+predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ... %               [(nanmean(content(rec).PF{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0)))./nanmean(content(rec).nSpikes{1}(idx_hpc,:)~=0)]'... % % of spikes from PF%               [[nanmean(content(rec).rewardContent{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)))] ./ nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'...
               nanmean(content(rec).cellLoc_wav{1}(idx_hpc,:).*content(rec).nSpikes{1}(idx_hpc,:))'...
               content(rec).condition{1}...
               content(rec).location{1}...
@@ -203,7 +199,7 @@ for spk = 1:length(idx)
             mse(p) = nanmean((yfit-actual').^2);
 
             
-            [corrs(count,p) pval(count,p)] = corr(predictors(keep,p),actual','rows','complete');
+            [corrs(count,p) pval(count,p)] = corr(predictors(keep,p),actual','rows','complete','type','spearman');
        
             for iter = 1:100
 %                  pred_shuf = [predictors(keep,1:p-1) bz_shuffleCircular(predictors(keep,p)')' predictors(keep,p+1:end) ];
@@ -214,7 +210,7 @@ for spk = 1:length(idx)
                 mse_shuf(p,iter) = nanmean((yfit-actual').^2);
                 
 %                 [corrs_shuff(count,p,iter)] = corr(pred_shuf(:,p),actual','rows','complete');
-                [corrs_shuff(count,p,iter) pval_shuff(count,p,iter)] = corr(pred_shuf,actual','rows','complete');
+                [corrs_shuff(count,p,iter) pval_shuff(count,p,iter)] = corr(pred_shuf,actual','rows','complete','type','spearman');
             end
                     
         [ft r1]= fit(predictors(keep,p),actual','poly1');
@@ -263,30 +259,30 @@ end
 
 mseZ_cells(mseZ_cells<-1000) = nan;
 idx = find(meanCount>.1);
-[a b] = sort(nanmean(corrs(idx,:)));
+[a b] = sort(nanmean(mseZ_cells(idx,:)));
 
 figure
 
 for i=1:size(corrs,2)
 subplot(size(corrs,2),1,i)
-% raincloud_plot('X',corrs(idx,i),'density_type', 'ks','bandwidth',.025,'color',[0 0 0]);
-% raincloud_plot('X',corrs_shuff(idx,i,1),'density_type', 'ks','bandwidth',.025,'color',[1 0 0]);
+% raincloud_plot('X',corrs(idx,b(i)),'density_type', 'ks','bandwidth',.025,'color',[0 0 0]);
+% raincloud_plot('X',corrs_shuff(idx,b(i),1),'density_type', 'ks','bandwidth',.025,'color',[1 0 0]);
 
-
-raincloud_plot('X',mseZ_cells(:,i),'density_type', 'ks','bandwidth',.2,'color',[0 0 0]);
-raincloud_plot('X',mseZ_cells_shuf(:,i,1),'density_type', 'ks','bandwidth',.2,'color',[1 0 0]);
+raincloud_plot('X',mseZ_cells(:,b(i)),'density_type', 'ks','bandwidth',.2,'color',[0 0 0]);
+raincloud_plot('X',mseZ_cells_shuf(:,b(i),1),'density_type', 'ks','bandwidth',.2,'color',[1 0 0]);
 % axis([-110 2 -1 3])
-title(names{i})
+xlim([-150 3])
+title(names{b(i)})
 end
 
-
-for i=1:11
-m{i,1} =mseZ_cells(:,i);
-m{i,2} =mseZ_cells_shuf(:,i);
-end
-raincloud_lineplot_2(m)
-m
-clz{1} = repmat([0 0 0],11,1);
-clz{2} = repmat([1 0 0],11,1);
-raincloud_lineplot_2(m,clz,1,1)
+% 
+% for i=1:11
+% m{i,1} =mseZ_cells(:,i);
+% m{i,2} =mseZ_cells_shuf(:,i);
+% end
+% raincloud_lineplot_2(m)
+% m
+% clz{1} = repmat([0 0 0],11,1);
+% clz{2} = repmat([1 0 0],11,1);
+% raincloud_lineplot_2(m,clz,1,1)
 
