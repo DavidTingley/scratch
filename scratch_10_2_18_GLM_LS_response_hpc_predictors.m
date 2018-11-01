@@ -124,9 +124,11 @@ for rec = 1:length(content)
                 'rs3 (rank ord, raw)',...
                 'seqNMF'};
             
-            
+for i = 1:size(seqs{rec},1)
+    [seq_fits(i) seq_ids(i)] = max(seqs{rec}(i,:));
+end
 predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ... %               [(nanmean(content(rec).PF{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0)))./nanmean(content(rec).nSpikes{1}(idx_hpc,:)~=0)]'... % % of spikes from PF%               [[nanmean(content(rec).rewardContent{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)))] ./ nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'...
-              content(rec).interRipInterval,...
+              content(rec).interRipInterval{1}',...
               nanmean(content(rec).cellLoc_wav{1}(idx_hpc,:).*content(rec).nSpikes{1}(idx_hpc,:))'...
               content(rec).condition{1}...
               content(rec).location{1}...
@@ -187,6 +189,7 @@ if isempty(hpc)
 end
 
 % keep = find(~isnan(sum(predictors,2))); 
+s = seqs{rec};
 
 for spk = 1:length(idx)
 %       if mean(actual) > 0
@@ -199,7 +202,10 @@ for spk = 1:length(idx)
 %             [beta dev(p) ] = glmfit(predictors(keep,:),actual,'normal');
 %             yfit = glmval(beta,predictors(keep,:),'identity');
             mse(p) = nanmean((yfit-actual').^2);
-
+            
+           
+            
+            
             
             [corrs(count,p) pval(count,p)] = corr(predictors(keep,p),actual','rows','complete','type','spearman');
        
@@ -210,6 +216,9 @@ for spk = 1:length(idx)
                 [beta dev_shuf(p,iter)] = glmfit([ pred_shuf],actual,'normal');
                 yfit = glmval(beta,[pred_shuf],'identity');
                 mse_shuf(p,iter) = nanmean((yfit-actual').^2);
+                
+                
+
                 
 %                 [corrs_shuff(count,p,iter)] = corr(pred_shuf(:,p),actual','rows','complete');
                 [corrs_shuff(count,p,iter) pval_shuff(count,p,iter)] = corr(pred_shuf,actual','rows','complete','type','spearman');
@@ -231,14 +240,30 @@ for spk = 1:length(idx)
         end
        end
        
+        % now for seqNMF
+       actual = content(rec).nSpikes{1}(idx(spk),:); 
+       [beta dev_seqNMF] = glmfit([predictors(:,1) (s)],actual','normal');
+       yfit = glmval(beta,[predictors(:,1) s],'identity');
+       mse_seqNMF = nanmean((yfit-actual').^2);
+       for iter = 1:100
+             % now for seqNMF
+            s_shuf = bz_shuffleCircular(s);
+            [beta dev_seqNMF_shuf(iter)] = glmfit([predictors(:,1) s_shuf],actual','normal');  
+            yfit = glmval(beta,[predictors(:,1) s_shuf],'identity');
+            mse_seqNMF_shuf(iter) = nanmean((yfit-actual').^2);
+       end
+       
        meanCount(count) = nanmean(actual);
        mseZ_cells(count,:) = (mse-nanmean(mse_shuf,2)')./nanstd(mse_shuf,[],2)';
        adjRSqaure(count,:,:) = adj_R;
        mseZ_cells_shuf(count,:) = (squeeze(mse_shuf(:,1))-nanmean(mse_shuf,2))./nanstd(mse_shuf,[],2);
        mse_cells(count,:) = mse;
        mse_shuf_cells(count,:,:) = mse_shuf;
+       seqNMF_mse(count) = mse_seqNMF;
+       seqNMF_mse_shuf(count,:) = mse_seqNMF_shuf;
        recording(count) = rec;
        cellID(count) = idx(spk);
+       
        count = 1+count;
 %    end
 end
@@ -260,8 +285,10 @@ end
 % end
 
 mseZ_cells(mseZ_cells<-1000) = nan;
-idx = find(meanCount>.1);
-[a b] = sort(nanmean(mseZ_cells(idx,:)));
+idx = find(meanCount>.05);
+nCellCount = sum(~isnan(mseZ_cells));
+[a b] = sort(nanmean(mseZ_cells(idx,:)),'descend');
+% [a b] = sort(nanmean(pval(idx,:)<.05),'descend');
 
 figure
 
@@ -274,17 +301,19 @@ raincloud_plot('X',mseZ_cells(:,b(i)),'density_type', 'ks','bandwidth',.2,'color
 raincloud_plot('X',mseZ_cells_shuf(:,b(i),1),'density_type', 'ks','bandwidth',.2,'color',[1 0 0]);
 % axis([-110 2 -1 3])
 xlim([-150 3])
-title([names{b(i)} ', ' num2str(mean(mseZ_cells(:,b(i))<-2)) '% P < .05, ' num2str(mean(mseZ_cells(idx,b(i))<-2)) '% P < .05'])
+title([names{b(i)} ', ' num2str(sum(mseZ_cells(:,b(i))<-2)./sum(~isnan(mseZ_cells(:,b(i))))) '% P < .05, mean=' num2str(nanmean(mseZ_cells(:,b(i)))) ', N=' num2str(nCellCount(b(i)))])
 end
 
-% 
-% for i=1:11
-% m{i,1} =mseZ_cells(:,i);
-% m{i,2} =mseZ_cells_shuf(:,i);
-% end
-% raincloud_lineplot_2(m)
-% m
-% clz{1} = repmat([0 0 0],11,1);
-% clz{2} = repmat([1 0 0],11,1);
-% raincloud_lineplot_2(m,clz,1,1)
+
+figure
+for i=1:size(mseZ_cells,2)
+m{i,1} =mseZ_cells(:,i);
+m{i,2} =mseZ_cells_shuf(:,i);
+end
+clz{1} = repmat([0 0 0],11,1);
+clz{2} = repmat([1 0 0],11,1);
+raincloud_lineplot_2(m,clz,1,1)
+
+
+save('/home/david/Dropbox/Rip_features_seqNMF_LS_data.mat','-v7.3')
 
