@@ -1,0 +1,42 @@
+folders = dir('*201*');
+
+c=1;
+        
+for f =1:length(folders)
+    cd(folders(f).name)
+    
+    sessionInfo = bz_getSessionInfo;
+    if ~isempty(sessionInfo.ca1)
+        load([sessionInfo.FileName '.behavior.mat'])
+
+        lfp = bz_GetLFP(sessionInfo.ca1);
+        [b a] = butter(3,[4/625 13/625],'bandpass');
+        filt = FiltFiltM(b,a,single(lfp.data));
+
+        clear mat* pk*
+        for i=1:length(behavior.events.trialIntervals)
+            int = behavior.events.trialIntervals(i,:);
+            m1 = makelength(diff(behavior.events.trials{i}.z),800);
+            m1 = Smooth(m1,3);
+            m2 = makelength(filt(round(int(1)*1250):round(int(2)*1250)),800);
+            mat1(i,:)=m1;
+            mat2(i,:)=m2;
+            [pks locs] =findpeaks(diff(behavior.events.trials{i}.z),'MinPeakHeight',.45,'MinPeakDistance',10);
+            for l = 1:length(locs)
+                int1 =  behavior.events.trials{i}.timestamps(locs(l));
+                pkTrigThet(c,:) = filt(round(int1*1250-625):round(int1*1250+625));
+                tType{c} = behavior.events.conditionType{behavior.events.trialConditions(i)};
+                c=1+c;
+            end
+        end
+        for i=1:size(pkTrigThet,1)
+pk(i,:) = angle(hilbert(pkTrigThet(i,:)));
+end
+        for i=1:1000
+            shuf(i,:) = (circ_std(bz_shuffleCircular((pk))));
+        end       
+    end
+    
+    
+    cd /home/david/datasets/lsDataset/
+end

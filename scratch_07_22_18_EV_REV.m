@@ -7,7 +7,7 @@ for ii=1:length(d)
     sessionInfo = bz_getSessionInfo;
     ls_spikes = bz_GetSpikes('region','ls','noprompts',true);
     SleepState = bz_LoadStates(pwd,'SleepState');
-    ripples = bz_LoadEvents(pwd,'CA1Ripples');
+    ripples = bz_LoadEvents(pwd,'LSRipples');
     ls_spikesNREM = ls_spikes;
     ls_spikesBEHAV = ls_spikes;
     
@@ -34,7 +34,7 @@ for ii=1:length(d)
     epoch = 0;
     while sum(epoch) < 600 & temp < intervals(end)
         it = SubtractIntervals(double(SleepState.ints.NREMstate),[0 intervals(2,2)+window; intervals(2,2)+temp+window intervals(end)]);
-        epoch = sum(diff(it));
+        epoch = sum(diff(it'));
         temp = temp+1;
     end
     
@@ -43,18 +43,18 @@ for ii=1:length(d)
     if ~isempty(ls_spikes) & ~isempty(it)
     for spk = 1:length(ls_spikes.times)
        ls_spikesNREM_post.times{spk} = Restrict(ls_spikes.times{spk},it); 
-       ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},double(SleepState.ints.NREMstate)); 
+%        ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},double(SleepState.ints.NREMstate)); 
        ls_spikesBEHAV.times{spk} = Restrict(ls_spikes.times{spk},behavior.events.trialIntervals);
-%        ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
+       ls_spikesNREM.times{spk} = Restrict(ls_spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
     end
     end
    
     for bins = 1:length(binSize)
     if ~isempty(ls_spikes) & ~isempty(SleepState.ints.NREMstate) & exist([ls_spikes.sessionName '.behavior.mat']) & all(diff(intervals')>600)
         
-    spkmat_ls = bz_SpktToSpkmat(ls_spikesBEHAV.times,'binSize',binSize(bins));
-    spkmatNREM_ls = bz_SpktToSpkmat(ls_spikesNREM.times,'binSize',binSize(bins));
-    spkmatNREM_post_ls = bz_SpktToSpkmat(ls_spikesNREM_post.times,'binSize',binSize(bins));
+    spkmat_ls = bz_SpktToSpkmat(ls_spikesBEHAV.times,'binSize',binSize(bins),'dt',binSize(bins));
+    spkmatNREM_ls = bz_SpktToSpkmat(ls_spikesNREM.times,'binSize',binSize(bins),'dt',binSize(bins));
+    spkmatNREM_post_ls = bz_SpktToSpkmat(ls_spikesNREM_post.times,'binSize',binSize(bins),'dt',binSize(bins));
     for spk = 1:size(spkmat_ls.data,2)
        spkmat_ls.zscoredData(:,spk) = zscore(spkmat_ls.data(:,spk));
        spkmatNREM_ls.zscoredData(:,spk) = zscore(spkmatNREM_ls.data(:,spk)); 
@@ -108,9 +108,9 @@ for ii=1:length(d)
     for spk = 1:length(hpc_spikes.times)
 %         if length(hpc_spikes.times{spk})./hpc_spikes.times{spk}(end) < 5 % 2.5Hz FR limit
        hpc_spikesNREM_post.times{spk} = Restrict(hpc_spikes.times{spk},it);   
-       hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},double(SleepState.ints.NREMstate));   
+%        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},double(SleepState.ints.NREMstate));   
        hpc_spikesBEHAV.times{spk} = Restrict(hpc_spikes.times{spk},behavior.events.trialIntervals); 
-%        hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
+       hpc_spikesNREM.times{spk} = Restrict(hpc_spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
 %         else
 %        hpc_spikesNREM.times{spk} = [];   
 %        hpc_spikesBEHAV.times{spk} = []; 
@@ -118,9 +118,9 @@ for ii=1:length(d)
 %         end
     end
 
-    spkmat_hpc = bz_SpktToSpkmat(hpc_spikesBEHAV.times,'binSize',binSize(bins));
-    spkmatNREM_hpc = bz_SpktToSpkmat(hpc_spikesNREM.times,'binSize',binSize(bins));
-    spkmatNREM_post_hpc = bz_SpktToSpkmat(hpc_spikesNREM_post.times,'binSize',binSize(bins));
+    spkmat_hpc = bz_SpktToSpkmat(hpc_spikesBEHAV.times,'binSize',binSize(bins),'dt',binSize(bins));
+    spkmatNREM_hpc = bz_SpktToSpkmat(hpc_spikesNREM.times,'binSize',binSize(bins),'dt',binSize(bins));
+    spkmatNREM_post_hpc = bz_SpktToSpkmat(hpc_spikesNREM_post.times,'binSize',binSize(bins),'dt',binSize(bins));
     for spk = 1:size(spkmat_hpc.data,2)
     spkmat_hpc.zscoredData(:,spk) = zscore(spkmat_hpc.data(:,spk));
     spkmatNREM_hpc.zscoredData(:,spk) = zscore(spkmatNREM_hpc.data(:,spk)); 
@@ -165,10 +165,10 @@ for ii=1:length(d)
     spikesNREM = spikes;
     spikesBEHAV = spikes;
     for spk = 1:length(spikes.times)
-        spikesNREM.times{spk} = Restrict(spikes.times{spk},double(SleepState.ints.NREMstate));   
+%         spikesNREM.times{spk} = Restrict(spikes.times{spk},double(SleepState.ints.NREMstate));   
         spikesBEHAV.times{spk} = Restrict(spikes.times{spk},behavior.events.trialIntervals);  
         spikesNREM_post.times{spk} = Restrict(spikes.times{spk},it); 
-%         spikesNREM.times{spk} = Restrict(spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
+        spikesNREM.times{spk} = Restrict(spikes.times{spk},[ripples.peaks-.1 ripples.peaks+.1]); 
        for spk2 = 1:length(spikes.times)
            if strcmp(spikes.region{spk},'hpc') & strcmp(spikes.region{spk2},'ls')
               idx(spk,spk2) = 1;
@@ -178,9 +178,9 @@ for ii=1:length(d)
        end
     end
 
-    spkmat = bz_SpktToSpkmat(spikesBEHAV.times,'binSize',binSize(bins));
-    spkmatNREM = bz_SpktToSpkmat(spikesNREM.times,'binSize',binSize(bins));
-    spkmatNREM_post = bz_SpktToSpkmat(spikesNREM_post.times,'binSize',binSize(bins));
+    spkmat = bz_SpktToSpkmat(spikesBEHAV.times,'binSize',binSize(bins),'dt',binSize(bins));
+    spkmatNREM = bz_SpktToSpkmat(spikesNREM.times,'binSize',binSize(bins),'dt',binSize(bins));
+    spkmatNREM_post = bz_SpktToSpkmat(spikesNREM_post.times,'binSize',binSize(bins),'dt',binSize(bins));
     for spk = 1:size(spkmat.data,2)
     spkmat.zscoredData(:,spk) = zscore(spkmat.data(:,spk));
     spkmatNREM.zscoredData(:,spk) = zscore(spkmatNREM.data(:,spk)); 
@@ -233,7 +233,7 @@ for ii=1:length(d)
     REV_cross(REV_cross==Inf) = nan;
     
     
-    figure(wind)
+%     figure(wind)
     
     subplot(3,4,bins)
     histogram(EV_ls(wind,bins,EV_ls(wind,bins,:)~=0)-REV_ls(wind,bins,EV_ls(wind,bins,:)~=0),-1:.1:1,'normalization','pdf','FaceColor','m')

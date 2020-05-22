@@ -6,6 +6,9 @@ count_ls = 1;
 count_hpc = 1;
 overlap = 1;
 
+load('/home/david/Dropbox/Documents/pubs/inProgress/2019_ReplayDavid/data/20170429_0um_0um_merge/exampleOrder.mat', 'b','ex')
+seqOrder = b;
+
 
 
 % for ii=61:length(d)
@@ -169,8 +172,8 @@ overlap = 1;
     
     
     
-    if ~isempty(hpc_spikes) & ~isempty(ls_spikes)
-%     lfp = bz_GetLFP(sessionInfo.ls);
+    if ~isempty(hpc_spikes) %& ~isempty(ls_spikes)
+    lfp = bz_GetLFP(95);
 %     hpc = bz_GetLFP(sessionInfo.spikeGroups.groups{9});
 %     ls_power = zscore(fastrms(bz_Filter(double(lfp.data),'filter','butter','passband',[100 150],'order', 4),12));
     
@@ -212,8 +215,10 @@ overlap = 1;
     outR_shuf = nan(length(firingMaps.rateMaps),length(ripples.peaks),100);
     corrs_hpc = nan(length(firingMaps.rateMaps),length(ripples.peaks));
     corrs_hpc_shuf = nan(length(firingMaps.rateMaps),length(ripples.peaks),100);
+    pvals_hpc = nan(length(firingMaps.rateMaps),length(ripples.peaks));
+    pvals_hpc_shuf = nan(length(firingMaps.rateMaps),length(ripples.peaks),100);
     
-    for t = 1:length(firingMaps.rateMaps)
+    for t = 1%:length(firingMaps.rateMaps)
         if size(firingMaps.rateMaps{t},2) >= 9
         rates = squeeze(mean(firingMaps.rateMaps{t}(idx_hpc,:,:),2));
         for spk = 1:size(rates,1)
@@ -226,8 +231,8 @@ overlap = 1;
          end
          pf = find(pf);
          keep = intersect(pf,idx_hpc)-length(idx_ls); 
-%          keep = 1:length(idx_hpc);
-%          keep(sum(rates')==0) = [];
+         keep = 1:length(idx_hpc);
+         keep(sum(rates')==0) = [];
 %         template = squeeze(circ_mean(binnedPhaseMaps{t},[],2))+pi;
 %         template = squeeze(mean(firingMaps.rateMaps{t},2));
         
@@ -235,12 +240,12 @@ overlap = 1;
         for i = 1:size(template,1)
            template(i,:) = mean_norm(Smooth(template(i,:),5)')';
         end
-        for event = 1:length(ripples.peaks)
+        for event = 1:length(ripples.peaks) % [36 109 630 703 540 650 810 343 400 765]%
             % start bigger than the event itself
             start = round((round(ripples.timestamps(event,1) * 1000)-50) ./ (spkmatNREM_hpc.dt*1000));
             stop = round((round(ripples.timestamps(event,2) * 1000)+50) ./ (spkmatNREM_hpc.dt*1000));
             
-            if stop < size(spkmatNREM_hpc.data,1) & stop-start > 5
+            if stop < size(spkmatNREM_hpc.data,1) & stop-start > 5 & start > 0
                 
                 
                 for spk = 1:size(spkmatNREM_hpc.data,2)
@@ -293,10 +298,18 @@ overlap = 1;
     %                 prMax = prMax(gaps(b):gaps(b+1));
     %                 data = data(gaps(b):gaps(b+1),:); 
                 end
-            if stop < size(spkmatNREM_hpc.data,1) & size(data,1) > 5
-                % now calc correlations and control distro w/ cut data...
-                corrs_hpc(t,event) = corr([1:length(prMax)]',prMax,'rows','complete');
+            if stop < size(spkmatNREM_hpc.data,1) & size(data,1) > 5 & sum(sum(counts(:,keep))>0) > 5
+                % now calc correlations and control distro w/ cutstop < size(spkmatNREM_hpc.data,1) & size(data,1) > 5 & length(idx)>3 %sum(sum(spkmatNREM_hpc.data(start:stop,:)))> 5 data...
+                [corrs_hpc(t,event) pvals_hpc(t,event)] = corr([1:length(prMax)]',prMax,'rows','complete');
                 [outR(t,event) outID] = makeBayesWeightedCorr1(Pr,ones(size(Pr,1),1));
+                
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                idx = intersect(find(nanmean(data)~=0),keep); % only take cells that spiked...               
+                [a b ord_template] = sort_cells(template(idx,:));
+                [a b ord_data] = sort_cells(data(:,idx)');
+                [rankOrder(t,event) pvals(t,event)] = corr(ord_template,ord_data,'rows','complete');
+                %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                
                 
                 for iter = 1:100
                     template_shuf = bz_shuffleCircular(squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_hpc,:,:),2)));
@@ -306,7 +319,7 @@ overlap = 1;
 %                     template_shuf = bz_shuffleCellID(template);
                     [Pr_shuf prMax_shuf] = placeBayes((data(:,keep)')', template_shuf(keep,:), spkmatNREM_hpc.dt*15);
                      [outR_shuf(t,event,iter) outID] = makeBayesWeightedCorrBatch1(Pr_shuf,ones(size(Pr_shuf,1),1));
-                     corrs_hpc_shuf(t,event,iter) = corr([1:length(prMax_shuf)]',prMax_shuf,'rows','complete');
+                     [corrs_hpc_shuf(t,event,iter) pvals_hpc_shuf(t,event,iter)] = corr([1:length(prMax_shuf)]',prMax_shuf,'rows','complete');
 %                     subplot(4,2,6)
                     [slope_hpc_shuf(t,event,iter) integral_hpc_shuf(t,event,iter)] = Pr2Radon(Pr_shuf');
                 end
@@ -317,6 +330,8 @@ overlap = 1;
                 else 
                     corrs_hpc(t,event) = nan;
                     corrs_hpc_shuf(t,event,1:100) = nan;
+                    pvals_hpc(t,event) = nan;
+                    pvals_hpc_shuf(t,event,1:100) = nan;
                     outR(t,event) = nan;
                     outR_shuf(t,event,1:100) = nan;
                     slope_hpc(t,event) = nan;
@@ -327,6 +342,8 @@ overlap = 1;
             else
                 corrs_hpc(t,event) = nan;
                 corrs_hpc_shuf(t,event,1:100) = nan;
+                pvals_hpc(t,event) = nan;
+                pvals_hpc_shuf(t,event,1:100) = nan;
                 outR(t,event) = nan;
                 outR_shuf(t,event,1:100) = nan;
                 slope_hpc(t,event) = nan;
@@ -343,71 +360,88 @@ overlap = 1;
 %             if ~isempty(Pr)
 %                 
 % d = (integral_hpc-mean(integral_hpc_shuf,3))./std(integral_hpc_shuf,[],3);
-% 
-% subplot(4,2,1)
-% histogram(integral_hpc,[0:.01:.3],'Normalization','pdf');
-% hold on
-% histogram(integral_hpc_shuf,[0:.01:.3],'Normalization','pdf')
-% title(['condition: ' num2str(t) ', event: ' num2str(event)])
-% 
-% % histogram(corrs_hpc,-1:.01:1,'Normalization','pdf');
-% % hold on
-% % histogram((corrs_hpc_shuf),-1:.01:1,'Normalization','pdf')
-% hold off
-% 
-% subplot(4,2,2)
-% % line([0 3],[.012 .012],'color','r');
-% bz_plotEphys([],'spikes',hpc_spikes,...
-%                     'scalelfp',5,...
-%                     'plotcells',hpc_spikes.UID(keep),...
-%                     'timewin',[ripples.timestamps(event,1)-.05 ripples.timestamps(event,2)+.05])
-% 
-% subplot(4,2,3)
-% scatter(max((d(:,1:event))),absmax(outR(:,1:event)),'.k')
-% % scatter(absmax((corrs_hpc(:,1:event))),spkCount(1:event),'.k')
-% xlabel('rZ radon integral')
-% ylabel('weighted corr')
-% 
-% subplot(4,2,4)
-% title([num2str(integral_hpc(t,event)) ' / ' num2str(d(t,event))])
-% % imagesc((Pr'))
-% % 
-% % title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
-% 
-% subplot(4,2,5)
-% % plot(PR{count_hpc}(1:event),'.k')
-% plot(absmax((corrs_hpc(:,1:event))),absmax(d(:,1:event)),'.k')
-% xlabel('rank order corr')
-% ylabel('rZ score')
-% % imagesc(data(:,ord)')
-% title('rank ord corr vs linear weight corr')
-% 
-% subplot(4,2,6)
-% title([num2str(nanmean(integral_hpc_shuf(t,event,:),3)) ' / ' num2str(d(t,event))])
-% % imagesc((Pr_shuf'))
-% % imagesc(rates(ord,:))
-% % nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
-% % wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
-% % errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
-% % hold on
-% % errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
-% % hold off        
-% % axis([0 3 0.004 .015])
-% 
-% subplot(4,2,7)
-% plot(absmax((corrs_hpc(:,1:event))),absmax(outR(:,1:event)),'.k')
-% % scatter(absmax((corrs_hpc(:,1:event))),popBursts.amplitudes(1:event),'.k')
-% xlabel('rank order corr')
-% ylabel('weighted corr')
-% 
-% subplot(4,2,8)
-% imagesc(flipud(data(:,keep)'))
-% % scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
-% % xlabel('ls rate')
-% % ylabel('hpc rate')
-% if d(t,event) > 2
-%     pause(.01)
-% end
+if abs(outR(t,event))>.2
+    interval = [ripples.timestamps(event,1)-.05 ripples.timestamps(event,2)+.05];
+    subplot(4,2,1)
+    bz_plotRasterTrial(spikes,interval,10,seqOrder,ex);
+    
+    
+    ylim([0 60])
+    title(['R = ' num2str(corrs_hpc(1,event)) ', evt #' num2str(event)]);
+    subplot(4,2,2)
+    bz_plotEphys(lfp,'timewin',interval)
+
+    
+    d = (outR-mean(outR_shuf,3))./std(outR_shuf,[],3);
+    subplot(4,2,3)
+    bz_plotRasterTrial(spikes,interval,10,seqOrder,((~ismember(spikes.UID,hpc_spikes.UID(keep))+ex')==2));
+    ylim([0 60])
+%     histogram(integral_hpc,[0:.01:.3],'Normalization','pdf');
+%     hold on
+%     histogram(integral_hpc_shuf,[0:.01:.3],'Normalization','pdf')
+%     title(['condition: ' num2str(t) ', event: ' num2str(event)])
+
+    % histogram(corrs_hpc,-1:.01:1,'Normalization','pdf');
+    % hold on
+    % histogram((corrs_hpc_shuf),-1:.01:1,'Normalization','pdf')
+    hold off
+
+    subplot(4,2,4)
+    % line([0 3],[.012 .012],'color','r');
+    bz_plotEphys([],'spikes',hpc_spikes,...
+                        'scalelfp',5,...
+                        'plotcells',hpc_spikes.UID(keep),...
+                        'timewin',[ripples.timestamps(event,1)-.05 ripples.timestamps(event,2)+.05])
+
+    subplot(4,2,5)
+    scatter(max((d(:,1:event))),absmax(outR(:,1:event)),'.k')
+    % scatter(absmax((corrs_hpc(:,1:event))),spkCount(1:event),'.k')
+    xlabel('rZ radon integral')
+    ylabel('weighted corr')
+    title(['weighted corr:' num2str(outR(t,event))])
+
+    subplot(4,2,6)
+    title([num2str(integral_hpc(t,event)) ' / ' num2str(d(t,event))])
+    % imagesc((Pr'))
+    % 
+    % title(corr(PR{count_hpc}(1:event)',max((d(:,1:event)))','rows','complete'))
+
+    subplot(4,2,7)
+    % plot(PR{count_hpc}(1:event),'.k')
+    plot(absmax((corrs_hpc(:,1:event))),absmax(d(:,1:event)),'.k')
+    xlabel('rank order corr')
+    ylabel('rZ score')
+    % imagesc(data(:,ord)')
+    title('rank ord corr vs linear weight corr')
+
+    subplot(4,2,8)
+    title(['radon int: ' num2str(nanmean(integral_hpc_shuf(t,event,:),3)) ' / ' num2str(d(t,event))])
+    % imagesc((Pr_shuf'))
+    % imagesc(rates(ord,:))
+    % nrem = InIntervals(ripples.peaks,SleepState.ints.NREMstate);
+    % wake = InIntervals(ripples.peaks,SleepState.ints.WAKEstate);
+    % errorbar(1,nanmean(max(integral_hpc(:,nrem))),nanstd(max(integral_hpc(:,nrem))'))
+    % hold on
+    % errorbar(2,nanmean(max(integral_hpc(:,wake))),nanstd(max(integral_hpc(:,wake))'))
+    % hold off        
+    % axis([0 3 0.004 .015])
+
+    % subplot(4,2,7)
+    % plot(absmax((corrs_hpc(:,1:event))),absmax(outR(:,1:event)),'.k')
+    % % scatter(absmax((corrs_hpc(:,1:event))),popBursts.amplitudes(1:event),'.k')
+    % xlabel('rank order corr')
+    % ylabel('weighted corr')
+    % title(['rank ord corr:' num2str(corrs_hpc(t,event))])
+
+
+    % subplot(4,2,8)
+    imagesc(flipud(data(:,keep)'))
+    % scatter(PR{count_hpc}(1:event),popBursts.amplitudes(1:event),'.k')
+    % xlabel('ls rate')
+    % ylabel('hpc rate')
+    pause
+    clf
+        end
 %             end
 clear data counts
         end

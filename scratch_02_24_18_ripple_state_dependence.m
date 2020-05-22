@@ -11,6 +11,9 @@ REMCrossRegionCoupling = nan(length(d),1);
 wakeLSRippleRate = nan(length(d),1);
 NREMLSRippleRate = nan(length(d),1);
 REMLSRippleRate = nan(length(d),1);
+wakeLSRippleCount = nan(length(d),1);
+NREMLSRippleCount = nan(length(d),1);
+REMLSRippleCount = nan(length(d),1);
 wakeCA1RippleRate = nan(length(d),1);
 NREMCA1RippleRate = nan(length(d),1);
 REMCA1RippleRate = nan(length(d),1);
@@ -22,15 +25,17 @@ reg =[];
 for rec = 1:length(d)
     cd(d(rec).name)
     sessionInfo = bz_getSessionInfo;
-    sessionInfo.FileName
+    sessionInfo.FileName;
     ls_ripples = bz_LoadEvents(pwd,'LSRipples');
     ca1_ripples = bz_LoadEvents(pwd,'CA1Ripples');
     sleep = bz_LoadStates(pwd,'SleepState');
     spikes = bz_GetSpikes('noprompt',true);
-    if exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat']) & exist([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
+%     if exist([sessionInfo.FileName '.placeFields.20_pctThresh.mat']) & exist([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
 %     load([sessionInfo.FileName '.positionDecodingMaxCorr_binned_box_mean.cellinfo.mat'])
 %     load([sessionInfo.FileName '.placeFields.20_pctThresh.mat'])
-    if ~isempty(ls_ripples) & ~isempty(ca1_ripples)
+    if ~isempty(ls_ripples) 
+        nEvents(rec) = length(ls_ripples.peaks);
+        if ~ isempty(ca1_ripples)
 %         if length(ca1_ripples.peaks) > 10
 %     % get coupling scores
     for i=1:length(ls_ripples.timestamps) % ca1 as ref for now...
@@ -105,14 +110,16 @@ for rec = 1:length(d)
 %             count = 1+count;
 %         end
 %         clear f
+        end
     end
-    
     % get wake rate
     wakeTime = double(sum(diff(sleep.ints.WAKEstate')));
     if ~isempty(ls_ripples)
         wakeLSRippleRate(rec) = length(Restrict(ls_ripples.peaks,double(sleep.ints.WAKEstate)))./wakeTime;
+        wakeLSRippleCount(rec) = length(Restrict(ls_ripples.peaks,double(sleep.ints.WAKEstate)));
     else
         wakeLSRippleRate(rec) = nan;
+        wakeLSRippleCount(rec) = nan;
     end
     if ~isempty(ca1_ripples)
         wakeCA1RippleRate(rec) = length(Restrict(ca1_ripples.peaks,double(sleep.ints.WAKEstate)))./wakeTime;
@@ -125,21 +132,19 @@ for rec = 1:length(d)
         wakeCrossRegionCoupling(rec) = nan;        
     end
     % get NREM rate
-    if isfield(sleep.ints,'REMstate')
-        NREMTime = double(sum(diff(sleep.ints.WAKEstate')));
+    if isfield(sleep.ints,'NREMstate')
+        NREMTime = double(sum(diff(sleep.ints.NREMstate')));
         if NREMTime > 60
         if ~isempty(ls_ripples)
             NREMLSRippleRate(rec) = length(Restrict(ls_ripples.peaks,double(sleep.ints.NREMstate)))./NREMTime;
+            NREMLSRippleCount(rec) = length(Restrict(ls_ripples.peaks,double(sleep.ints.NREMstate)));
         else
             NREMLSRippleRate(rec) = nan;
+            NREMLSRippleCount(rec) = nan;
         end
         if ~isempty(ca1_ripples)
             NREMCA1RippleRate(rec) = length(Restrict(ca1_ripples.peaks,double(sleep.ints.NREMstate)))./NREMTime;
         else
-            NREMCA1RippleRate(rec) = nan;
-        end
-        else
-            NREMLSRippleRate(rec) = nan;
             NREMCA1RippleRate(rec) = nan;
         end
         if ~isempty(ca1_ripples) & ~isempty(ls_ripples)
@@ -147,14 +152,21 @@ for rec = 1:length(d)
         else
             NREMCrossRegionCoupling(rec) = nan;
         end
+        else
+            NREMLSRippleRate(rec) = nan;
+            NREMCA1RippleRate(rec) = nan;
+        end
     end
     % get REM rate
     if isfield(sleep.ints,'REMstate')
         REMTime = double(sum(diff(sleep.ints.REMstate')));
+        if REMTime > 60
         if ~isempty(ls_ripples)
             REMLSRippleRate(rec) = length(Restrict(ls_ripples.peaks,double(sleep.ints.REMstate)))./REMTime;
+            REMLSRippleCount(rec) = length(Restrict(ls_ripples.peaks,double(sleep.ints.REMstate)));
         else
             REMLSRippleRate(rec) = nan;
+            REMLSRippleCount(rec) = nan;
         end
         if ~isempty(ca1_ripples)
             REMCA1RippleRate(rec) = length(Restrict(ca1_ripples.peaks,double(sleep.ints.REMstate)))./REMTime;
@@ -168,6 +180,7 @@ for rec = 1:length(d)
         end
         end
     end
+%     end
     
    cd /home/david/datasets/ripples_LS 
 % cd E:\datasets\ripples_LS
@@ -177,19 +190,19 @@ end
 
 %% plotting
 subplot(2,2,1)
-errorbar(1,nanmean(wakeLSRippleRate),nanstd(wakeLSRippleRate)./sqrt(93)*3,'.r')
+errorbar(1,nanmean(wakeLSRippleRate(idx)),nanstd(wakeLSRippleRate(idx)),'.r')
 hold on
-errorbar(2,nanmean(NREMLSRippleRate),nanstd(NREMLSRippleRate)./sqrt(93)*3,'.r')
-errorbar(3,nanmean(REMLSRippleRate),nanstd(REMLSRippleRate)./sqrt(93)*3,'.r')
+errorbar(2,nanmean(NREMLSRippleRate(idx)),nanstd(NREMLSRippleRate(idx)),'.r')
+errorbar(3,nanmean(REMLSRippleRate(idx)),nanstd(REMLSRippleRate(idx)),'.r')
 
-errorbar(1.2,nanmean(wakeCA1RippleRate),nanstd(wakeCA1RippleRate)./sqrt(93)*3,'.k')
+errorbar(1.2,nanmean(wakeCA1RippleRate),nanstd(wakeCA1RippleRate),'.k')
 hold on
-errorbar(2.2,nanmean(NREMCA1RippleRate),nanstd(NREMCA1RippleRate)./sqrt(93)*3,'.k')
-errorbar(3.2,nanmean(REMCA1RippleRate),nanstd(REMCA1RippleRate)./sqrt(93)*3,'.k')
+errorbar(2.2,nanmean(NREMCA1RippleRate),nanstd(NREMCA1RippleRate),'.k')
+errorbar(3.2,nanmean(REMCA1RippleRate),nanstd(REMCA1RippleRate),'.k')
 axis([0 4 0.0001 .2])
 set(gca,'yscale','log')
 subplot(2,2,2)
-errorbar(1,nanmedian(wakeCrossRegionCoupling),nanstd(wakeCrossRegionCoupling),'.r')
+errorbar(1,nanmean(wakeCrossRegionCoupling(idx)),nanstd(wakeCrossRegionCoupling(idx)),'.r')
 hold on
-errorbar(2,nanmedian(NREMCrossRegionCoupling),nanstd(NREMCrossRegionCoupling),'.k')
-errorbar(3,nanmedian(REMCrossRegionCoupling),nanstd(REMCrossRegionCoupling),'.b')
+errorbar(2,nanmean(NREMCrossRegionCoupling(idx)),nanstd(NREMCrossRegionCoupling(idx)),'.k')
+errorbar(3,nanmean(REMCrossRegionCoupling(idx)),nanstd(REMCrossRegionCoupling(idx)),'.b')

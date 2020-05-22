@@ -39,7 +39,7 @@ count=0;
             ca1.ripples.timestamps = popBursts.timestamps;
         end
         
-        if ~isempty(SleepState) & ~isempty(ca1.ripples) & isfield(SleepState.ints,'NREMstate')
+        if ~isempty(SleepState) & ~isempty(SleepState.ints.NREMstate) & ~isempty(ca1.ripples) & isfield(SleepState.ints,'NREMstate')
             
                    
         spikes = bz_GetSpikes('noprompts',true);
@@ -89,11 +89,11 @@ count=0;
         hpc_rec = [];
 %         hpc_pop = [];
         for event = 1:size(ca1.ripples.timestamps,1)
-            start = round((ca1.ripples.timestamps(event,1)-.025) * 1250); % used to be 20 ms
+            start = round((ca1.ripples.timestamps(event,1)-.05) * 1250); % used to be 20 ms
             if start<1
                 start = 1;
             end
-            stop = round((ca1.ripples.timestamps(event,2)+.025) * 1250);
+            stop = round((ca1.ripples.timestamps(event,2)+.05) * 1250);
             if stop > length(ls_power)
                 stop = length(ls_power);
             end
@@ -102,11 +102,11 @@ count=0;
             hpc_rec=[hpc_rec;ls_max,hpc_max];
             
             
-            start = round((ca1.ripples.timestamps(event,1)-.025) * 1000); % used to be 20 ms
+            start = round((ca1.ripples.timestamps(event,1)-.05) * 1000); % used to be 20 ms
             if start<1
                 start = 1;
             end
-            stop = round((ca1.ripples.timestamps(event,2)+.025) * 1000);
+            stop = round((ca1.ripples.timestamps(event,2)+.05) * 1000);
             if stop > length(ls_power)
                 stop = length(ls_power);
             end
@@ -171,12 +171,17 @@ count=0;
 %             meanPeakRate(spk) = nanmax(olypherInfo.results{spk}.ratePeakInfo(cols)); % used to be nanmean
             
             for ind = 1:length(ca1.ripples.peaks)
-                start = ((ca1.ripples.peaks(ind)-.025)); % used to be 20 ms
+                start = ((ca1.ripples.peaks(ind)-.05)); % used to be 20 ms
                 if start<1
                     start = 1;
                 end
-                stop = ((ca1.ripples.peaks(ind)+.025));
+                stop = ((ca1.ripples.peaks(ind)+.05));
                 ripSpks = Restrict(spikes.times{spk},[start stop]);
+                if ~isempty(ripSpks)
+                    spkTimes(ind,spk) = mean(ripSpks);
+                else
+                    spkTimes(ind,spk) = nan;
+                end
                 duration(ind) = abs(diff(popBursts.timestamps(ind,:)));
 %                 spatialContent(spk,ind) = meanPeakRate(spk);
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk);
@@ -190,21 +195,35 @@ count=0;
                 
                 
             end   
-           
+            
 %             else 
 %                 meanPeakRate = [];
 %             end
         end
         
+%         for ind = 1:length(ca1.ripples.peaks)
+%            [a b] = sort(spkTimes(ind,:));
+%            [a spikeOrder(ind,:)] = sort(b);
+%         end
+%         spikeOrder(isnan(spkTimes)) = 0;
+%         u = unique(spikeOrder,'rows');
+%         for uu=1:length(u)
+%             for ind = 1:length(ca1.ripples.peaks)
+%                 if sum(u(uu,:)==spikeOrder(ind,:))==size(spikeOrder,2)
+%                     spkOrd(ind) = uu;
+%                 end
+% %                spkOrd(ind) = find(u==spikeOrder(ind,:)); 
+%             end
+%         end
         
-        
+    content.spikeTimes = spkTimes;
     content.interRipInterval{rec} = IRI;
     content.totalSpikes{rec} = totSpks;
     content.duration{rec} = duration;
     content.location{rec} = location;
     content.condition{rec} = condition; 
     content.SleepState{rec} = State;
-    content.region{rec} = spikes.region{end};
+    content.region{rec} = spikes.region;
     content.nCells{rec} = size(rewardContent,1);
 %     content.spatialContent{rec} = spatialContent;
     content.rewardContent{rec} = rewardContent;
@@ -218,7 +237,6 @@ count=0;
     content.hpc_power{rec} = hpc_rec(:,2);
     content.ls_power{rec} = hpc_rec(:,1);
     content.animal(rec) = sum(double(sessionInfo.animal));
-    content.region{rec} = spikes.region;
     
     
 %% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -271,7 +289,7 @@ count=0;
 % pause(.001)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-save([sessionInfo.FileName '.content_GLM_popBursts_25ms.mat'],'-v7.3')
+save([sessionInfo.FileName '.content_GLM_popBursts_50ms.mat'],'-v7.3')
     rec
     clear totSpks State meanPeakRate condition rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content* PF cellLoc*
         end

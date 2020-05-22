@@ -8,7 +8,7 @@ for rec=1:length(d)
     spikes = bz_GetSpikes('noprompts',true);
     SleepState = bz_LoadStates(pwd,'SleepState');
     if exist([sessionInfo.FileName '.behavior.mat']) & ...
-        isfield(SleepState.ints,'NREMstate') & ~isempty(spikes)
+        isfield(SleepState.ints,'NREMstate') & ~isempty(spikes) & ~isempty(SleepState.ints.NREMstate)
         load([sessionInfo.FileName '.behavior.mat'])
         for i=1:length(behavior.events.trials)
             bStart(i) = behavior.events.trials{i}.timestamps(1);

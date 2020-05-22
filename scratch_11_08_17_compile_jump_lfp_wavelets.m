@@ -1,9 +1,15 @@
 d = dir('*201*')
 for rec = 5:length(d)
     cd(d(rec).name);
+    if exist([d(rec).name '.jump.behavior.mat']) 
 load([d(rec).name '.jump.behavior.mat'])
+
 sessionInfo = bz_getSessionInfo;
-lfp = bz_GetLFP(sessionInfo.ca1);
+if~isempty(sessionInfo.ca1) 
+    lfp = bz_GetLFP(sessionInfo.ca1);
+% else isempty(sessionInfo.ca3) 
+%     lfp = bz_GetLFP(sessionInfo.ca3);
+end
 if isfield(sessionInfo,'ls') 
 septal = bz_GetLFP(sessionInfo.ls);
 end
@@ -13,8 +19,8 @@ if ~isempty(sessionInfo.ca1)
     if ~isnan(ints(i))
     %ca1
     [aa bb] = min(abs(lfp.timestamps-ints(i)));
-    [freqs,t,spec] = WaveSpec(double(lfp.data(bb-1250*3:bb+1250*3)),[1 200],200,3,1/1250,'lin');
-    specs(i,:,:) = abs(spec);
+    [spec] = bz_WaveSpec(double(lfp.data(bb-1250*3:bb+1250*3)),'samplingRate', 1250,'frange',[1 200],'nfreqs',200,'ncyc',3,'space','lin');
+    specs(i,:,:) = abs(spec.data);
     subplot(2,2,1)
     imagesc(squeeze(mean(specs)))
     subplot(2,2,2)
@@ -34,8 +40,8 @@ if ~isempty(sessionInfo.ca1)
         if ~isempty(sessionInfo.ls)
     for i=1:length(behavior.events.trialConditions)
     if ~isnan(ints(i))
-    [freqs,t,spec] = WaveSpec(double(septal.data(bb-1250*3:bb+1250*3)),[1 200],200,3,1/1250,'lin');
-    specs(i,:,:) = abs(spec);
+    [spec] = bz_WaveSpec(double(septal.data(bb-1250*3:bb+1250*3)),'samplingRate', 1250,'frange',[1 200],'nfreqs',200,'ncyc',3,'space','lin');
+    specs(i,:,:) = abs(spec.data);
     subplot(2,2,3)
     imagesc(squeeze(mean(specs)))
     subplot(2,2,4)
@@ -56,6 +62,7 @@ if ~isempty(sessionInfo.ca1)
 
     clear s ss sss spec specs
 end
+    end
     
     cd /home/david/datasets/jumpDataset/
 end

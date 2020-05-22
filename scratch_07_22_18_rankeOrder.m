@@ -230,7 +230,7 @@ sessionInfo = bz_getSessionInfo;
         
         template = squeeze(mean(firingMaps.rateMaps_unsmooth{t}(idx_hpc,:,:),2));
         for i = 1:size(template,1)
-           template(i,:) = mean_norm(Smooth(template(i,:),5)')';
+           template(i,:) = minmax_norm(Smooth(template(i,:),5)')';
         end
         
         for event = 1:length(ripples.peaks)
@@ -243,7 +243,7 @@ sessionInfo = bz_getSessionInfo;
             
             if stop < size(spkmatNREM_hpc.data,1) & (stop-start) > 15
                 for spk = 1:size(spkmatNREM_hpc.data,2)
-                    data(:,spk) = mean_norm(spkmatNREM_hpc.data(start:stop,spk)')';  
+                    data(:,spk) = minmax_norm(spkmatNREM_hpc.data(start:stop,spk)')';  
                 end 
                 
                 idx = intersect(find(nanmean(data)~=0),keep); % only take cells that spiked...
@@ -402,7 +402,7 @@ clear data
 %     pause(.1)
 
     
-    save([sessionInfo.FileName '.rankOrder_ripples.mat'],'-v7.3')
+%     save([sessionInfo.FileName '.rankOrder_ripples.mat'],'-v7.3')
     end
     end
     end

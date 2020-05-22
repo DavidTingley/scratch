@@ -1,7 +1,7 @@
 % clear all
 d = dir('*201*');
 warning off
-% cd  ~/datasets/ripples_LS/
+cd  ~/datasets/ripples_LS/
 
 for i=1:length(d)
 cd(d(i).name)
@@ -15,19 +15,42 @@ dat = load([d(i).name '.content_GLM_popBursts_25ms.mat'],'content');
 content(i) = dat.content;
 % 
 if  exist([d(i).name '.bayesianResults_popBursts_all_evts.mat']) 
-    dat = load([d(i).name '.bayesianResults_popBursts_all_evts.mat'],'integral_hpc*','corr*');
-    if isfield(dat,'integral_hpc')
+    dat = load([d(i).name '.bayesianResults_popBursts_all_evts.mat'],'integral_hpc*','corr*','outR*');
+    if isfield(dat,'integral_hpc') & isfield(dat,'outR')
     bay{i} = (dat.integral_hpc - nanmean(dat.integral_hpc_shuf,3)) ./ nanstd(dat.integral_hpc_shuf,[],3);
+    weightedCorr{i} = dat.outR;
+    replay{i}.rZscore = (abs(dat.outR) - mean(abs(dat.outR_shuf),3)) ./ std(abs(dat.outR_shuf),[],3);
+    
+     for j = 1:size(dat.corrs_hpc,1)
+        for k=1:size(dat.corrs_hpc,2)
+%             [a replay{i}.rankOrder_bayes_pvals(j,k)] = ttest2(dat.corrs_hpc(j,k),dat.corrs_hpc_shuf(j,k,:));
+            [a replay{i}.weightedCorr_pvals(j,k)] = ttest2(dat.outR(j,k),dat.outR_shuf(j,k,:));
+        end
+    end
+    replay{i}.radonIntegral = dat.integral_hpc;
+    replay{i}.radonIntegral_z = bay{i};
+    replay{i}.linearWeighted = weightedCorr{i};
+    
     else
     bay{i} = nan(2,length(content(i).nSpikes{1}));
+    weightedCorr{i} = nan(2,length(content(i).nSpikes{1}));
     end
 else
     bay{i} = nan(2,length(content(i).nSpikes{1}));
+    weightedCorr{i} = nan(2,length(content(i).nSpikes{1}));
 end
 
 %% rank order correlations here
 if isfield(dat,'corrs_hpc')
     rankOrder_bayes{i} = absmax(dat.corrs_hpc); %dat.rankOrder;
+    for j = 1:size(dat.corrs_hpc,1)
+        for k=1:size(dat.corrs_hpc,2)
+            [a replay{i}.rankOrder_bayes_pvals(j,k)] = ttest2(dat.corrs_hpc(j,k),dat.corrs_hpc_shuf(j,k,:));
+%             [a replay{i}.rankOrder_pvals(j,k)] = ttest2(dat.outR(j,k),dat.outR_shuf(j,k,:));
+        end
+    end
+    
+    replay{i}.rankOrder_bayes =  dat.corrs_hpc;
 else
     rankOrder_bayes{i} = nan(1,length(content(i).nSpikes{1}));
 end
@@ -35,9 +58,15 @@ end
 if exist([d(i).name '.rankOrder_popBursts.mat']) 
     dat = load([d(i).name '.rankOrder_popBursts.mat'],'rankOrder');
     rankOrder{i} = absmax(dat.rankOrder);
+    replay{i}.rankOrder = dat.rankOrder;
 else
     rankOrder{i} = nan(1,length(content(i).nSpikes{1}));
 end
+
+
+
+
+
 
 
 %% seqNMF data here
@@ -61,6 +90,7 @@ else
 end
 end
 % cd ..
+% cd D:\datasets\ripples_LS
 cd ~/datasets/ripples_LS/
 end
 
@@ -122,11 +152,16 @@ for rec = 1:length(content)
                 'rs1 (radon int)',...
                 'rs2 (rank ord,bayes)',...
                 'rs3 (rank ord, raw)',...
-                'seqNMF'};
+                'rs4 (weighted Corr)',...
+                'seqNMF',...
+                'hpc cellID vec',...
+                'seqNMF_all'};
             
 for i = 1:size(seqs{rec},1)
     [seq_fits(i) seq_ids(i)] = max(seqs{rec}(i,:));
 end
+
+i
 predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ... %               [(nanmean(content(rec).PF{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)~=0)))./nanmean(content(rec).nSpikes{1}(idx_hpc,:)~=0)]'... % % of spikes from PF%               [[nanmean(content(rec).rewardContent{1}(idx_hpc,:) .* (content(rec).nSpikes{1}(idx_hpc,:)))] ./ nanmean(content(rec).nSpikes{1}(idx_hpc,:))]'...
               content(rec).interRipInterval{1}',...
               nanmean(content(rec).cellLoc_wav{1}(idx_hpc,:).*content(rec).nSpikes{1}(idx_hpc,:))'...
@@ -137,9 +172,10 @@ predictors = [nanmean(content(rec).nSpikes{1}(idx_hpc,:))' ... %               [
               max(bay{rec})'...
               rankOrder_bayes{rec}'...
               rankOrder{rec}'...
+              absmax(weightedCorr{rec})'...
               max(seqs{rec}')'];%...
           
-actual = content(rec).ls_popBurst{1};
+% actual = content(rec).ls_popBurst{1};
 % actual = content(rec).ls_power{1}';
 
 % for p = 1:size(predictors,2)
@@ -193,6 +229,7 @@ s = seqs{rec};
 
 for spk = 1:length(idx)
 %       if mean(actual) > 0
+       %% now for most predictors
        for p = 1:size(predictors,2)
            keep = find(~isnan((predictors(:,p)))); 
            actual = content(rec).nSpikes{1}(idx(spk),keep); 
@@ -201,12 +238,7 @@ for spk = 1:length(idx)
             yfit = glmval(beta,[predictors(keep,p)],'identity');
 %             [beta dev(p) ] = glmfit(predictors(keep,:),actual,'normal');
 %             yfit = glmval(beta,predictors(keep,:),'identity');
-            mse(p) = nanmean((yfit-actual').^2);
-            
-           
-            
-            
-            
+            mse(p) = nanmean((yfit-actual').^2);            
             [corrs(count,p) pval(count,p)] = corr(predictors(keep,p),actual','rows','complete','type','spearman');
        
             for iter = 1:100
@@ -240,11 +272,50 @@ for spk = 1:length(idx)
         end
        end
        
-        % now for seqNMF
+       %% now for cell ID vec prediction
+       actual = content(rec).nSpikes{1}(idx(spk),:); 
+       pred = double(content(rec).nSpikes{1}(hpc,:)>0)'; 
+       counts = sum(double(content(rec).nSpikes{1}(hpc,:)))'; 
+       [beta dev_cellID stats{count}] = glmfit([pred mean(pred')' counts],actual','normal');
+       yfit = glmval(beta,[pred mean(pred')' counts],'identity');
+       mse_cellIDVec = nanmean((yfit-actual').^2);
+       clear pred_shuf
+%        [beta dev_pop] = glmfit([counts],actual','normal');
+       for cell = 1:size(pred,2)
+           [beta dev_cell(cell)] = glmfit([pred(:,cell) counts],actual','normal');
+       end
+       
+       for iter = 1:100
+%            for p = 1:size(pred,1)
+%            pred_shuf(p,:) = bz_shuffleCellID(pred(p,:)');
+%            end
+           pred_shuf = bz_shuffleCircular(pred);
+           
+           [beta dev_cellID_shuf(iter)] = glmfit([pred_shuf mean(pred_shuf')' counts],actual','normal');
+           yfit = glmval(beta,[pred_shuf mean(pred_shuf')' counts],'identity');
+           mse_cellIDVec_shuf(iter) = nanmean((yfit-actual').^2);
+           
+           for cell = 1:size(pred,2)
+                [beta dev_cell_shuf(iter,cell)] = glmfit([pred_shuf(:,cell) counts],actual','normal');
+           end
+       
+           
+       end
+       mse_individual_cells{count} = (dev_cell-mean(dev_cell_shuf))./nanstd(dev_cell_shuf); 
+       for iter = 1:100
+            mse_individual_cells_shuf{count}(iter,:) = (mean(dev_cell_shuf)-mean(mean(dev_cell_shuf)))./nanstd(mean(dev_cell_shuf)); 
+       end
+       clear dev_cell* dev_pop
+       mseZ_cells(count,13) = (mse_cellIDVec - mean(mse_cellIDVec_shuf,2)) ./ nanstd(mse_cellIDVec_shuf,[],2);
+       mseZ_cells_shuf(count,13) = (mse_cellIDVec_shuf(1) - mean(mse_cellIDVec_shuf(2:end),2)) ./ nanstd(mse_cellIDVec_shuf(2:end),[],2);
+%        pvals_cellID(count,:) = stats.p(3:end);
+       
+       %% now for seqNMF prediction
        actual = content(rec).nSpikes{1}(idx(spk),:); 
        [beta dev_seqNMF] = glmfit([predictors(:,1) (s)],actual','normal');
        yfit = glmval(beta,[predictors(:,1) s],'identity');
        mse_seqNMF = nanmean((yfit-actual').^2);
+       
        for iter = 1:100
              % now for seqNMF
             s_shuf = bz_shuffleCircular(s);
@@ -253,14 +324,18 @@ for spk = 1:length(idx)
             mse_seqNMF_shuf(iter) = nanmean((yfit-actual').^2);
        end
        
+       mseZ_cells(count,14) = (mse_seqNMF - nanmean(mse_seqNMF_shuf)) ./ nanstd(mse_seqNMF_shuf);
+       mseZ_cells_shuf(count,14) = (mse_seqNMF_shuf(1) - nanmean(mse_seqNMF_shuf(2:end))) ./ nanstd(mse_seqNMF_shuf(2:end));
+       
        meanCount(count) = nanmean(actual);
-       mseZ_cells(count,:) = (mse-nanmean(mse_shuf,2)')./nanstd(mse_shuf,[],2)';
+       mseZ_cells(count,1:12) = (mse-nanmean(mse_shuf,2)')./nanstd(mse_shuf,[],2)';
        adjRSqaure(count,:,:) = adj_R;
-       mseZ_cells_shuf(count,:) = (squeeze(mse_shuf(:,1))-nanmean(mse_shuf,2))./nanstd(mse_shuf,[],2);
+       mseZ_cells_shuf(count,1:12) = (squeeze(mse_shuf(:,1))-nanmean(mse_shuf,2))./nanstd(mse_shuf,[],2);
        mse_cells(count,:) = mse;
        mse_shuf_cells(count,:,:) = mse_shuf;
        seqNMF_mse(count) = mse_seqNMF;
        seqNMF_mse_shuf(count,:) = mse_seqNMF_shuf;
+       
        recording(count) = rec;
        cellID(count) = idx(spk);
        
@@ -278,7 +353,7 @@ pause(.001)
     end
 end
 %% CHECK THAT ls BURSTS ARE LARGER AFTER BEHAV????
-%  for i=1:3
+% for i=1:3
 % idx = find(content(rec).condition{1}==i);
 % plot(i,nanmean(content(rec).ls_popBurst{1}(idx)),'.r')
 % hold on
@@ -292,8 +367,8 @@ nCellCount = sum(~isnan(mseZ_cells));
 
 figure
 
-for i=1:size(corrs,2)
-subplot(size(corrs,2),1,i)
+for i=1:size(mseZ_cells,2)
+subplot(size(mseZ_cells,2)/2,2,i)
 % raincloud_plot('X',corrs(idx,b(i)),'density_type', 'ks','bandwidth',.025,'color',[0 0 0]);
 % raincloud_plot('X',corrs_shuff(idx,b(i),1),'density_type', 'ks','bandwidth',.025,'color',[1 0 0]);
 
@@ -310,10 +385,10 @@ for i=1:size(mseZ_cells,2)
 m{i,1} =mseZ_cells(:,i);
 m{i,2} =mseZ_cells_shuf(:,i);
 end
-clz{1} = repmat([0 0 0],11,1);
-clz{2} = repmat([1 0 0],11,1);
+clz{1} = repmat([0 0 0],14,1);
+clz{2} = repmat([1 0 0],14,1);
 raincloud_lineplot_2(m,clz,1,1)
 
 
-save('/home/david/Dropbox/Rip_features_seqNMF_LS_data.mat','-v7.3')
+save('C:\Users\SB13FLLT001\Dropbox\Rip_features_seqNMF_LS_data_25ms.mat','-v7.3')
 

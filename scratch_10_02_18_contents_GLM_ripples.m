@@ -34,7 +34,8 @@ count=0;
 %         ca1 = load([sessionInfo.FileName '.CA1Ripples.events.mat']);
 %         popBursts = bz_LoadEvents(pwd,'popBursts');
         ca1.ripples = bz_LoadEvents(pwd,'CA1Ripples');
-        if ~isempty(SleepState) & ~isempty(ca1.ripples) & isfield(SleepState.ints,'NREMstate')
+        if ~isempty(SleepState) & ~isempty(ca1.ripples) & isfield(SleepState.ints,'NREMstate') 
+         if   ~isempty(SleepState.ints.NREMstate)
 %         ca1.ripples.peaks = ca1.ripples.peaks;
 %         ca1.ripples.timestamps = popBursts.timestamps;
         spikes = bz_GetSpikes('noprompts',true);
@@ -100,7 +101,14 @@ count=0;
             end
             [ls_pop(event)] = max(abs(pr(start:stop)));
             hpc_pop(event) =  max(abs(pr_hpc(start:stop)));
-%             hold on
+            
+            if event > 1 & event < length(ca1.ripples.peaks)
+                IRI(event) = (abs(ca1.ripples.peaks(event-1)-ca1.ripples.peaks(event)) + ...
+                             abs(ca1.ripples.peaks(event+1)-ca1.ripples.peaks(event)))/2;
+            else
+                IRI(event) = nan;
+            end
+            
         end
         
         %% get that content, initialize
@@ -116,9 +124,10 @@ count=0;
         State(find(idx)) = 1;
         idx = InIntervals(ca1.ripples.peaks,SleepState.ints.WAKEstate);
         State(find(idx)) = 2;
-        idx = InIntervals(ca1.ripples.peaks,SleepState.ints.REMstate);
-        State(find(idx)) = 3;
-        
+        if isfield(SleepState.ints,'REMstate')
+            idx = InIntervals(ca1.ripples.peaks,SleepState.ints.REMstate);
+            State(find(idx)) = 3;
+        end
         % behavioral condition (pre/behav/sleep)
         condition = zeros(length(ca1.ripples.peaks),1);
         for t = 1:3
@@ -153,7 +162,13 @@ count=0;
                 end
                 stop = ((ca1.ripples.peaks(ind)+.05));
                 ripSpks = Restrict(spikes.times{spk},[start stop]);
-                duration(ind) = stop-start;
+                if ~isempty(ripSpks)
+                    spkTimes(ind,spk) = mean(ripSpks);
+                else
+                    spkTimes(ind,spk) = nan;
+                end
+                duration(ind) = diff(ca1.ripples.timestamps(ind,:)); %stop-start;
+                
 %                 spatialContent(spk,ind) = meanPeakRate(spk);
                 rewardContent(spk,ind) = rewardModulation.rewardGain(spk);
                 PF(spk,ind) = (hasField(spk)>0);
@@ -170,12 +185,16 @@ count=0;
 %             end
         end
         
+        
+    content.spikeTimes = spkTimes;
+    content.interRipInterval{rec} = IRI;
+    
     content.totalSpikes{rec} = totSpks;
     content.duration{rec} = duration;
     content.location{rec} = location;
     content.condition{rec} = condition; 
     content.SleepState{rec} = State;
-    content.region{rec} = spikes.region{end};
+    content.region{rec} = spikes.region;
     content.nCells{rec} = size(rewardContent,1);
 %     content.spatialContent{rec} = spatialContent;
     content.rewardContent{rec} = rewardContent;
@@ -189,7 +208,7 @@ count=0;
     content.hpc_power{rec} = hpc_rec(:,2);
     content.ls_power{rec} = hpc_rec(:,1);
     content.animal(rec) = sum(double(sessionInfo.animal));
-    content.region{rec} = spikes.region;
+
     
     
 %% plotting %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -246,6 +265,7 @@ save([sessionInfo.FileName '.content_GLM_ripple_50ms.mat'],'-v7.3')
     rec
     clear totSpks State meanPeakRate condition rewardModulation hpc_rec ls_rec meanPeakRate nSpikes *Content* PF cellLoc*
         end
+         end
         end
     end
 %    cd /home/david/datasets/ripples_LS 

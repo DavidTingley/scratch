@@ -6,7 +6,7 @@ for i=98:-1:1
 cd(d(i).name)
 popBursts = bz_LoadEvents(pwd,'popBursts');
 ls_spikes = bz_GetSpikes('region','ls','noprompts',true);
-if ~isempty(ls_spikes) & ~isempty(popBursts) 
+if ~isempty(ls_spikes) & ~isempty(popBursts) & ~isempty(SleepState.ints.NREMstate)
     if length(popBursts.bursts) > 100
 SleepState = bz_LoadStates(pwd,'SleepState');
 if isfield(SleepState.ints,'NREMstate')
@@ -52,4 +52,5 @@ pause(.1)
     end
 end
 cd ~/datasets/ripples_LS/
+% cd E:\datasets\ripples_LS
 end
