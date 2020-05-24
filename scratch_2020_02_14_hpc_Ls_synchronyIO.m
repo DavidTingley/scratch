@@ -162,5 +162,6 @@
 %     end
 %     cd D:\datasets\lsDataset
 % end
+clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
 save([sessionInfo.FileName '.synchronyAnalysis.mat'],'-v7.3')
 %% need to find all theta cycles and ripples and plot histograms over HPC synchrony percentiles
