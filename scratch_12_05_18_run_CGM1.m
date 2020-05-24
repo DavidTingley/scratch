@@ -343,7 +343,6 @@ for i=1:length(absTime)
     rec(i) = nanmean(recording(ind));
     theta_z(i) = nanmean(thetaPower_z(ind));
     theta_resid(i) = nanmean(thetaPower_resid(ind));
-
     emgSig(i) = nanmean(emg(ind));
     if ~isempty(ind)
         zeitTimes(i) = zTime(ind(end));

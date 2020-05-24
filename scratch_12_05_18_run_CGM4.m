@@ -206,8 +206,7 @@ if ~isempty(rt{ii}) & ~isempty(ripples{ii}) & ~isempty(SleepState{ii})
         [a b]= min(abs(rt{ii} - specslope{ii}.timestamps(s)));
         [aa bb] = min(abs(at{ii}(b)-absTime));
         specSlope(c_slope) = specslope{ii}.data(s);
-        [aa bb] = min(abs(at{ii}(b)-absTime));
-        specSlopeTimes(c_stim) = absTime(bb);
+        specSlopeTimes(c_slope) = absTime(bb);
         c_slope = 1 + c_slope; 
     end
     
@@ -331,20 +330,21 @@ for i=1:length(absTime)
     rec(i) = mean(recording(ind));
     theta_z(i) = mean(thetaPower_z(ind));
     theta_resid(i) = mean(thetaPower_resid(ind));
-    
+    emgSig(i) = nanmean(emg(ind));
     if ~isempty(ind)
         zeitTimes(i) = zTime(ind(end));
     else
         zeitTimes(i) = nan;
     end
 
+    ind = find(InIntervals(specSlopeTimes,[absTime(i)-1.15741277113557e-05*60*2.5 absTime(i)+1.15741277113557e-05*60*2.5]));
     if ~isempty(ind)
-        spSlope(i) = nanmean(specSlope(ceil(ind(1)/10):round(ind(end)/10)));
+        spSlope(i) =  nanmean(specSlope(ind));
     else
         spSlope(i) = nan;
     end
     
-    emgSig(i) = nanmean(emg(ind));
+    
     
 %     ind = find(InIntervals(stimTimesAbs,[absTime(i)-1.15741277113557e-05*60*5 absTime(i)]));
 %     stimRate(i) = length(ind);

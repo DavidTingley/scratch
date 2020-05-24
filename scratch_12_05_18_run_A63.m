@@ -226,8 +226,6 @@ stimAlignedCGM = [];
 responseMag=[];
 stimTime =[];
 stimTimesAbs = [];
-specSlope = [];
-specSlopeTimes =[];
 rippleAlignedCGM = [];
 ripTime = [];
 ripState = [];
@@ -281,18 +279,14 @@ if ~isempty(rt{ii}) & ~isempty(ripples{ii}) % & ~isempty(SleepState{ii})
     stimTime = [stimTime;stimTime_t];
     stimTimesAbs = [stimTimesAbs;stimTimesAbs_t];
     
-    specSlope_t = nan(length(specslope{ii}.timestamps),1);
-    specSlopeTimes_t = nan(length(specslope{ii}.timestamps),1);
-    
-    parfor s = 1:length(specslope{ii}.timestamps)
-        [a b]= min(abs(relTime - specslope{ii}.timestamps(s)));
-        [aa bb] = min(abs(abTime(b)-absTime));
-        specSlope_t(s) = specslope{ii}.data(s);
-        specSlopeTimes_t(s) = absTime(bb);
-%         c_slope = 1 + c_slope; 
+    for s = 1:length(specslope{ii}.timestamps)
+        [a b]= min(abs(rt{ii} - specslope{ii}.timestamps(s)));
+        [aa bb] = min(abs(at{ii}(b)-absTime));
+        specSlope(c_slope) = specslope{ii}.data(s);
+        specSlopeTimes(c_slope) = absTime(bb);
+        c_slope = 1 + c_slope; 
     end
-    specSlopeTimes = [specSlopeTimes;specSlopeTimes_t];
-    specSlope = [specSlope;specSlope_t];
+
     rippleAlignedCGM_t =[];
     time_t=[];
     ripTime_t=[]; ripState_t =[];offsets_t=[];
@@ -453,13 +447,18 @@ for i=1:length(absTime)
         zeitTimes(i) = nan;
     end
     
+%     ind = find(InIntervals(specSlopeTimes,[absTime(i)-1.15741277113557e-05*60*2.5 absTime(i)+1.15741277113557e-05*60*2.5]));
+%     if ~isempty(ind)
+%         spSlope(i) = nanmean(specSlope(ceil(ind(1)/10):round(ind(end)/10)));
+%     else
+%         spSlope(i) = nan;
+%     end
     ind = find(InIntervals(specSlopeTimes,[absTime(i)-1.15741277113557e-05*60*2.5 absTime(i)+1.15741277113557e-05*60*2.5]));
     if ~isempty(ind)
-        spSlope(i) = nanmean(specSlope(ceil(ind(1)/10):round(ind(end)/10)));
+        spSlope(i) =  nanmean(specSlope(ind));
     else
         spSlope(i) = nan;
     end
-    
     ind = find(InIntervals(stimTimesAbs,[absTime(i)-1.15741277113557e-05*60*5 absTime(i)]));
     stimRate(i) = length(ind);
     responseMags(i,:) = nanmean(responseMag(ind,:));

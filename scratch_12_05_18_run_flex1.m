@@ -128,11 +128,12 @@ for i=1:length(d)
             end
             if ~exist([d(i).name '.thetaPower.mat'])
                 [bb aa] = butter(3,[6/625 11/625],'bandpass');
-                temp = decimate(filtfilt(bb,aa,double(ripples{i}.detectorinfo.detectionparms.lfp)),1250);
-                temp(1:10)=nan; temp(end-10:end)=nan; % kill those edges
+                temp = downsample(filtfilt(bb,aa,double(ripples{i}.detectorinfo.detectionparms.lfp)),1250);
+%                 temp(1:10)=nan; temp(end-10:end)=nan; % kill those edges
+                temp = [temp; 0];
                 thetaPow_raw_s = fastrms(temp,60*5);
                 thetaPow_z_s = nanZscore(thetaPow_raw_s);
-                save([d(i).name '.thetaPower.mat'],'thetaPow_z_s')
+                save([d(i).name '.thetaPower.mat'],'thetaPow*')
 %                 thetaPow_raw{i} = thetaPow_raw_s; clear thetaPow_raw_s
                 thetaPow_z{i} = thetaPow_z_s; clear thetaPow_z_s
             else
@@ -216,8 +217,7 @@ if ~isempty(rt{ii}) & ~isempty(ripples{ii})
         [a b]= min(abs(rt{ii} - specslope{ii}.timestamps(s)));
         [aa bb] = min(abs(at{ii}(b)-absTime));
         specSlope(c_slope) = specslope{ii}.data(s);
-        [aa bb] = min(abs(at{ii}(b)-absTime));
-        specSlopeTimes(c_stim) = absTime(bb);
+        specSlopeTimes(c_slope) = absTime(bb);
         c_slope = 1 + c_slope; 
     end
     
@@ -341,6 +341,7 @@ for i=1:length(absTime)
     theta_z(i) = mean(thetaPower_z(ind));
     theta_resid(i) = mean(thetaPower_resid(ind));
     
+    emgSig(i) = nanmean(emg(ind));
     if ~isempty(ind)
         zeitTimes(i) = zTime(ind(end));
     else
@@ -348,12 +349,12 @@ for i=1:length(absTime)
     end
     
    
+    ind = find(InIntervals(specSlopeTimes,[absTime(i)-1.15741277113557e-05*60*2.5 absTime(i)+1.15741277113557e-05*60*2.5]));
     if ~isempty(ind)
         spSlope(i) =  nanmean(specSlope(ceil(ind(1)/10):round(ind(end)/10)));
     else
         spSlope(i) = nan;
     end
-    emgSig(i) = nanmean(emg(ind));
     
 %     ind = find(InIntervals(muaTimes,[absTime(i)-1.15741277113557e-05*60*5 absTime(i)]));
 %     stimRate(i) = length(ind);
