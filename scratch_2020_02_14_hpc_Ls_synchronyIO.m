@@ -108,6 +108,12 @@
         else
             rippleCount = nan(ceil(lfp.timestamps(end)*1000/25),1);
             thetaCycleCount = nan(ceil(lfp.timestamps(end)*1000/25),1);
+            ripPETH{f} = nan(1,120);
+            thetaCycPETH{f} = nan(1,120);
+            spksPerRipple_ls{f}=[];
+            spksPerRipple{f}=[];
+            spksPerThetaCyc_ls{f}=[];
+            spksPerThetaCyc{f}=[];
         end
         %% carry on
         if ~isempty(hpc) & ~isempty(latS)
