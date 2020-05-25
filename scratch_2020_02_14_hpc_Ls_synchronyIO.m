@@ -69,11 +69,13 @@
                 id = FindInInterval(spkIndices,[cycles(cyc)-thresh cycles(cyc)+thresh]);
                 if ~isempty(id)
                     temp(cyc) = diff(id)+1;
+                    s = ceil((spkIndices(id(1):id(2))-cycles(cyc)+.06)*1000);
+                    tempPETH(cyc,:) = hist(s,1:120);
                 else
                     temp(cyc) = 0;
+                    tempPeth(cyc,:) = zeros(1,120);
                 end
-                s = ceil((spkIndices(id(1):id(2))-cycles(cyc)+.06)*1000);
-                tempPETH(cyc,:) = hist(s,1:120);
+                
                 if ~isempty(spkIndices_ls) & ~isempty(FindInInterval(spkIndices_ls,[cycles(cyc)-thresh cycles(cyc)+thresh]))
                     temp2(cyc) = diff(FindInInterval(spkIndices_ls,[cycles(cyc)-thresh cycles(cyc)+thresh]))+1;
                 end
@@ -88,12 +90,12 @@
                 id = FindInInterval(spkIndices,[ripples.peaks(rip)-thresh ripples.peaks(rip)+thresh]);
                 if ~isempty(id)
                     temp(rip) = diff(id)+1;
+                    s = ceil((spkIndices(id(1):id(2))-ripples.peaks(rip)+.06)*1000);
+                    tempPETH(rip,:) = hist(s,1:120);
                 else
-                    temp(rip) = 0;
+                    tempPeth(rip,:) = zeros(1,120);
                 end
-                s = ceil((spkIndices(id(1):id(2))-ripples.peaks(rip)+.06)*1000);
-                tempPETH(rip,:) = hist(s,1:120);
-                if ~isempty(spkIndices_ls) & ~isempty(FindInInterval(spkIndices_ls,[cycles(cyc)-thresh cycles(cyc)+thresh]))
+                if ~isempty(spkIndices_ls) & ~isempty(FindInInterval(spkIndices_ls,[ripples.peaks(rip)-thresh ripples.peaks(rip)+thresh]))
                     temp2(rip) = diff(FindInInterval(spkIndices_ls,[ripples.peaks(rip)-thresh ripples.peaks(rip)+thresh]))+1;
                 end
             end
