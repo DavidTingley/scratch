@@ -44,11 +44,11 @@
             cycles = cycles(id);
             behavior.velocity(end+1)=behavior.velocity(end);
 
-            vels=behavior.velocity(ceil((cycles-behavior.timestamps(1))*round(behavior.samplingRate)));
-    %         parfor c =1:length(cycles)
-    %             [a b]=min(abs(cycles(c)-behavior.timestamps));
-    %             vels(c)=behavior.velocity(b);            
-    %         end
+%             vels=behavior.velocity(ceil((cycles-behavior.timestamps(1))*round(behavior.samplingRate)));
+            parfor c =1:length(cycles)
+                [a b]=min(abs(cycles(c)-behavior.timestamps));
+                vels(c)=behavior.velocity(b);            
+            end
     %         cycles(vels<20)=[]; clear vels
             velocities{f} = vels; clear vels
 
