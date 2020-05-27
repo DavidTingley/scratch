@@ -76,11 +76,11 @@
 
         [pks locs] = findpeaks(-phase,'MinPeakDistance',100);
         % cut by power thresh
-        powThresh(f) = mean(td_pow)-std(td_pow);
+        powThresh(f) = mean(td_pow);%+std(td_pow);
         idx = find(td_pow(locs)>powThresh(f));
         cycles = lfp.timestamps(locs(idx));
         % cut by behavior
-        id = find(InIntervals(cycles,[behavior.events.trialIntervals]));
+        id = find(InIntervals(cycles,[behavior.timestamps(1) behavior.timestamps(end)]));
         cycles = cycles(id);
 
 %         behavior.velocity(end+1)=behavior.velocity(end);
@@ -172,9 +172,9 @@
                 ripHisto_z(f,i) = nansum(rippleCount(idx));
                 thetaHisto_z(f,i) = nansum(thetaCycleCount(idx));
                 
-                thresh_low = prctile(hpcCounts,i-1);
-                thresh_hi = prctile(hpcCounts,i+5);
-                idx = find(hpcCounts>thresh_low & hpcCounts<thresh_hi);
+                thresh_low = prctile(hpcCounts_smooth,i-1);
+                thresh_hi = prctile(hpcCounts_smooth,i+5);
+                idx = find(hpcCounts_smooth>thresh_low & hpcCounts_smooth<thresh_hi);
                 ripHisto_count(f,i) = nansum(rippleCount(idx));
                 thetaHisto_count(f,i) = nansum(thetaCycleCount(idx));
                 count_z(f,i) = nanmean(lsRates_smooth_z(idx));
