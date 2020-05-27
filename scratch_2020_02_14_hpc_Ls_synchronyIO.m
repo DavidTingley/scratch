@@ -124,8 +124,15 @@
         end
         %% carry on
         if ~isempty(hpc) & ~isempty(latS)
+            toss = 0;
             for i=1:length(spikes.times)
                 spkMat.dataZ(:,i) = zscore(spkMat.data(:,i));
+                r = length(spikes.times{i})./lfp.timestamps(end);
+                if r > 2 % toss those pesky interneurons
+                    spkMat.data(:,i) = nan;
+                    spkMat.dataZ(:,i) = nan;
+                    toss = toss+1;
+                end
             end
             hpcCounts = nansum(spkMat.data(:,hpc)'>0);
             hpcRates_z = nanmean(spkMat.dataZ(:,hpc)');
@@ -171,7 +178,7 @@
                 count_z(f,i) = nanmean(lsRates_smooth_z(idx));
                 count_r(f,i) = nanmean(lsRates_smooth(idx));
             end
-            nHPC_cells(f) = length(hpc);
+            nHPC_cells(f) = length(hpc)-toss;
             nLS_cells(f) = length(latS);
             
 %             subplot(4,2,1)
