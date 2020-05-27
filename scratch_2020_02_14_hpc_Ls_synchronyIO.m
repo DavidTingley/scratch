@@ -1,10 +1,10 @@
-folders = dir('*201*');
+% folders = dir('*201*');
+% 
+% for f=1:length(folders)
+%     cd(folders(f).name)
+%     if exist([folders(f).name '.spikes.cellinfo.mat']) & exist([folders(f).name '.CA1Ripples.events.mat'])
 
-for f=1:length(folders)
-    cd(folders(f).name)
-    if exist([folders(f).name '.spikes.cellinfo.mat']) & exist([folders(f).name '.CA1Ripples.events.mat'])
-
-%         f=1;
+        f=1;
         sessionInfo = bz_getSessionInfo;
         load([sessionInfo.FileName '.behavior.mat'])
         spikes = bz_GetSpikes('noprompts',true);
@@ -183,41 +183,41 @@ for f=1:length(folders)
             nHPC_cells(f) = length(hpc)-toss;
             nLS_cells(f) = length(latS);
             
-            subplot(4,2,1)
-            imagesc(rr)
-            subplot(4,2,2)
-            imagesc(rz)
-            subplot(4,2,3)
-            imagesc(zr)
-            subplot(4,2,4)
-            plot(nanmean(zr(nHPC_cells>15,:)))
-            subplot(4,2,5)
-            plot(mean(zscore(ripHisto(nHPC_cells>15,:),[],2)))
-            hold on
-            plot(mean(zscore(thetaHisto(nHPC_cells>15,:),[],2)))
-            hold off            
-            subplot(4,2,6)
-            plot(mean(zscore(ripHisto_z(nHPC_cells>15,:),[],2)))
-            hold on
-            plot(mean(zscore(thetaHisto_z(nHPC_cells>15,:),[],2)))
-            hold off
-            subplot(4,2,7)
-            plot(mean((ripPercentHisto(nHPC_cells>15,:))))
-            hold on
-            plot(mean((thetaPercentHisto(nHPC_cells>15,:))))
-            hold off
-            subplot(4,2,8)
-            plot(mean(zscore(ripHisto_count(nHPC_cells>15,:),[],2)))
-            hold on
-            plot(mean(zscore(thetaHisto_count(nHPC_cells>15,:),[],2)))
-            hold off
-            pause(.1)
+%             subplot(4,2,1)
+%             imagesc(rr)
+%             subplot(4,2,2)
+%             imagesc(rz)
+%             subplot(4,2,3)
+%             imagesc(zr)
+%             subplot(4,2,4)
+%             plot(nanmean(zr(nHPC_cells>15,:)))
+%             subplot(4,2,5)
+%             plot(mean(zscore(ripHisto(nHPC_cells>15,:),[],2)))
+%             hold on
+%             plot(mean(zscore(thetaHisto(nHPC_cells>15,:),[],2)))
+%             hold off            
+%             subplot(4,2,6)
+%             plot(mean(zscore(ripHisto_z(nHPC_cells>15,:),[],2)))
+%             hold on
+%             plot(mean(zscore(thetaHisto_z(nHPC_cells>15,:),[],2)))
+%             hold off
+%             subplot(4,2,7)
+%             plot(mean((ripPercentHisto(nHPC_cells>15,:))))
+%             hold on
+%             plot(mean((thetaPercentHisto(nHPC_cells>15,:))))
+%             hold off
+%             subplot(4,2,8)
+%             plot(mean(zscore(ripHisto_count(nHPC_cells>15,:),[],2)))
+%             hold on
+%             plot(mean(zscore(thetaHisto_count(nHPC_cells>15,:),[],2)))
+%             hold off
+%             pause(.1)
         end
     
-    end
-    cd D:\datasets\lsDataset
-end
-% FileName = sessionInfo.FileName;
-% clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
-% save([FileName '.synchronyAnalysis.mat'],'*Histo*','*spks*','n*','cells*')
+%     end
+%     cd D:\datasets\lsDataset
+% end
+FileName = sessionInfo.FileName;
+clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
+save([FileName '.synchronyAnalysis.mat'],'*Histo*','*spks*','n*','cells*')
 %% need to find all theta cycles and ripples and plot histograms over HPC synchrony percentiles
