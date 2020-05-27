@@ -84,13 +84,13 @@
         id = find(InIntervals(cycles,[behavior.events.trialIntervals]));
         cycles = cycles(id);
 % 
-        behavior.velocity(end+1)=behavior.velocity(end);
-        vels=behavior.velocity(ceil((cycles-behavior.timestamps(1))*round(behavior.samplingRate)));
-        parfor c =1:length(cycles)
-            [a b]=min(abs(cycles(c)-behavior.timestamps));
-            vels(c)=behavior.velocity(b);            
-        end
-        cycles(vels<10)=[]; 
+%         behavior.velocity(end+1)=behavior.velocity(end);
+%         vels=behavior.velocity(ceil((cycles-behavior.timestamps(1))*round(behavior.samplingRate)));
+%         parfor c =1:length(cycles)
+%             [a b]=min(abs(cycles(c)-behavior.timestamps));
+%             vels(c)=behavior.velocity(b);            
+%         end
+%         cycles(vels<10)=[]; 
         
         nCycles{f} = cycles;
         %             velocities{f} = vels; clear vels
