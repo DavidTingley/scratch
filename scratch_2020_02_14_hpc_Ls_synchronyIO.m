@@ -67,6 +67,7 @@
         end
         
         %% move theta cyc stuff here
+        thresh = .06;
         [b a] = butter(4,[5/625 12/625],'bandpass');
         filt = filtfilt(b,a,double(lfp.data));
         [b a] = butter(4,[4/625],'low');
