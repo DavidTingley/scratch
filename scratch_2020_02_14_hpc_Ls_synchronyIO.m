@@ -77,11 +77,11 @@
 
         [pks locs] = findpeaks(-phase,'MinPeakDistance',100);
         % cut by power thresh
-        powThresh(f) = mean(td_pow)+std(td_pow);
+        powThresh(f) = mean(td_pow)+std(td_pow)*2;
         idx = find(td_pow(locs)>powThresh(f));
         cycles = lfp.timestamps(locs(idx));
         % cut by behavior
-%         id = find(InIntervals(cycles,[behavior.timestamps(1) behavior.timestamps(end)]));
+%         id = find(InIntervals(cycles,[0 behavior.events.trialIntervals(1); behavior.events.trialIntervals(end) lfp.timestamps(end)]));
 %         cycles = cycles(id);
 % 
 %         behavior.velocity(end+1)=behavior.velocity(end);
@@ -130,12 +130,12 @@
             toss = 0;
             for i=1:length(spikes.times)
                 spkMat.dataZ(:,i) = zscore(spkMat.data(:,i));
-%                 r = length(spikes.times{i})./lfp.timestamps(end);
-%                 if r > 2 & ismember(i,hpc) % toss those pesky interneurons
-%                     spkMat.data(:,i) = nan;
-%                     spkMat.dataZ(:,i) = nan;
-%                     toss = toss+1;
-%                 end
+                r = length(spikes.times{i})./lfp.timestamps(end);
+                if r > 5 & ismember(i,hpc) % toss those pesky interneurons
+                    spkMat.data(:,i) = nan;
+                    spkMat.dataZ(:,i) = nan;
+                    toss = toss+1;
+                end
             end
             hpcCounts = nansum(spkMat.data(:,hpc)'>0);
             hpcRates_z = nanmean(spkMat.dataZ(:,hpc)');
@@ -144,11 +144,11 @@
             lsRates_z = nanmean(spkMat.dataZ(:,latS)');
             lsRates = nanmean(spkMat.data(:,latS)');
             
-            hpcCounts_smooth = fastrms(hpcCounts,24);
-            hpcRates_smooth = fastrms(hpcRates,24);
-            lsRates_smooth = fastrms(lsRates,24);
-            hpcRates_smooth_z = fastrms(hpcRates_z,24);
-            lsRates_smooth_z = fastrms(lsRates_z,24);
+            hpcCounts_smooth = fastrms(hpcCounts,12);
+            hpcRates_smooth = fastrms(hpcRates,12);
+            lsRates_smooth = fastrms(lsRates,12);
+            hpcRates_smooth_z = fastrms(hpcRates_z,12)-fastrms(hpcRates_z,1200);
+            lsRates_smooth_z = fastrms(lsRates_z,12);
             for i=1:100
                idx = find(hpcPercentActive>i/100 & hpcPercentActive>(i+10)/100);
                ripPercentHisto(f,i) = nansum(rippleCount(idx));
@@ -222,3 +222,4 @@ FileName = sessionInfo.FileName;
 clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
 save([FileName '.synchronyAnalysis.mat'],'*Histo*','*spks*','n*','cells*','count*')
 %% need to find all theta cycles and ripples and plot histograms over HPC synchrony percentiles
+c
