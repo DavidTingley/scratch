@@ -3,8 +3,8 @@ folders = dir('*201*');
 for f=1:length(folders)
     cd(folders(f).name)
     if exist([folders(f).name '.spikes.cellinfo.mat']) & exist([folders(f).name '.CA1Ripples.events.mat'])
-% 
-%         f=1;
+
+        f=1;
         sessionInfo = bz_getSessionInfo;
         load([sessionInfo.FileName '.behavior.mat'])
         spikes = bz_GetSpikes('noprompts',true);
@@ -13,10 +13,10 @@ for f=1:length(folders)
 %        spkMat_large = bz_SpktToSpkmat(spikes,'binSize',.4,'overlap',4);
         hpc = find(strcmp(spikes.region ,'hpc') | strcmp(spikes.region ,'ca1'));
         latS = find(strcmp(spikes.region ,'ls'));
-        reg(f) = 0;
+%         reg(f) = 0;
         if isempty(hpc)
             hpc = find(strcmp(spikes.region ,'ca3'));
-            reg(f) = 1;
+%             reg(f) = 1;
         end
 
        
@@ -60,7 +60,7 @@ for f=1:length(folders)
 %             subplot(4,2,3)
 %             imagesc(zr)
 %             subplot(4,2,4)
-            plot(nanmean(zr(nHPC_cells>15,:)))
+%             plot(nanmean(zr(nHPC_cells>15,:)))
 %             subplot(4,2,5)
 %             plot(mean(zscore(ripHisto(nHPC_cells>15,:),[],2)))
 %             hold on
@@ -76,13 +76,13 @@ for f=1:length(folders)
 %             hold on
 %             plot(mean((thetaPercentHisto(nHPC_cells>15,:))))
 %             hold off
-            pause(.1)
+%             pause(.1)
         end
     
     end
     cd D:\datasets\lsDataset
 end
-% FileName = sessionInfo.FileName;
-% clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
-% save([FileName '.synchronyAnalysis.mat'],'-v7.3')
+FileName = sessionInfo.FileName;
+clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
+save([FileName '.synchronyAnalysis.mat'],'-v7.3')
 %% need to find all theta cycles and ripples and plot histograms over HPC synchrony percentiles
