@@ -77,20 +77,20 @@
 
         [pks locs] = findpeaks(-phase,'MinPeakDistance',100);
         % cut by power thresh
-        powThresh(f) = mean(td_pow)+std(td_pow)*2;
+        powThresh(f) = mean(td_pow)-std(td_pow);
         idx = find(td_pow(locs)>powThresh(f));
         cycles = lfp.timestamps(locs(idx));
         % cut by behavior
-%         id = find(InIntervals(cycles,[0 behavior.events.trialIntervals(1); behavior.events.trialIntervals(end) lfp.timestamps(end)]));
-%         cycles = cycles(id);
+        id = find(InIntervals(cycles,[behavior.events.trialIntervals]));
+        cycles = cycles(id);
 % 
-%         behavior.velocity(end+1)=behavior.velocity(end);
-%         vels=behavior.velocity(ceil((cycles-behavior.timestamps(1))*round(behavior.samplingRate)));
-%         parfor c =1:length(cycles)
-%             [a b]=min(abs(cycles(c)-behavior.timestamps));
-%             vels(c)=behavior.velocity(b);            
-%         end
-%         cycles(vels<20)=[]; 
+        behavior.velocity(end+1)=behavior.velocity(end);
+        vels=behavior.velocity(ceil((cycles-behavior.timestamps(1))*round(behavior.samplingRate)));
+        parfor c =1:length(cycles)
+            [a b]=min(abs(cycles(c)-behavior.timestamps));
+            vels(c)=behavior.velocity(b);            
+        end
+        cycles(vels<10)=[]; 
         
         nCycles{f} = cycles;
         %             velocities{f} = vels; clear vels
@@ -220,5 +220,5 @@
 % end
 FileName = sessionInfo.FileName;
 clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
-save([FileName '.synchronyAnalysis.mat'],'*Histo*','*spks*','n*','cells*','count*')
+save([FileName '.synchronyAnalysis_thetaByTrials.mat'],'*Histo*','*spks*','n*','cells*','count*')
 %% need to find all theta cycles and ripples and plot histograms over HPC synchrony percentiles
