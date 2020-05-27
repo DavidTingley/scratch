@@ -131,11 +131,11 @@
             for i=1:length(spikes.times)
                 spkMat.dataZ(:,i) = zscore(spkMat.data(:,i));
                 r = length(spikes.times{i})./lfp.timestamps(end);
-                if r > 5 & ismember(i,hpc) % toss those pesky interneurons
-                    spkMat.data(:,i) = nan;
-                    spkMat.dataZ(:,i) = nan;
-                    toss = toss+1;
-                end
+%                 if r > 5 & ismember(i,hpc) % toss those pesky interneurons
+%                     spkMat.data(:,i) = nan;
+%                     spkMat.dataZ(:,i) = nan;
+%                     toss = toss+1;
+%                 end
             end
             hpcCounts = nansum(spkMat.data(:,hpc)'>0);
             hpcRates_z = nanmean(spkMat.dataZ(:,hpc)');
@@ -222,4 +222,3 @@ FileName = sessionInfo.FileName;
 clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
 save([FileName '.synchronyAnalysis.mat'],'*Histo*','*spks*','n*','cells*','count*')
 %% need to find all theta cycles and ripples and plot histograms over HPC synchrony percentiles
-c
