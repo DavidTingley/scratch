@@ -220,5 +220,5 @@
 % end
 FileName = sessionInfo.FileName;
 clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
-save([FileName '.synchronyAnalysis_thetaByTrials.mat'],'*Histo*','*spks*','n*','cells*','count*')
+save([FileName '.synchronyAnalysis_thetaByTrials.mat'],'*Histo*','*spks*','n*','cells*','count*','zz','zr','rz','rr')
 %% need to find all theta cycles and ripples and plot histograms over HPC synchrony percentiles
