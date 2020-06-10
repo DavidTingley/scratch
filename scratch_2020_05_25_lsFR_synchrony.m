@@ -27,7 +27,7 @@ for f=1:length(folders)
             end
             hpcRates_z = nanmean(spkMat.dataZ(:,hpc)');
             hpcRates = nanmean(spkMat.data(:,hpc)');
-            hpcPercentActive = nansum(spkMat.data(:,hpc)')./length(hpc);
+            hpcPercentActive = nansum(spkMat.data(:,hpc)>1')./length(hpc);
             lsRates_z = nanmean(spkMat.dataZ(:,latS)');
             lsRates = nanmean(spkMat.data(:,latS)');
             
