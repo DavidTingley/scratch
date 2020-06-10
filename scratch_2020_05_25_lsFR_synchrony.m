@@ -31,10 +31,10 @@ for f=1:length(folders)
             lsRates_z = nanmean(spkMat.dataZ(:,latS)');
             lsRates = nanmean(spkMat.data(:,latS)');
             
-            hpcRates_smooth = fastrms(hpcRates,24);
-            lsRates_smooth = fastrms(lsRates,24);
-            hpcRates_smooth_z = fastrms(hpcRates_z,24);
-            lsRates_smooth_z = fastrms(lsRates_z,24);
+            hpcRates_smooth = fastrms(hpcRates,4);
+            lsRates_smooth = fastrms(lsRates,4);
+            hpcRates_smooth_z = fastrms(hpcRates_z,4)-fastrms(hpcRates_z,1200);
+            lsRates_smooth_z = fastrms(lsRates_z,4);
           
             for i=1:95
                 thresh_low = prctile(hpcRates_smooth,i-1);
@@ -60,7 +60,7 @@ for f=1:length(folders)
 %             subplot(4,2,3)
 %             imagesc(zr)
 %             subplot(4,2,4)
-            plot(nanmean(zr(nHPC_cells>15,:)))
+            plot(nanmedian(zr(nHPC_cells>15,:)))
 %             subplot(4,2,5)
 %             plot(mean(zscore(ripHisto(nHPC_cells>15,:),[],2)))
 %             hold on
