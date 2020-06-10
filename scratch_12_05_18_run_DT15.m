@@ -28,10 +28,12 @@ for i=1:length(d)
             SleepState{i} = bz_LoadStates(pwd,'SleepState');
 
              %% add accelerometer data
-            if ~exist([d(i).name '.movement.mat']) & exist(['auxiliary.dat'])
+            if 1 %~exist([d(i).name '.movement.mat']) 
                 num_channels = 6;
-                fid = fopen('auxiliary.dat', 'r');
-                f = dir('auxiliary.dat');
+%                 filePath = ['Z:\dwt244\zpool4\hypthal\dt15\' d(i).name '\'];
+                filePath = '';[d(i).name '\'];
+                fid = fopen([filePath 'auxiliary.dat'], 'r');
+                f = dir([filePath 'auxiliary.dat']);
                 v = 1;
                 chunk = 1;
                 while ~isempty(v)
@@ -229,7 +231,7 @@ if ~isempty(rt{ii}) & ~isempty(ripples{ii})
         [aa bb] = min(abs(at{ii}(b)-absTime));
         
         
-%         m(c) = movement{ii}(b);
+        m(c) = movement{ii}(b);
         zTime(c) = zt_rec{ii}(b);
         absolute(c) = absTime(bb);
         amplitude(c) = ripples{ii}.data.zScoredAmps(i);
@@ -331,7 +333,7 @@ for i=1:length(absTime)
     ind = find(InIntervals(absolute,[absTime(i)-1.15741277113557e-05*60*2.5 absTime(i)+1.15741277113557e-05*60*2.5]));
 %     ind = find(InIntervals(absolute,[absTime(i)-1.15741277113557e-05 absTime(i)]));
 %     
-%     mov(i) = nanmean(m(ind));
+    mov(i) = nanmean(m(ind));
     amps(i) = nanmean(amplitude(ind));
     freq(i) = nanmean(frequency(ind));
     dur(i) = nanmean(duration(ind));

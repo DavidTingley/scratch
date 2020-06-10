@@ -31,6 +31,7 @@
 
         if exist([sessionInfo.FileName '.CA1Ripples.events.mat'])
             %% get ripple times
+            thresh = .06;
             load([sessionInfo.FileName '.CA1Ripples.events.mat'])
             rippleCount = zeros(ceil(lfp.timestamps(end)*1000/25),1);
             rippleCount(ceil(ripples.peaks*1000/25)) = 1;
@@ -66,6 +67,7 @@
         end
         
         %% move theta cyc stuff here
+        thresh = .06;
         [b a] = butter(4,[5/625 12/625],'bandpass');
         filt = filtfilt(b,a,double(lfp.data));
         [b a] = butter(4,[4/625],'low');
@@ -81,14 +83,14 @@
         % cut by behavior
         id = find(InIntervals(cycles,[behavior.events.trialIntervals]));
         cycles = cycles(id);
-
+% 
 %         behavior.velocity(end+1)=behavior.velocity(end);
 %         vels=behavior.velocity(ceil((cycles-behavior.timestamps(1))*round(behavior.samplingRate)));
 %         parfor c =1:length(cycles)
 %             [a b]=min(abs(cycles(c)-behavior.timestamps));
 %             vels(c)=behavior.velocity(b);            
 %         end
-%         cycles(vels<20)=[]; 
+%         cycles(vels<10)=[]; 
         
         nCycles{f} = cycles;
         %             velocities{f} = vels; clear vels
@@ -98,7 +100,6 @@
         thetaCycleCount = zeros(ceil(lfp.timestamps(end)*1000/25),1);
         thetaCycleCount(ceil(cycles*1000/25)) = 1;
         % spikes per event analysis
-        thresh = .06;
         tempPETH = zeros(length(cycles),120);
         parfor cyc = 1:length(cycles)
             id = FindInInterval(spkIndices,[cycles(cyc)-thresh cycles(cyc)+thresh]);
@@ -129,12 +130,12 @@
             toss = 0;
             for i=1:length(spikes.times)
                 spkMat.dataZ(:,i) = zscore(spkMat.data(:,i));
-%                 r = length(spikes.times{i})./lfp.timestamps(end);
-%                 if r > 2 & ismember(i,hpc) % toss those pesky interneurons
-%                     spkMat.data(:,i) = nan;
-%                     spkMat.dataZ(:,i) = nan;
-%                     toss = toss+1;
-%                 end
+                r = length(spikes.times{i})./lfp.timestamps(end);
+                if r > 3 & ismember(i,hpc) % toss those pesky interneurons
+                    spkMat.data(:,i) = nan;
+                    spkMat.dataZ(:,i) = nan;
+                    toss = toss+1;
+                end
             end
             hpcCounts = nansum(spkMat.data(:,hpc)'>0);
             hpcRates_z = nanmean(spkMat.dataZ(:,hpc)');
@@ -143,15 +144,16 @@
             lsRates_z = nanmean(spkMat.dataZ(:,latS)');
             lsRates = nanmean(spkMat.data(:,latS)');
             
-            hpcCounts_smooth = fastrms(hpcCounts,24);
-            hpcRates_smooth = fastrms(hpcRates,24);
-            lsRates_smooth = fastrms(lsRates,24);
-            hpcRates_smooth_z = fastrms(hpcRates_z,24);
-            lsRates_smooth_z = fastrms(lsRates_z,24);
+            hpcCounts_smooth = fastrms(hpcCounts,12);
+            hpcRates_smooth = fastrms(hpcRates,12);
+            lsRates_smooth = fastrms(lsRates,12);
+            hpcRates_smooth_z = fastrms(hpcRates_z,12)-fastrms(hpcRates_z,1200);
+            lsRates_smooth_z = fastrms(lsRates_z,12);
             for i=1:100
                idx = find(hpcPercentActive>i/100 & hpcPercentActive>(i+10)/100);
                ripPercentHisto(f,i) = nansum(rippleCount(idx));
                thetaPercentHisto(f,i) = nansum(thetaCycleCount(idx));
+               lsRatesPercentHisto(f,i) = nanmean(ls_rates_smooth(idx));
             end
             for i=1:95
                 thresh_low = prctile(hpcRates_smooth,i-1);
@@ -172,9 +174,9 @@
                 ripHisto_z(f,i) = nansum(rippleCount(idx));
                 thetaHisto_z(f,i) = nansum(thetaCycleCount(idx));
                 
-                thresh_low = prctile(hpcCounts,i-1);
-                thresh_hi = prctile(hpcCounts,i+5);
-                idx = find(hpcCounts>thresh_low & hpcCounts<thresh_hi);
+                thresh_low = prctile(hpcCounts_smooth,i-1);
+                thresh_hi = prctile(hpcCounts_smooth,i+5);
+                idx = find(hpcCounts_smooth>thresh_low & hpcCounts_smooth<thresh_hi);
                 ripHisto_count(f,i) = nansum(rippleCount(idx));
                 thetaHisto_count(f,i) = nansum(thetaCycleCount(idx));
                 count_z(f,i) = nanmean(lsRates_smooth_z(idx));
@@ -183,41 +185,41 @@
             nHPC_cells(f) = length(hpc)-toss;
             nLS_cells(f) = length(latS);
             
-            subplot(4,2,1)
-            imagesc(rr)
-            subplot(4,2,2)
-            imagesc(rz)
-            subplot(4,2,3)
-            imagesc(zr)
-            subplot(4,2,4)
-            plot(nanmean(zr(nHPC_cells>15,:)))
-            subplot(4,2,5)
-            plot(mean(zscore(ripHisto(nHPC_cells>15,:),[],2)))
-            hold on
-            plot(mean(zscore(thetaHisto(nHPC_cells>15,:),[],2)))
-            hold off            
-            subplot(4,2,6)
-            plot(mean(zscore(ripHisto_z(nHPC_cells>15,:),[],2)))
-            hold on
-            plot(mean(zscore(thetaHisto_z(nHPC_cells>15,:),[],2)))
-            hold off
-            subplot(4,2,7)
-            plot(mean((ripPercentHisto(nHPC_cells>15,:))))
-            hold on
-            plot(mean((thetaPercentHisto(nHPC_cells>15,:))))
-            hold off
-            subplot(4,2,8)
-            plot(mean(zscore(ripHisto_count(nHPC_cells>15,:),[],2)))
-            hold on
-            plot(mean(zscore(thetaHisto_count(nHPC_cells>15,:),[],2)))
-            hold off
-            pause(.1)
+%             subplot(4,2,1)
+%             imagesc(rr)
+%             subplot(4,2,2)
+%             imagesc(rz)
+%             subplot(4,2,3)
+%             imagesc(zr)
+%             subplot(4,2,4)
+%             plot(nanmean(zr(nHPC_cells>15,:)))
+%             subplot(4,2,5)
+%             plot(mean(zscore(ripHisto(nHPC_cells>15,:),[],2)))
+%             hold on
+%             plot(mean(zscore(thetaHisto(nHPC_cells>15,:),[],2)))
+%             hold off            
+%             subplot(4,2,6)
+%             plot(mean(zscore(ripHisto_z(nHPC_cells>15,:),[],2)))
+%             hold on
+%             plot(mean(zscore(thetaHisto_z(nHPC_cells>15,:),[],2)))
+%             hold off
+%             subplot(4,2,7)
+%             plot(mean((ripPercentHisto(nHPC_cells>15,:))))
+%             hold on
+%             plot(mean((thetaPercentHisto(nHPC_cells>15,:))))
+%             hold off
+%             subplot(4,2,8)
+%             plot(mean(zscore(ripHisto_count(nHPC_cells>15,:),[],2)))
+%             hold on
+%             plot(mean(zscore(thetaHisto_count(nHPC_cells>15,:),[],2)))
+%             hold off
+%             pause(.1)
         end
     
-%     end
-%     cd D:\datasets\lsDataset
-% end
-FileName = sessionInfo.FileName;
-clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
-save([FileName '.synchronyAnalysis.mat'],'*Histo*','*spks*','n*'')
+    end
+    cd D:\datasets\lsDataset
+end
+% FileName = sessionInfo.FileName;
+% clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
+% save([FileName '.synchronyAnalysis_thetaByTrials.mat'],'*Histo*','*spks*','n*','cells*','count*','zz','zr','rz','rr')
 %% need to find all theta cycles and ripples and plot histograms over HPC synchrony percentiles

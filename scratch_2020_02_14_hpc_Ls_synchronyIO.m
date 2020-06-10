@@ -153,6 +153,7 @@
                idx = find(hpcPercentActive>i/100 & hpcPercentActive>(i+10)/100);
                ripPercentHisto(f,i) = nansum(rippleCount(idx));
                thetaPercentHisto(f,i) = nansum(thetaCycleCount(idx));
+               lsRatesPercentHisto(f,i) = nanmean(ls_rates_smooth(idx));
             end
             for i=1:95
                 thresh_low = prctile(hpcRates_smooth,i-1);
