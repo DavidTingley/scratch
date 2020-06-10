@@ -31,10 +31,10 @@ for f=1:length(folders)
             lsRates_z = nanmean(spkMat.dataZ(:,latS)');
             lsRates = nanmean(spkMat.data(:,latS)');
             
-            hpcRates_smooth = fastrms(hpcRates,4);
-            lsRates_smooth = fastrms(lsRates,4);
-            hpcRates_smooth_z = fastrms(hpcRates_z,4)-fastrms(hpcRates_z,1200);
-            lsRates_smooth_z = fastrms(lsRates_z,4);
+            hpcRates_smooth = fastrms(hpcRates,12);
+            lsRates_smooth = fastrms(lsRates,12);
+            hpcRates_smooth_z = fastrms(hpcRates_z,12)-fastrms(hpcRates_z,1200);
+            lsRates_smooth_z = fastrms(lsRates_z,12);
           
             for i=1:95
                 thresh_low = prctile(hpcRates_smooth,i-1);
