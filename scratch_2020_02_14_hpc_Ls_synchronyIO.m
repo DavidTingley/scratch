@@ -8,8 +8,8 @@
         sessionInfo = bz_getSessionInfo;
         load([sessionInfo.FileName '.behavior.mat'])
         spikes = bz_GetSpikes('noprompts',true);
-        spkMat = bz_SpktToSpkmat(spikes,'binSize',.1,'overlap',4);
-%         spkMat = bz_SpktToSpkmat(spikes,'binSize',.25,'overlap',10);
+%         spkMat = bz_SpktToSpkmat(spikes,'binSize',.1,'overlap',4);
+        spkMat = bz_SpktToSpkmat(spikes,'binSize',.25,'overlap',10);
 %        spkMat_large = bz_SpktToSpkmat(spikes,'binSize',.4,'overlap',4);
         hpc = find(strcmp(spikes.region ,'hpc') | strcmp(spikes.region ,'ca1'));
         latS = find(strcmp(spikes.region ,'ls'));
@@ -144,11 +144,11 @@
             lsRates_z = nanmean(spkMat.dataZ(:,latS)');
             lsRates = nanmean(spkMat.data(:,latS)');
             
-            hpcCounts_smooth = fastrms(hpcCounts,12);
-            hpcRates_smooth = fastrms(hpcRates,12);
-            lsRates_smooth = fastrms(lsRates,12);
-            hpcRates_smooth_z = fastrms(hpcRates_z,12)-fastrms(hpcRates_z,1200);
-            lsRates_smooth_z = fastrms(lsRates_z,12);
+            hpcCounts_smooth = fastrms(hpcCounts,24);
+            hpcRates_smooth = fastrms(hpcRates,24);
+            lsRates_smooth = fastrms(lsRates,24);
+            hpcRates_smooth_z = fastrms(hpcRates_z,24)-fastrms(hpcRates_z,1200);
+            lsRates_smooth_z = fastrms(lsRates_z,24);
             for i=1:100
                idx = find(hpcPercentActive>i/100 & hpcPercentActive>(i+10)/100);
                ripPercentHisto(f,i) = nansum(rippleCount(idx));
