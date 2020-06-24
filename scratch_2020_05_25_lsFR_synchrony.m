@@ -8,7 +8,7 @@ for f=1:length(folders)
         sessionInfo = bz_getSessionInfo;
         load([sessionInfo.FileName '.behavior.mat'])
         spikes = bz_GetSpikes('noprompts',true);
-        spkMat = bz_SpktToSpkmat(spikes,'binSize',.1,'overlap',4);
+        spkMat = bz_SpktToSpkmat(spikes,'binSize',.25,'overlap',10);
 %        spkMat = bz_SpktToSpkmat(spikes,'binSize',.1,'overlap',1);
 %        spkMat_large = bz_SpktToSpkmat(spikes,'binSize',.4,'overlap',4);
         hpc = find(strcmp(spikes.region ,'hpc') | strcmp(spikes.region ,'ca1'));
@@ -22,20 +22,31 @@ for f=1:length(folders)
        
         %% carry on
         if ~isempty(hpc) & ~isempty(latS)
+            toss = 0;
             for i=1:length(spikes.times)
                 spkMat.dataZ(:,i) = zscore(spkMat.data(:,i));
+                r = length(spikes.times{i})./spikes.spindices(end,1);
+                if r > 3 & ismember(i,hpc) % toss those pesky interneurons
+                    spkMat.data(:,i) = nan;
+                    spkMat.dataZ(:,i) = nan;
+                    toss = toss+1;
+                end
             end
             hpcRates_z = nanmean(spkMat.dataZ(:,hpc)');
             hpcRates = nanmean(spkMat.data(:,hpc)');
-            hpcPercentActive = nansum(spkMat.data(:,hpc)>1')./length(hpc);
+            hpcPercentActive = nansum(spkMat.data(:,hpc)'>1)./length(hpc);
             lsRates_z = nanmean(spkMat.dataZ(:,latS)');
             lsRates = nanmean(spkMat.data(:,latS)');
             
             hpcRates_smooth = fastrms(hpcRates,12);
             lsRates_smooth = fastrms(lsRates,12);
-            hpcRates_smooth_z = fastrms(hpcRates_z,12)-fastrms(hpcRates_z,1200);
+            hpcRates_smooth_z = fastrms(hpcRates_z,12)-fastrms(hpcRates_z,12000);
             lsRates_smooth_z = fastrms(lsRates_z,12);
-          
+            for i=1:100
+               idx = find(hpcPercentActive>i/100 & hpcPercentActive>(i+10)/100);
+               lsRatesPercentHisto(f,i) = nanmean(lsRates_smooth(idx));
+               lsRatesZPercentHisto(f,i) = nanmean(lsRates_smooth_z(idx));
+            end
             for i=1:95
                 thresh_low = prctile(hpcRates_smooth,i-1);
                 thresh_hi = prctile(hpcRates_smooth,i+5);
@@ -46,11 +57,13 @@ for f=1:length(folders)
                 thresh_low = prctile(hpcRates_smooth_z,i-1);
                 thresh_hi = prctile(hpcRates_smooth_z,i+5);
                 idx = find(hpcRates_smooth_z>thresh_low & hpcRates_smooth_z<thresh_hi);
+                
+                prcTilePercentActive(f,i) = nanmean(hpcPercentActive(idx));
                 zz(f,i) = nanmean(lsRates_smooth_z(idx));
                 zr(f,i) = nanmean(lsRates_smooth(idx));
                 
             end
-            nHPC_cells(f) = length(hpc);
+            nHPC_cells(f) = length(hpc) - toss;
             nLS_cells(f) = length(latS);
             
 %             subplot(4,2,1)
@@ -60,7 +73,7 @@ for f=1:length(folders)
 %             subplot(4,2,3)
 %             imagesc(zr)
 %             subplot(4,2,4)
-            plot(nanmedian(zr(nHPC_cells>15,:)))
+%             plot(nanmedian(zr(nHPC_cells>15,:)))
 %             subplot(4,2,5)
 %             plot(mean(zscore(ripHisto(nHPC_cells>15,:),[],2)))
 %             hold on

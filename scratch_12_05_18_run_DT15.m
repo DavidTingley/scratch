@@ -28,7 +28,7 @@ for i=1:length(d)
             SleepState{i} = bz_LoadStates(pwd,'SleepState');
 
              %% add accelerometer data
-            if 1 %~exist([d(i).name '.movement.mat']) 
+            if ~exist([d(i).name '.movement.mat']) 
                 num_channels = 6;
 %                 filePath = ['Z:\dwt244\zpool4\hypthal\dt15\' d(i).name '\'];
                 filePath = '';[d(i).name '\'];
@@ -130,25 +130,34 @@ for i=1:length(d)
                 thetaPow_resid{i} = theta_resid;  clear theta_resid
 %                 thetaPow_z{i} = theta_resid;
             end
-            if exist([d(i).name '.thetaPower.mat'])
+            if 1 % exist([d(i).name '.thetaPower.mat'])
                 [bb aa] = butter(3,[6/625 11/625],'bandpass');
                 temp = downsample(filtfilt(bb,aa,double(ripples{i}.detectorinfo.detectionparms.lfp)),1250);
 %                 temp(1:10)=nan; temp(end-10:end)=nan; % kill those edges
                 thetaPow_raw_s = fastrms(temp,60*5);
                 thetaPow_z_s = nanZscore(thetaPow_raw_s);
-                save([d(i).name '.thetaPower.mat'],'thetaPow*')
+                
+                [bb aa] = butter(3,[.5/625 4/625],'bandpass');
+                temp = downsample(filtfilt(bb,aa,double(ripples{i}.detectorinfo.detectionparms.lfp)),1250);
+%                 temp(1:10)=nan; temp(end-10:end)=nan; % kill those edges
+                thetaDelta_ratio = thetaPow_raw_s ./ fastrms(temp,60*5);
+                
+                save([d(i).name '.thetaPower.mat'],'thetaPow*', 'thetaDelta_ratio')
 %                 thetaPow_raw{i} = thetaPow_raw_s; clear thetaPow_raw_s
                 thetaPow_z{i} = thetaPow_z_s; clear thetaPow_z_s
+                thetaDelta_z{i} = nanZscore(thetaDelta_ratio); clear thetaDelta_ratio
             else
-                load([d(i).name '.thetaPower.mat'],'thetaPow_z_s')
+                load([d(i).name '.thetaPower.mat'],'thetaPow*')
 %                 thetaPow_raw{i} = thetaPow_raw_s; clear thetaPow_raw_s
                 thetaPow_z{i} = thetaPow_z_s; clear thetaPow_z_s
+                thetaDelta_z{i} = nanZscore(thetaDelta_ratio); clear thetaDelta_ratio
             end
             
             
         else
             emgFromLFP{i} = [];
             thetaPow_z{i} = [];
+            thetaDelta_z{i}=[];
             thetaPow_resid{i} = [];
             specslope{i} = [];
             SleepState{i} = [];
@@ -239,6 +248,7 @@ if ~isempty(rt{ii}) & ~isempty(ripples{ii})
         frequency(c) = ripples{ii}.data.peakFrequency(i);
         recording(c) = ii;
         thetaPower_z(c) = thetaPow_z{ii}(b);
+        thetaDeltaRatio_z(c) = thetaDelta_z{ii}(b);
         thetaPower_resid(c) = thetaPow_resid{ii}(b);
         
         
@@ -325,6 +335,7 @@ amps = nan(1,length(absTime));
 freq = nan(1,length(absTime));
 states = nan(1,length(absTime));
 theta_z = nan(1,length(absTime));
+theta_deltaR = nan(1,length(absTime));
 theta_resid = nan(1,length(absTime));
 spSlope = nan(1,length(absTime));
 emgSig = nan(1,length(absTime));
@@ -343,8 +354,11 @@ for i=1:length(absTime)
 %     states(i) = nansum(state(ind)==3)./length(ind);
     count(i) = length(ind);
     rec(i) = mean(recording(ind));
+    
     theta_z(i) = mean(thetaPower_z(ind));
+    theta_deltaR(i) = nanmean(thetaDeltaRatio_z(ind));
     theta_resid(i) = mean(thetaPower_resid(ind));
+    
     emgSig(i) = nanmean(emg(ind));
     if ~isempty(ind)
         zeitTimes(i) = zTime(ind(end));

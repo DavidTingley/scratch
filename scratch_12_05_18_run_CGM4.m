@@ -2,7 +2,7 @@ clear all
 cd C:\Users\SB13FLLT001\Dropbox\Documents\pubs\inProgress\glucose
 % 
 
-animal = 'CGM4'; 
+animal = 'A63'; 
 addpath(genpath(pwd))
 read_CGM_data
 clear a b dat nSteps timeStep ts ISIG_vals datatype dates times % clean up
@@ -127,23 +127,32 @@ for i=1:length(d)
                 thetaPow_resid{i} = theta_resid;  clear theta_resid
 %                 thetaPow_z{i} = theta_resid;
             end
-            if exist([d(i).name '.thetaPower.mat'])
+             if ~exist([d(i).name '.thetaPower.mat'])
                 [bb aa] = butter(3,[6/625 11/625],'bandpass');
                 temp = downsample(filtfilt(bb,aa,double(ripples{i}.detectorinfo.detectionparms.lfp)),1250);
 %                 temp(1:10)=nan; temp(end-10:end)=nan; % kill those edges
                 thetaPow_raw_s = fastrms(temp,60*5);
                 thetaPow_z_s = nanZscore(thetaPow_raw_s);
-                save([d(i).name '.thetaPower.mat'],'thetaPow*')
+                
+                [bb aa] = butter(3,[.5/625 4/625],'bandpass');
+                temp = downsample(filtfilt(bb,aa,double(ripples{i}.detectorinfo.detectionparms.lfp)),1250);
+%                 temp(1:10)=nan; temp(end-10:end)=nan; % kill those edges
+                thetaDelta_ratio = thetaPow_raw_s ./ fastrms(temp,60*5);
+                
+                save([d(i).name '.thetaPower.mat'],'thetaPow*', 'thetaDelta_ratio')
 %                 thetaPow_raw{i} = thetaPow_raw_s; clear thetaPow_raw_s
                 thetaPow_z{i} = thetaPow_z_s; clear thetaPow_z_s
+                thetaDelta_z{i} = nanZscore(thetaDelta_ratio); clear thetaDelta_ratio
             else
-                load([d(i).name '.thetaPower.mat'],'thetaPow_z_s')
+                load([d(i).name '.thetaPower.mat'],'thetaPow*')
 %                 thetaPow_raw{i} = thetaPow_raw_s; clear thetaPow_raw_s
                 thetaPow_z{i} = thetaPow_z_s; clear thetaPow_z_s
+                thetaDelta_z{i} = nanZscore(thetaDelta_ratio); clear thetaDelta_ratio
             end
         else
             emgFromLFP{i} = [];
             thetaPow_z{i} = [];
+            thetaDelta_z{i}=[];
             thetaPow_resid{i} = [];
             specslope{i} = [];
             SleepState{i} = [];
@@ -166,10 +175,8 @@ for i=1:length(d)
 end
 
 
-remove = [1:30 1520:1528 2230:2260];
-% 1860:2419
+remove = [1:20];
 isig_orig = isig_levels;
-
 isig_levels(remove) = nan;
 
 nyquist = 5./(24*60)/2;
@@ -191,7 +198,7 @@ c_stim = 1;
 c_slope = 1;
 clear absolute
 
-for ii=1:length(d)
+for ii=6:14
     if  d(ii).isdir
 if ~isempty(rt{ii}) & ~isempty(ripples{ii}) & ~isempty(SleepState{ii})
     
@@ -223,6 +230,7 @@ if ~isempty(rt{ii}) & ~isempty(ripples{ii}) & ~isempty(SleepState{ii})
         frequency(c) = ripples{ii}.data.peakFrequency(i);
         recording(c) = ii;
         thetaPower_z(c) = thetaPow_z{ii}(b);
+        thetaDeltaRatio_z(c) = thetaDelta_z{ii}(b);
         thetaPower_resid(c) = thetaPow_resid{ii}(b);
         
         
@@ -310,6 +318,7 @@ dur = nan(1,length(absTime));
 rec = nan(1,length(absTime));
 states = nan(1,length(absTime));
 theta_z = nan(1,length(absTime));
+theta_deltaR = nan(1,length(absTime));
 theta_resid = nan(1,length(absTime));
 spSlope = nan(1,length(absTime));
 emgSig = nan(1,length(absTime));
@@ -328,8 +337,11 @@ for i=1:length(absTime)
 %     states(i) = nansum(state(ind)==3)./length(ind);
     count(i) = length(ind);
     rec(i) = mean(recording(ind));
+    
     theta_z(i) = mean(thetaPower_z(ind));
+    theta_deltaR(i) = nanmean(thetaDeltaRatio_z(ind));
     theta_resid(i) = mean(thetaPower_resid(ind));
+    
     emgSig(i) = nanmean(emg(ind));
     if ~isempty(ind)
         zeitTimes(i) = zTime(ind(end));
@@ -352,11 +364,7 @@ for i=1:length(absTime)
 
 end
 
-idx = [1:3613];
-% idx = find(absTime > 737397.05);   % for CGM1_day1
-% idx = 1000:length(count);
-% count(count==0)=nan;
-% isig_levels(isig_levels<2) = nan;
+idx = 40:1900;
 
 subplot(3,2,1)
 plot(absTime(idx),count(idx),'r')
@@ -418,6 +426,6 @@ plot(avg)
 
 
 
-%  save('C:\Users\SB13FLLT001\Dropbox\Documents\pubs\inProgress\glucose\data\_CGM4.mat','-v7.3')
+ save('C:\Users\SB13FLLT001\Dropbox\Documents\pubs\inProgress\glucose\data\_A63.mat','-v7.3')
 
 

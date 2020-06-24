@@ -2,6 +2,7 @@
 
 
 clear all
+warning off
 cgm_files = dir('_*mat');
 hourHz = 1/(60*60);
 dayHz = 1/(24*60*60);
@@ -16,6 +17,7 @@ for ff=1:length(cgm_files)
     isig_levels = data{ff}.isig_levels;
     theta_resid = data{ff}.theta_resid; 
     theta_z = data{ff}.theta_z;
+    theta_deltaR = data{ff}.theta_deltaR;
     spSlope = data{ff}.spSlope;
     emgSig = data{ff}.emgSig;
     states = data{ff}.states;
@@ -28,8 +30,8 @@ for ff=1:length(cgm_files)
         movement =  rand(1,length(count));%ones(1,length(count));
         bad_movement = 1;
     end
-    pred = [nanZscore(theta_resid'),nanZscore(count'),nanZscore(spSlope'),nanZscore(states'),nanZscore(movement'),nanZscore(emgSig'),nanZscore(zeitTime')]; %,nanZscore(theta_z'),amps',dur',freq',;
-    names = [{'theta_resid'},{'count'},{'spSlope'},{'states'},{'movement'},{'emgSig'},{'ZeitTime'}]; % ,{'theta_z'},'amps','dur','freq',
+    pred = [nanZscore(theta_deltaR'),nanZscore(theta_z'),nanZscore(theta_resid'),nanZscore(count'),nanZscore(spSlope'),nanZscore(states'),nanZscore(movement'),nanZscore(emgSig')]; %,nanZscore(theta_z'),amps',dur',freq',;
+    names = [{'theta_deltaR'},{'theta_z'},{'theta_resid'},{'count'},{'spSlope'},{'states'},{'movement'},{'emgSig'}]; % ,{'theta_z'},'amps','dur','freq',
 
     for i=1:size(pred(:,1))
         if  ~ismember(i,data{ff}.idx) | isnan(sum(pred(i,:)))
@@ -41,20 +43,27 @@ for ff=1:length(cgm_files)
     glucFlux = nanZscore(isa);
     cc = ccgBinned(count,[(glucFlux)],40);
     [a b] = min(cc);
-    glucFlux = circshift(glucFlux,41-b);
+%     glucFlux = circshift(glucFlux,2);
 
 seq=[];
- for i=1:7
-    for j=1:7
-    mdl = fitlm(pred(:,[seq; j]),glucFlux);
-    ms(j) = mdl.MSE;
+offs = [];
+ for i=1:length(names)
+    
+    for j=1:length(names)
+        for offset=-5:5
+            mdl = fitlm(pred(:,[seq; j]),circshift(glucFlux,offset));
+            err(offset+6) = mdl.SSE;
+        end
+        [ms(j) off = min(err);
     end
-    ms(seq)=nan;[mins(i) b] = min(ms);
+    
+    ms(seq)=nan;
+    [mins(i) b] = max(ms);
     seq = [seq;b];
  end
 
  subplot(4,2,ff)
- plot(-diff([1,mins]))
+ plot(mins)
  title(num2str(seq'))
  
 end

@@ -1,14 +1,18 @@
 clear all
-cd C:\Users\SB13FLLT001\Dropbox\Documents\pubs\inProgress\glucose\
-% 
+% cd /home/david/Dropbox/Documents/pubs/inProgress/glucose
+cd C:\Users\SB13FLLT001\Dropbox\Documents\pubs\inProgress\glucose
 
-animal = 'flex1'; 
-addpath(genpath(pwd))
+% parpool(4)
+animal = 'A63'; 
+addpath(genpath(pwd));
 read_CGM_data
-clear a b dat nSteps timeStep ts ISIG_vals dataType dates times % clean up
+clear a b dat nSteps timeStep ts ISIG_vals datatype dates times % clean up
 
-% cd(['C:\Users\SB13FLLT001\Dropbox\flex1'])
-cd D:\datasets\glucose\flex1
+% read_stimLog_data
+
+% cd(['/mnt/packrat/userdirs/david/zpool4/' animal])
+cd(['D:\datasets\glucose\' animal])
+% cd /mnt/nyuShare/Buzsakilabspace/david/zpool2/CGM2
 d = dir(['*' animal '*']);
 
 for i=1:length(d)
@@ -23,12 +27,12 @@ for i=1:length(d)
             emgFromLFP{i} = load([d(i).name '.EMGFromLFP.LFP.mat']);
             emgFromLFP{i}.EMGFromLFP.data = single(emgFromLFP{i}.EMGFromLFP.data);
             
-            [zt_rec{i} rt{i} at{i}] = bz_getZeitgeberTime(d(i).name,1250,1250);
+            [zt_rec{i} rt{i} at{i}] = bz_getZeitgeberTime(d(i).name,20000,20000);
             SleepState{i} = bz_LoadStates(pwd,'SleepState');
 
-             %% add accelerometer data
+            %% add accelerometer data
             if ~exist([d(i).name '.movement.mat'])
-                num_channels = 6;
+                num_channels = 3;
                 fid = fopen('auxiliary.dat', 'r');
                 f = dir('auxiliary.dat');
                 v = 1;
@@ -55,7 +59,7 @@ for i=1:length(d)
                     chunk = chunk + 100000;
     %                 movement{i} = sum(abs(diffs)); clear diffs   
                 end
-                movement_s = makeLength(movement{i},f.bytes/6/312.5);
+                movement_s = makeLength(movement{i},f.bytes/6/5000);
                 clear v diffs lastV
                 fclose(fid);
                 save([d(i).name '.movement.mat'],'movement_s')
@@ -65,8 +69,8 @@ for i=1:length(d)
                 movement{i} = movement_s; clear movement_s;
             end
             
-%             %% get stim times
-%             if ~exist([d(i).name '.stimTimes.mat'])
+            %% get stim times
+            if ~exist([d(i).name '.stimTimes.mat'])
 %                 if exist('digitalin.dat')
 %                     fileinfo = dir('digitalin.dat');
 %                     num_samples = fileinfo.bytes/2;
@@ -92,10 +96,38 @@ for i=1:length(d)
 %                 end
 %                 save([d(i).name '.stimTimes.mat'],'stimTimes_s')
 %                 stimTimes{i} = stimTimes_s; clear stimTimes_s
-%             else
-%                 load([d(i).name '.stimTimes.mat'],'stimTimes_s')
-%                 stimTimes{i} = stimTimes_s; clear stimTimes_s
-%             end
+            else
+                load([d(i).name '.responseMagnitudes.mat'])
+                load([d(i).name '.stimTimes.mat'],'pul')
+                stims_analog = pul{1}; clear pul
+                
+%                 inRec = find(at{i}(1) < stimTimes_logFile & at{i}(end) > stimTimes_logFile);
+%                 c=1;
+%                 stims = [];
+%                 stimRelTime = [];
+%                 for t = 1:length(inRec)
+%                     [a b] = min(abs(stimTimes_logFile(inRec(t))-at{i}));
+%                     if a < .005
+%                         stims(c)= stimTimes_logFile(inRec(t));
+%                         stimRelTime(c) = rt{i}(b);
+%                         c=c+1;
+%                     end
+%                 end
+%                 stims = sort(stimRelTime);
+                
+%                 if length(stims)==length(stims_analog)
+                    stimTimes{i} = stims_analog; clear stims stims_analog stimRelTime
+%                 elseif length(stims) > length(stims_analog)
+%                     stimTimes{i} = stims; clear stims stims_analog stimRelTime
+%                 elseif length(stims) < length(stims_analog)
+%                     stimTimes{i} = stims_analog; clear stims stims_analog stimRelTime
+%                 else
+%                     error('wut')
+%                 end
+                responses{i} = responseMag;
+                
+                clear stims 
+            end
         
              %% add power spectrum
             if ~exist([d(i).name '.specSlope.mat'])
@@ -125,6 +157,7 @@ for i=1:length(d)
             else
                 load([d(i).name '.thetaResid.mat'],'theta_resid')
                 thetaPow_resid{i} = theta_resid;  clear theta_resid
+%                 thetaPow_z{i} = theta_resid;
             end
             if 1 % exist([d(i).name '.thetaPower.mat'])
                 [bb aa] = butter(3,[6/625 11/625],'bandpass');
@@ -147,8 +180,8 @@ for i=1:length(d)
 %                 thetaPow_raw{i} = thetaPow_raw_s; clear thetaPow_raw_s
                 thetaPow_z{i} = thetaPow_z_s; clear thetaPow_z_s
                 thetaDelta_z{i} = nanZscore(thetaDelta_ratio); clear thetaDelta_ratio
-            end         
-            
+            end
+                
         else
             emgFromLFP{i} = [];
             thetaPow_z{i} = [];
@@ -160,8 +193,9 @@ for i=1:length(d)
             rt{i} = [];
             at{i} = [];
         end
+%         cd(['/mnt/packrat/userdirs/david/zpool4/' animal])
         cd(['D:\datasets\glucose\' animal])
-
+%         cd /mnt/nyuShare/Buzsakilabspace/david/zpool2/CGM1
         
         % plot(cell2mat(at));
         % pause(.1)
@@ -175,52 +209,86 @@ for i=1:length(d)
 end
 
 
-remove = [1692:2070];
-% 1860:2419
+remove = [1:20];
 isig_orig = isig_levels;
-
 isig_levels(remove) = nan;
 
 nyquist = 5./(24*60)/2;
 dayHz = 1/(24*60*60);
 hourHz = 1/(60*60);
 minuteHz = 1/(60);
-% [b a] = butter(3,[ / nyquist],'high');
 isa = fillmissing((isig_levels),'nearest');
-isa = highpass(isa,dayHz,nyquist*2);
+% isa2 = highpass(isa,dayHz,nyquist*2);
+[b a] = butter(4,[ dayHz / nyquist],'high');
+isa = filtfilt(b,a,isa);
 % isa = filtfilt(b,a,isa);
 isa(isnan(isig_levels)) = nan;
 
 
-
+[hi lo]=butter(4,[140/625 180/625],'bandpass');
 c=1;
 c_NREM = 1;
 c_WAKE = 1;
 c_stim = 1;
 c_slope = 1;
-c_mua = 1; 
-clear absolute
+stimAlignedCGM = [];
+responseMag=[];
+stimTime =[];
+stimTimesAbs = [];
+rippleAlignedCGM = [];
+ripTime = [];
+ripState = [];
+offsets = [];
+m = [];
+zTime = [];
+absolute = [];
+amplitude = [];
+duration = [];
+frequency = [];
+recording = [];
+thetaPower_z = [];
+thetaDeltaRatio_z = [];
+thetaPower_resid = [];
+state = [];
+emg = [];
 
-for ii= [1:length(d)]
+for ii=6:14
     if  d(ii).isdir
-if ~isempty(rt{ii}) & ~isempty(ripples{ii})
+if ~isempty(rt{ii}) & ~isempty(ripples{ii}) % & ~isempty(SleepState{ii})
     
-%     for s = 1:length(stimTimes{ii})
-%         [a b]= min(abs(rt{ii}-stimTimes{ii}(s)));
-%         [aa bb] = min(abs(at{ii}(b)-absTime));
-%         stimTimesAbs(c_stim) = absTime(bb);
-%         c_stim = 1 + c_stim; 
-%     end
-
-%     for s = 1:length(pow{ii}.data)
-%         [a b] = min(abs(rt{ii} - pow{ii}.timestamps(s)));
-% %         [aa bb] = min(abs(at{ii}(b)-absTime));
-%         muaPower(c_mua) = pow{ii}.data(b);
-%         [aa bb] = min(abs(at{ii}(b)-absTime));
-%         muaTimes(c_mua) = absTime(bb);
-%         c_mua = 1 + c_mua; 
-%     end
-
+    stimAlignedCGM_t = nan(length(stimTimes{ii}),48);
+%     responseMag_t = nan(length(stimTimes{ii}),1251);
+    stimTime_t = nan(length(stimTimes{ii}),1);
+    stimTimesAbs_t = nan(length(stimTimes{ii}),1);
+    relTime = rt{ii}; abTime = at{ii}; rips = ripples{ii}; sti = stimTimes{ii};
+    for s = 1:length(sti)
+        [a b]= min(abs(relTime-sti(s)));
+        [aa bb] = min(abs(abTime(b)-absTime));
+        stimTimesAbs_t(s) = absTime(bb);
+        
+        offset = (abTime(b) - absTime(bb)) / 1.15741277113557e-05;  % offset in seconds
+        idx = find(absTime> abTime(b)-1.15741277113557e-05*60*60*2 & ...
+            absTime < abTime(b)+1.15741277113557e-05*60*60*2);
+        if length(idx)>48 & ~isempty(idx)
+            idx = idx(1:48);
+        elseif length(idx)< 48  & ~isempty(idx) & idx(end) ~= length(absTime)
+            idx(end+1) = idx(end) + 1;
+        end
+        if length(idx) == 48
+            responseMag_t(s,:) = responses{ii}(s,:);
+            stimAlignedCGM_t(s,:) = isa(idx);
+            stimTime_t(s) = abTime(b);
+        else
+            responseMag_t(s,:) = responses{ii}(s,:);
+            stimAlignedCGM_t(s,:) = nan(48,1);
+            stimTime_t(s) = abTime(b);
+        end
+    end
+    stimAlignedCGM = [stimAlignedCGM;stimAlignedCGM_t];
+    responseMag = [responseMag;responseMag_t];
+    stimTime = [stimTime;stimTime_t];
+    stimTimesAbs = [stimTimesAbs;stimTimesAbs_t];
+    
     for s = 1:length(specslope{ii}.timestamps)
         [a b]= min(abs(rt{ii} - specslope{ii}.timestamps(s)));
         [aa bb] = min(abs(at{ii}(b)-absTime));
@@ -228,40 +296,44 @@ if ~isempty(rt{ii}) & ~isempty(ripples{ii})
         specSlopeTimes(c_slope) = absTime(bb);
         c_slope = 1 + c_slope; 
     end
-    
+
+    rippleAlignedCGM_t =[];
+    time_t=[];
+    ripTime_t=[]; ripState_t =[];offsets_t=[];
+    slState = SleepState{ii};
+    mo = movement{ii};
     for i=1:length(ripples{ii}.peaks)
-        [a b]= min(abs(rt{ii}-ripples{ii}.peaks(i)));
-        [aa bb] = min(abs(at{ii}(b)-absTime));
+        [a b]= min(abs(relTime-rips.peaks(i)));
+        [aa bb] = min(abs(abTime(b)-absTime));
         
         
-        m(c) = movement{ii}(b);
-        zTime(c) = zt_rec{ii}(b);
-        absolute(c) = absTime(bb);
-        amplitude(c) = ripples{ii}.data.zScoredAmps(i);
-        duration(c) = ripples{ii}.data.duration(i);
-        frequency(c) = ripples{ii}.data.peakFrequency(i);
-        recording(c) = ii;
-        thetaPower_z(c) = thetaPow_z{ii}(b);
-        thetaDeltaRatio_z(c) = thetaDelta_z{ii}(b);
-        thetaPower_resid(c) = thetaPow_resid{ii}(b);
+        m_t(i) = mo(b);
+        zTime_t(i) = zt_rec{ii}(b);
+        absolute_t(i) = absTime(bb);
+        amplitude_t(i) = rips.data.zScoredAmps(i);
+        duration_t(i) = rips.data.duration(i);
+        frequency_t(i) = rips.data.peakFrequency(i);
+        recording_t(i) = ii;
+        thetaPower_z_t(i) = thetaPow_z{ii}(b);
+        thetaDelta_z_t(i) = thetaDelta_z{ii}(b);
+        thetaPower_resid_t(i) = thetaPow_resid{ii}(b);
         
         
-        
-        [blah loc] = min(abs(SleepState{ii}.idx.timestamps-ripples{ii}.peaks(i)));
-        state(c) = SleepState{ii}.idx.states(loc);
-        
+        [blah loc] = min(abs(slState.idx.timestamps-rips.peaks(i)));
+        state_t(i) = slState.idx.states(loc);
         %% EMG add
-        [emg_pk emg_loc]= min(abs(emgFromLFP{ii}.EMGFromLFP.timestamps-ripples{ii}.peaks(i)));
+        [emg_pk emg_loc]= min(abs(emgFromLFP{ii}.EMGFromLFP.timestamps-rips.peaks(i)));
         emg_idx = emg_loc-75:emg_loc+75;
         emg_idx(emg_idx<1)=[]; emg_idx(emg_idx>length(emgFromLFP{ii}.EMGFromLFP.data))=[]; 
-        emg(c) = nanmean(emgFromLFP{ii}.EMGFromLFP.data(emg_idx));  % sampled at 0.5 Hz, take avg over 5 min block?? 
-%         
+        emg_t(i) = nanmean(emgFromLFP{ii}.EMGFromLFP.data(emg_idx));  % sampled at 0.5 Hz, take avg over 5 min block?? 
+        
+        
 %         [a b]= min(abs(rt{ii}-ripples{ii}.peaks(i)));
         
-        offset = (at{ii}(b) - absTime(bb)) / 1.15741277113557e-05;  % offset in seconds
+        offset = (abTime(b) - absTime(bb)) / 1.15741277113557e-05;  % offset in seconds
         
-        idx = find(absTime> at{ii}(b)-1.15741277113557e-05*60*60*2 & ...
-            absTime < at{ii}(b)+1.15741277113557e-05*60*60*2);
+        idx = find(absTime> abTime(b)-1.15741277113557e-05*60*60*2 & ...
+            absTime < abTime(b)+1.15741277113557e-05*60*60*2);
         
         if length(idx)>48 & ~isempty(idx)
             idx = idx(1:48);
@@ -269,58 +341,87 @@ if ~isempty(rt{ii}) & ~isempty(ripples{ii})
             idx(end+1) = idx(end) + 1;
         end
         if abs(offset) < 60*5 & length(idx) == 48
-            rippleAlignedCGM(c,:) = isa(idx);
-            time(c,:) = linspace(-7200,7200,48) - offset;
-            ripTime(c) = absTime(bb);
-            if i ~= 1 & i < length(ripples{ii}.peaks)
-                IRI(c) = mean(diff(ripples{ii}.peaks(i-1:i+1)));
+            rippleAlignedCGM_t(i,:) = isa(idx);
+            time_t(i,:) = linspace(-7200,7200,48) - offset;
+            ripTime_t(i) = absTime(bb);%rips.peaks(i);
+            if i ~= 1 & i < length(rips.peaks)
+                IRI_t(i) = mean(diff(rips.peaks(i-1:i+1)));
             end
-            ripState(c) = state(c);
-            offsets(c) = offset;
-            c=1+c;
+            ripState_t(i) = state_t(i);
+            offsets_t(i) = offset;
         end
+
+%         m(c) = movement{ii}(b);
+%         zTime(c) = zt_rec{ii}(b);
+%         absolute(c) = absTime(bb);
+%         amplitude(c) = ripples{ii}.data.zScoredAmps(i);
+%         duration(c) = ripples{ii}.data.duration(i);
+%         frequency(c) = ripples{ii}.data.peakFrequency(i);
+%         recording(c) = ii;
+%         thetaPower_z(c) = thetaPow_z{ii}(b);
+%         thetaPower_resid(c) = thetaPow_resid{ii}(b);
+%         
+%         
+%         [blah loc] = min(abs(SleepState{ii}.idx.timestamps-ripples{ii}.peaks(i)));
+%         state(c) = SleepState{ii}.idx.states(loc);
+%         %% EMG add
+%         [emg_pk emg_loc]= min(abs(emgFromLFP{ii}.EMGFromLFP.timestamps-ripples{ii}.peaks(i)));
+%         emg_idx = emg_loc-75:emg_loc+75;
+%         emg_idx(emg_idx<1)=[]; emg_idx(emg_idx>length(emgFromLFP{ii}.EMGFromLFP.data))=[]; 
+%         emg(c) = nanmean(emgFromLFP{ii}.EMGFromLFP.data(emg_idx));  % sampled at 0.5 Hz, take avg over 5 min block?? 
+%         
+%         
+% %         [a b]= min(abs(rt{ii}-ripples{ii}.peaks(i)));
+%         
+%         offset = (at{ii}(b) - absTime(bb)) / 1.15741277113557e-05;  % offset in seconds
+%         
+%         idx = find(absTime> at{ii}(b)-1.15741277113557e-05*60*60*2 & ...
+%             absTime < at{ii}(b)+1.15741277113557e-05*60*60*2);
+%         
+%         if length(idx)>48 & ~isempty(idx)
+%             idx = idx(1:48);
+%         elseif length(idx)< 48  & ~isempty(idx) & idx(end) ~= length(absTime)
+%             idx(end+1) = idx(end) + 1;
+%         end
+%         if abs(offset) < 60*5 & length(idx) == 48
+%             rippleAlignedCGM(c,:) = isa(idx);
+%             time(c,:) = linspace(-7200,7200,48) - offset;
+%             ripTime(c) = ripples{ii}.peaks(i);
+%             if i ~= 1 & i < length(ripples{ii}.peaks)
+%                 IRI(c) = mean(diff(ripples{ii}.peaks(i-1:i+1)));
+%             end
+%             ripState(c) = state(c);
+%             offsets(c) = offset;
+%             c=1+c;
+%         end
     end
+    
+    rippleAlignedCGM = [rippleAlignedCGM; rippleAlignedCGM_t];
+%     time = 
+    ripTime = [ripTime; ripTime_t'];
+    ripState = [ripState; ripState_t'];
+    offsets = [offsets; offsets_t'];
+    
+    m = [m, m_t];
+    zTime = [zTime, zTime_t];
+    absolute = [absolute, absolute_t];
+    amplitude = [amplitude,amplitude_t];
+    duration = [duration, duration_t];
+    frequency = [frequency, frequency_t];
+    recording = [recording, recording_t];
+    thetaPower_z = [thetaPower_z, thetaPower_z_t];
+    thetaDeltaRatio_z = [thetaDeltaRatio_z, thetaDelta_z_t];
+    thetaPower_resid = [thetaPower_resid, thetaPower_resid_t];
+    state = [state, state_t];
+    emg = [emg, emg_t];
+    end
+    clear *_t
+    
     ii
 
-%     rips_NREM = Restrict(ripples{ii}.peaks,double(SleepState{ii}.ints.NREMstate));
-%     for i=1:length(rips_NREM) 
-%         [a b]= min(abs(rt{ii}-rips_NREM(i)));
-%         [aa bb] = min(abs(at{ii}(b)-absTime));
-%         offset = (at{ii}(b) - absTime(bb)) / 1.15741277113557e-05;  % offset in seconds
-%         idx = find(absTime> at{ii}(b)-1.15741277113557e-05*60*60*2 & ...
-%             absTime< at{ii}(b)+1.15741277113557e-05*60*60*2);
-%         if length(idx)>48 & ~isempty(idx)
-%             idx = idx(1:48);
-%         elseif length(idx)< 48 & ~isempty(idx)
-%             idx(end+1) = idx(end) + 1;
-%         end1
-%         if abs(offset) < 60*5 & length(idx) == 48
-%             rippleAlignedCGM_NREM(c_NREM,:) = circshift(makeLength(isig_levels(idx),length(idx)*5),round(offset));
-%             c_NREM=1+c_NREM;
-%         end
-%     end
-% 
-%     rips_WAKE = Restrict(ripples{ii}.peaks,double(SleepState{ii}.ints.WAKEstate));
-%     for i=1:length(rips_WAKE)
-%         [a b]= min(abs(rt{ii}-rips_WAKE(i)));
-%         [aa bb] = min(abs(at{ii}(b)-absTime));
-%         offset = (at{ii}(b) - absTime(bb)) / 1.15741277113557e-05;  % offset in seconds
-%         idx = find(absTime> at{ii}(b)-1.15741277113557e-05*60*60*2 & ...
-%             absTime< at{ii}(b)+1.15741277113557e-05*60*60*2);
-%         if length(idx)>48 & ~isempty(idx)
-%             idx = idx(1:48);
-%         elseif length(idx)< 48 & ~isempty(idx)
-%             idx(end+1) = idx(end) + 1;
-%         end
-%         if abs(offset) < 60*5 & length(idx) == 48
-%             rippleAlignedCGM_WAKE(c_WAKE,:) = circshift(makeLength(isig_levels(idx),length(idx)*5),round(offset));
-%             c_WAKE=1+c_WAKE;
-%         end
-%     end
-end
-end
-end
 
+end
+end
 
 count = nan(1,length(absTime));
 rec = nan(1,length(absTime));
@@ -335,50 +436,52 @@ spSlope = nan(1,length(absTime));
 emgSig = nan(1,length(absTime));
 
 for i=1:length(absTime)
-    ind = find(InIntervals(absolute,[absTime(i)-1.15741277113557e-05*60*2.5 absTime(i)+1.15741277113557e-05*60*2.5]));
-%     ind = find(InIntervals(absolute,[absTime(i)-1.15741277113557e-05 absTime(i)]));
-%     
+%     ind = find(InIntervals(absolute,[absTime(i)-1.15741277113557e-05*60*5 absTime(i)]));
+    ind = find(InIntervals(absolute,[absTime(i)-1.15741277113557e-05 absTime(i)]));
+    
     mov(i) = nanmean(m(ind));
     amps(i) = nanmean(amplitude(ind));
     freq(i) = nanmean(frequency(ind));
     dur(i) = nanmean(duration(ind));
 %     states(i) = (sum(state(ind)==1) ./ (sum(state(ind)==3))+.0001);  % wake to NREM sleep ratio
     states(i) = (sum(state(ind)==1) - (sum(state(ind)==3)))./(length(ind)+1);  % wake to NREM sleep ratio
+    states_rem(i) = (sum(state(ind)==1)+sum(state(ind)==5) - (sum(state(ind)==3)))./(length(ind)+1);  % wake to NREM sleep ratio
+    emgSig(i) = nanmean(emg(ind));
+    rec(i) = nanmean(recording(ind));
+    
+    theta_deltaR(i) = nanmean(thetaDeltaRatio_z(ind));
+    theta_z(i) = nanmean(thetaPower_z(ind));
+    theta_resid(i) = nanmean(thetaPower_resid(ind));
     
 %     states(i) = nansum(state(ind)==3)./length(ind);
     count(i) = length(ind);
-    rec(i) = mean(recording(ind));
     
-    theta_z(i) = mean(thetaPower_z(ind));
-    theta_deltaR(i) = nanmean(thetaDeltaRatio_z(ind));
-    theta_resid(i) = mean(thetaPower_resid(ind));
-    
-    emgSig(i) = nanmean(emg(ind));
     if ~isempty(ind)
         zeitTimes(i) = zTime(ind(end));
     else
         zeitTimes(i) = nan;
     end
     
-   
+%     ind = find(InIntervals(specSlopeTimes,[absTime(i)-1.15741277113557e-05*60*2.5 absTime(i)+1.15741277113557e-05*60*2.5]));
+%     if ~isempty(ind)
+%         spSlope(i) = nanmean(specSlope(ceil(ind(1)/10):round(ind(end)/10)));
+%     else
+%         spSlope(i) = nan;
+%     end
     ind = find(InIntervals(specSlopeTimes,[absTime(i)-1.15741277113557e-05*60*2.5 absTime(i)+1.15741277113557e-05*60*2.5]));
     if ~isempty(ind)
-        spSlope(i) =  nanmean(specSlope(ceil(ind(1)/10):round(ind(end)/10)));
+        spSlope(i) =  nanmean(specSlope(ind));
     else
         spSlope(i) = nan;
     end
-    
-%     ind = find(InIntervals(muaTimes,[absTime(i)-1.15741277113557e-05*60*5 absTime(i)]));
-%     stimRate(i) = length(ind);
-%     MUA_power(i) = mean(muaPower(ind));
+    ind = find(InIntervals(stimTimesAbs,[absTime(i)-1.15741277113557e-05*60*5 absTime(i)]));
+    stimRate(i) = length(ind);
+    responseMags(i,:) = nanmean(responseMag(ind,:));
 
 end
 
 
-idx = find(absTime > 737397.05);   % for CGM1_day1
-% idx = 1000:length(count);
-count(count==0)=nan;
-% isig_levels(isig_levels<2) = nan;
+idx = 40:1900;
 
 subplot(3,2,1)
 plot(absTime(idx),count(idx),'r')
@@ -407,21 +510,20 @@ end
 end
 av(201+i,:) = nanmean(t,1);clear t;
 end
-imagesc(-20:20,-200:200,av)
+imagesc(av)
 
 
 
 
-%%%%%%%%%%%%
-
+figure
 for i=1:size(rippleAlignedCGM,1)
 time(i,:) = linspace(-7200,7200,48);
 time(i,:) = time(i,:) - offsets(i);
 end
- timeD = time(:,2:end);
 
 for i=1:size(rippleAlignedCGM,1)
-r(i,:) = diff(rippleAlignedCGM(i,:));
+    r(i,:) = diff(rippleAlignedCGM(i,:));
+    rz(i,:) = zscore(rippleAlignedCGM(i,:));
 end
 timeD = time(:,2:end);
 for i= -7200:7200
@@ -432,8 +534,16 @@ plot(avg)
 
 
 
-save('C:\Users\SB13FLLT001\Dropbox\Documents\pubs\inProgress\glucose\data\_flex1.mat','-v7.3')
+save('C:\Users\SB13FLLT001\Dropbox\Documents\pubs\inProgress\glucose\data\_A63.mat','-v7.3')
 % whos
+% 
+% for i=-60:60
+%     pred = [theta',count',amps',dur',freq',states',zt'];
+% [beta(i+61,:) dev(i+61) stats(i+61)]=glmfit(pred(idx,:),circshift([0,diff(isig_levels(idx))]',-i),'normal');
+% end
+% for i=1:121
+% p(i,:) = stats(i).p;
+% end
 % 
 % 
 % 
