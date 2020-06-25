@@ -77,12 +77,12 @@
 
         [pks locs] = findpeaks(-phase,'MinPeakDistance',100);
         % cut by power thresh
-        powThresh(f) = mean(td_pow)-std(td_pow);
+        powThresh(f) = mean(td_pow)+std(td_pow);
         idx = find(td_pow(locs)>powThresh(f));
         cycles = lfp.timestamps(locs(idx));
         % cut by behavior
-        id = find(InIntervals(cycles,[behavior.events.trialIntervals]));
-        cycles = cycles(id);
+%         id = find(InIntervals(cycles,[behavior.events.trialIntervals]));
+%         cycles = cycles(id);
 % 
 %         behavior.velocity(end+1)=behavior.velocity(end);
 %         vels=behavior.velocity(ceil((cycles-behavior.timestamps(1))*round(behavior.samplingRate)));
