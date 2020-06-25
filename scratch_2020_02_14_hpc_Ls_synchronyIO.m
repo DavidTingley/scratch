@@ -77,7 +77,7 @@
 
         [pks locs] = findpeaks(-phase,'MinPeakDistance',100);
         % cut by power thresh
-        powThresh(f) = mean(td_pow)-std(td_pow);
+        powThresh(f) = mean(td_pow)+std(td_pow);
         idx = find(td_pow(locs)>powThresh(f));
         cycles = lfp.timestamps(locs(idx));
         % cut by behavior
