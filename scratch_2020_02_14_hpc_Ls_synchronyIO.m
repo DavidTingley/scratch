@@ -8,8 +8,8 @@
         sessionInfo = bz_getSessionInfo;
         load([sessionInfo.FileName '.behavior.mat'])
         spikes = bz_GetSpikes('noprompts',true);
-%         spkMat = bz_SpktToSpkmat(spikes,'binSize',.1,'overlap',4);
-        spkMat = bz_SpktToSpkmat(spikes,'binSize',.25,'overlap',10);
+        spkMat = bz_SpktToSpkmat(spikes,'binSize',.1,'overlap',4);
+%         spkMat = bz_SpktToSpkmat(spikes,'binSize',.25,'overlap',10);
 %        spkMat_large = bz_SpktToSpkmat(spikes,'binSize',.4,'overlap',4);
         hpc = find(strcmp(spikes.region ,'hpc') | strcmp(spikes.region ,'ca1'));
         latS = find(strcmp(spikes.region ,'ls'));
@@ -77,7 +77,7 @@
 
         [pks locs] = findpeaks(-phase,'MinPeakDistance',100);
         % cut by power thresh
-        powThresh(f) = mean(td_pow)+std(td_pow);
+        powThresh(f) = mean(td_pow)-std(td_pow);
         idx = find(td_pow(locs)>powThresh(f));
         cycles = lfp.timestamps(locs(idx));
         % cut by behavior
@@ -130,12 +130,12 @@
             toss = 0;
             for i=1:length(spikes.times)
                 spkMat.dataZ(:,i) = zscore(spkMat.data(:,i));
-%                 r = length(spikes.times{i})./lfp.timestamps(end);
-%                 if r > 3 & ismember(i,hpc) % toss those pesky interneurons
-%                     spkMat.data(:,i) = nan;
-%                     spkMat.dataZ(:,i) = nan;
-%                     toss = toss+1;
-%                 end
+                r = length(spikes.times{i})./lfp.timestamps(end);
+                if r > 3 & ismember(i,hpc) % toss those pesky interneurons
+                    spkMat.data(:,i) = nan;
+                    spkMat.dataZ(:,i) = nan;
+                    toss = toss+1;
+                end
             end
             hpcCounts = nansum(spkMat.data(:,hpc)'>0);
             hpcRates_z = nanmean(spkMat.dataZ(:,hpc)');
@@ -147,7 +147,7 @@
             hpcCounts_smooth = fastrms(hpcCounts,24);
             hpcRates_smooth = fastrms(hpcRates,24);
             lsRates_smooth = fastrms(lsRates,24);
-            hpcRates_smooth_z = fastrms(hpcRates_z,24);%-fastrms(hpcRates_z,1200);
+            hpcRates_smooth_z = fastrms(hpcRates_z,24)-fastrms(hpcRates_z,1200);
             lsRates_smooth_z = fastrms(lsRates_z,24);
             for i=1:100
                idx = find(hpcPercentActive>i/100 & hpcPercentActive>(i+10)/100);
