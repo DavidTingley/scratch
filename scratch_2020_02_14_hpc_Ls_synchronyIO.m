@@ -130,12 +130,12 @@
             toss = 0;
             for i=1:length(spikes.times)
                 spkMat.dataZ(:,i) = zscore(spkMat.data(:,i));
-                r = length(spikes.times{i})./lfp.timestamps(end);
-                if r > 3 & ismember(i,hpc) % toss those pesky interneurons
-                    spkMat.data(:,i) = nan;
-                    spkMat.dataZ(:,i) = nan;
-                    toss = toss+1;
-                end
+%                 r = length(spikes.times{i})./lfp.timestamps(end);
+%                 if r > 3 & ismember(i,hpc) % toss those pesky interneurons
+%                     spkMat.data(:,i) = nan;
+%                     spkMat.dataZ(:,i) = nan;
+%                     toss = toss+1;
+%                 end
             end
             hpcCounts = nansum(spkMat.data(:,hpc)'>0);
             hpcRates_z = nanmean(spkMat.dataZ(:,hpc)');
