@@ -38,24 +38,24 @@ for f=1:length(folders)
             lsRates_z = nanmean(spkMat.dataZ(:,latS)');
             lsRates = nanmean(spkMat.data(:,latS)');
             
-            hpcRates_smooth = fastrms(hpcRates,12);
-            lsRates_smooth = fastrms(lsRates,12);
-            hpcRates_smooth_z = fastrms(hpcRates_z,12)-fastrms(hpcRates_z,12000);
-            lsRates_smooth_z = fastrms(lsRates_z,12);
+            hpcRates_smooth = fastrms(hpcRates,24);
+            lsRates_smooth = fastrms(lsRates,24);
+            hpcRates_smooth_z = fastrms(hpcRates_z,24);%-fastrms(hpcRates_z,1200);
+            lsRates_smooth_z = fastrms(lsRates_z,24);
             for i=1:100
                idx = find(hpcPercentActive>i/100 & hpcPercentActive>(i+10)/100);
                lsRatesPercentHisto(f,i) = nanmean(lsRates_smooth(idx));
                lsRatesZPercentHisto(f,i) = nanmean(lsRates_smooth_z(idx));
             end
-            for i=1:95
-                thresh_low = prctile(hpcRates_smooth,i-1);
-                thresh_hi = prctile(hpcRates_smooth,i+5);
+            for i=3:97
+                thresh_low = prctile(hpcRates_smooth,i-3);
+                thresh_hi = prctile(hpcRates_smooth,i+3);
                 idx = find(hpcRates_smooth>thresh_low & hpcRates_smooth<thresh_hi);
                 rr(f,i) = nanmean(lsRates_smooth(idx));
                 rz(f,i) = nanmean(lsRates_smooth_z(idx));
                 
-                thresh_low = prctile(hpcRates_smooth_z,i-1);
-                thresh_hi = prctile(hpcRates_smooth_z,i+5);
+                thresh_low = prctile(hpcRates_smooth_z,i-3);
+                thresh_hi = prctile(hpcRates_smooth_z,i+3);
                 idx = find(hpcRates_smooth_z>thresh_low & hpcRates_smooth_z<thresh_hi);
                 
                 prcTilePercentActive(f,i) = nanmean(hpcPercentActive(idx));

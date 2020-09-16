@@ -1,10 +1,10 @@
-% folders = dir('*201*');
-% 
-% for f=1:length(folders)
-%     cd(folders(f).name)
-%     if exist([folders(f).name '.spikes.cellinfo.mat']) & exist([folders(f).name '.CA1Ripples.events.mat'])
+folders = dir('*201*');
 
-        f=1;
+for f=1:length(folders)
+    cd(folders(f).name)
+    if exist([folders(f).name '.spikes.cellinfo.mat']) & exist([folders(f).name '.CA1Ripples.events.mat'])
+
+%         f=1;
         sessionInfo = bz_getSessionInfo;
         load([sessionInfo.FileName '.behavior.mat'])
         spikes = bz_GetSpikes('noprompts',true);
@@ -75,7 +75,7 @@
         td_pow = fastrms(filt,125)./fastrms(filt_lo,1250);
         phase = angle(hilbert(filt));
 
-        [pks locs] = findpeaks(-phase,'MinPeakDistance',100);
+        [pks locs] = findpeaks(cos(phase),'MinPeakDistance',100);
         % cut by power thresh
         powThresh(f) = mean(td_pow)-std(td_pow);
         idx = find(td_pow(locs)>powThresh(f));
@@ -216,10 +216,10 @@
 %             pause(.1)
         end
     
-%     end
-%     cd D:\datasets\lsDataset
-% end
-FileName = sessionInfo.FileName;
-clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
-save([FileName '.synchronyAnalysis_thetaByTrials.mat'],'*Histo*','*spks*','n*','cells*','count*','zz','zr','rz','rr')
+    end
+    cd D:\datasets\lsDataset
+end
+% FileName = sessionInfo.FileName;
+% clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
+% save([FileName '.synchronyAnalysis_thetaByTrials.mat'],'*Histo*','*spks*','n*','cells*','count*','zz','zr','rz','rr')
 %% need to find all theta cycles and ripples and plot histograms over HPC synchrony percentiles
