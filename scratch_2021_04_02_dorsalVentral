@@ -1,0 +1,35 @@
+ r = {'CGM37.mat';'CGM48.mat';'Vanessa.mat'};
+ 
+ for rr = 1:length(r)
+     load(r{rr})
+     
+    clear cc ccc
+    for ii=31:length(isig_levels)-30
+    id = ii-30:ii+30; cc = nan(61,1);
+    for i = -30:30
+    if sum(~isnan(count(id)))>30
+    cc(i+31) = corr(circshift(count(id),i)',[0;diff(isig_levels(id)')],'rows','complete');
+    else
+    cc(i+31)=nan;
+    end
+    end
+    ccc(ii,:) = cc; clear cc;
+    end
+
+    clear cc ccc
+    for ii=31:length(isig_levels)-30
+    id = ii-30:ii+30; cc = nan(61,1);
+    for i = -30:30
+    if sum(~isnan(count(id)))>30
+    cc(i+31) = corr(circshift(vcount(id),i)',[0;diff(isig_levels(id)')],'rows','complete');
+    else
+    cc(i+31)=nan;
+    end
+    end
+    vccc(ii,:) = cc; clear cc;
+    end
+    
+    ccg(rr,:) = nanmedian(ccc(idx,:));
+    ccg_v(rr,:) = nanmedian(vccc(idx,:));
+     
+ end

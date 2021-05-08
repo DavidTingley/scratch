@@ -2,7 +2,7 @@ clear all
 cd C:\Users\SB13FLLT001\Dropbox\Documents\pubs\inProgress\glucose
 %
 
-animal = 'DT12'; 
+animal = 'bruce'; 
 addpath(genpath(pwd))
 read_CGM_data
 clear a b dat nSteps timeStep ts ISIG_vals dataType dates times % clean up

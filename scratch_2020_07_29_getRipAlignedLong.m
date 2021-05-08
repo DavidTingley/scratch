@@ -57,9 +57,9 @@ end
 id = find((absTime(idx(1))<ripTime & absTime(idx(end))>ripTime));
 c_nostim(i,:)=nanmean(diff(rippleAlignedCGM(id,:)')');
 cl_nostim(i,:)=nanmean(diff(ripAlignedL(id,:)')');
-ripAligned{i} = diff(ripAlignedL(id,:)')';
+ripAligned{i} = (ripAlignedL(id,:)')';
 % respsAligned{i} = responseMag(id,:);
-% clear ripAligned* responseMag;
+clear ripAlignedL responseMag;
 i
 end
 end
