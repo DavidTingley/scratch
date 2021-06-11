@@ -2,7 +2,7 @@ folders = dir('*201*');
 
 for f=1:length(folders)
     cd(folders(f).name)
-    if exist([folders(f).name '.spikes.cellinfo.mat']) & exist([folders(f).name '.CA1Ripples.events.mat'])
+    if exist([folders(f).name '.behavior.mat']) & exist([folders(f).name '.spikes.cellinfo.mat']) & exist([folders(f).name '.CA1Ripples.events.mat'])
 
 %         f=1;
         sessionInfo = bz_getSessionInfo;
@@ -18,8 +18,12 @@ for f=1:length(folders)
             hpc = find(strcmp(spikes.region ,'ca3'));
             reg(f) = 1;
         end
-        if ~isempty(sessionInfo.ca3)
-            lfpChan = sessionInfo.ca3;
+        if isfield(sessionInfo,'ca3')
+            if ~isempty(sessionInfo.ca3)
+                lfpChan = sessionInfo.ca3;
+            else
+                lfpChan = sessionInfo.ca1;
+            end
         else
             lfpChan = sessionInfo.ca1;
         end
@@ -140,7 +144,8 @@ for f=1:length(folders)
             hpcCounts = nansum(spkMat.data(:,hpc)'>0);
             hpcRates_z = nanmean(spkMat.dataZ(:,hpc)');
             hpcRates = nanmean(spkMat.data(:,hpc)');
-            hpcPercentActive = nansum(spkMat.data(:,hpc)'>1)./length(hpc);
+            lsPercentActive = nansum(spkMat.data(:,hpc)'>1)./length(hpc);
+            hpcPercentActive = nansum(spkMat.data(:,latS)'>1)./length(latS);
             lsRates_z = nanmean(spkMat.dataZ(:,latS)');
             lsRates = nanmean(spkMat.data(:,latS)');
             
@@ -153,7 +158,9 @@ for f=1:length(folders)
                idx = find(hpcPercentActive>i/100 & hpcPercentActive>(i+10)/100);
                ripPercentHisto(f,i) = nansum(rippleCount(idx));
                thetaPercentHisto(f,i) = nansum(thetaCycleCount(idx));
+               lsPctActHisto(f,i) = nanmean(lsPercentActive(idx));
                lsRatesPercentHisto(f,i) = nanmean(lsRates_smooth(idx));
+               lsRatesPercentHisto_z(f,i) = nanmean(lsRates_smooth_z(idx));
             end
             for i=1:95
                 thresh_low = prctile(hpcRates_smooth,i-1);
@@ -185,39 +192,39 @@ for f=1:length(folders)
             nHPC_cells(f) = length(hpc)-toss;
             nLS_cells(f) = length(latS);
             
-%             subplot(4,2,1)
-%             imagesc(rr)
-%             subplot(4,2,2)
-%             imagesc(rz)
-%             subplot(4,2,3)
-%             imagesc(zr)
-%             subplot(4,2,4)
-%             plot(nanmean(zr(nHPC_cells>15,:)))
-%             subplot(4,2,5)
-%             plot(mean(zscore(ripHisto(nHPC_cells>15,:),[],2)))
-%             hold on
-%             plot(mean(zscore(thetaHisto(nHPC_cells>15,:),[],2)))
-%             hold off            
-%             subplot(4,2,6)
-%             plot(mean(zscore(ripHisto_z(nHPC_cells>15,:),[],2)))
-%             hold on
-%             plot(mean(zscore(thetaHisto_z(nHPC_cells>15,:),[],2)))
-%             hold off
-%             subplot(4,2,7)
-%             plot(mean((ripPercentHisto(nHPC_cells>15,:))))
-%             hold on
-%             plot(mean((thetaPercentHisto(nHPC_cells>15,:))))
-%             hold off
-%             subplot(4,2,8)
-%             plot(mean(zscore(ripHisto_count(nHPC_cells>15,:),[],2)))
-%             hold on
-%             plot(mean(zscore(thetaHisto_count(nHPC_cells>15,:),[],2)))
-%             hold off
-%             pause(.1)
+            subplot(4,2,1)
+            imagesc(rr)
+            subplot(4,2,2)
+            imagesc(rz)
+            subplot(4,2,3)
+            imagesc(zr)
+            subplot(4,2,4)
+            plot(nanmean(zr(nHPC_cells>15,:)))
+            subplot(4,2,5)
+            plot(mean(zscore(ripHisto(nHPC_cells>15,:),[],2)))
+            hold on
+            plot(mean(zscore(thetaHisto(nHPC_cells>15,:),[],2)))
+            hold off            
+            subplot(4,2,6)
+            plot(mean(zscore(ripHisto_z(nHPC_cells>15,:),[],2)))
+            hold on
+            plot(mean(zscore(thetaHisto_z(nHPC_cells>15,:),[],2)))
+            hold off
+            subplot(4,2,7)
+            plot(mean((ripPercentHisto(nHPC_cells>15,:))))
+            hold on
+            plot(mean((thetaPercentHisto(nHPC_cells>15,:))))
+            hold off
+            subplot(4,2,8)
+            plot(mean(zscore(ripHisto_count(nHPC_cells>15,:),[],2)))
+            hold on
+            plot(mean(zscore(thetaHisto_count(nHPC_cells>15,:),[],2)))
+            hold off
+            pause(.1)
         end
     
     end
-    cd D:\datasets\lsDataset
+    cd /mnt/nyuShare/Homes/dwt244/CRCNS_ripples/ripples_LS
 end
 % FileName = sessionInfo.FileName;
 % clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo

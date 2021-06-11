@@ -2,11 +2,11 @@ folders = dir('*201*');
 
 for f=1:length(folders)
     cd(folders(f).name)
-    if exist([folders(f).name '.spikes.cellinfo.mat']) & exist([folders(f).name '.CA1Ripples.events.mat'])
+    if  exist([folders(f).name '.spikes.cellinfo.mat']) & exist([folders(f).name '.CA1Ripples.events.mat'])
 % 
 %         f=1;
         sessionInfo = bz_getSessionInfo;
-        load([sessionInfo.FileName '.behavior.mat'])
+%         load([sessionInfo.FileName '.behavior.mat'])
         spikes = bz_GetSpikes('noprompts',true);
         spkMat = bz_SpktToSpkmat(spikes,'binSize',.25,'overlap',10);
 %        spkMat = bz_SpktToSpkmat(spikes,'binSize',.1,'overlap',1);
@@ -44,8 +44,9 @@ for f=1:length(folders)
             lsRates_smooth_z = fastrms(lsRates_z,24);
             for i=1:100
                idx = find(hpcPercentActive>i/100 & hpcPercentActive>(i+10)/100);
+               
                lsRatesPercentHisto(f,i) = nanmean(lsRates_smooth(idx));
-               lsRatesZPercentHisto(f,i) = nanmean(lsRates_smooth_z(idx));
+               lsRatesPercentHisto_z(f,i) = nanmean(lsRates_smooth_z(idx));
             end
             for i=3:97
                 thresh_low = prctile(hpcRates_smooth,i-3);
@@ -66,14 +67,14 @@ for f=1:length(folders)
             nHPC_cells(f) = length(hpc) - toss;
             nLS_cells(f) = length(latS);
             
-%             subplot(4,2,1)
-%             imagesc(rr)
-%             subplot(4,2,2)
-%             imagesc(rz)
-%             subplot(4,2,3)
-%             imagesc(zr)
-%             subplot(4,2,4)
-%             plot(nanmedian(zr(nHPC_cells>15,:)))
+            subplot(4,2,1)
+            imagesc(rr)
+            subplot(4,2,2)
+            imagesc(rz)
+            subplot(4,2,3)
+            imagesc(zr)
+            subplot(4,2,4)
+            plot(nanmedian(zr(nHPC_cells>15,:)))
 %             subplot(4,2,5)
 %             plot(mean(zscore(ripHisto(nHPC_cells>15,:),[],2)))
 %             hold on
@@ -93,7 +94,8 @@ for f=1:length(folders)
         end
     
     end
-    cd D:\datasets\lsDataset
+%     cd D:\datasets\lsDataset
+      cd /mnt/nyuShare/Homes/dwt244/CRCNS_ripples/ripples_LS
 end
 % FileName = sessionInfo.FileName;
 % clear lfp spikes spkMat* td_pow filt filt_lo phase ripples behavior sessionInfo
